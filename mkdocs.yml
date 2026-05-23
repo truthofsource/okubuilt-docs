@@ -1,0 +1,63 @@
+site_name: OkuBuilt Infrastructure & Cloud Portfolio
+site_description: Infrastructure, cloud, automation, security, and operations documentation portfolio.
+site_author: Kingsley Oku
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+nav:
+  - Home: index.md
+  - Architecture:
+      - Overview: architecture/index.md
+      - Infrastructure: architecture/infrastructure.md
+      - Cloud: architecture/cloud.md
+  - Compute:
+      - Overview: compute/index.md
+      - Infrastructure: compute/infrastructure.md
+      - Cloud: compute/cloud.md
+  - Networking:
+      - Overview: networking/index.md
+      - Infrastructure: networking/infrastructure.md
+      - Cloud: networking/cloud.md
+  - Storage:
+      - Overview: storage/index.md
+      - Infrastructure: storage/infrastructure.md
+      - Cloud: storage/cloud.md
+  - Containers & Apps:
+      - Overview: containers-apps/index.md
+      - Infrastructure: containers-apps/infrastructure.md
+      - Cloud: containers-apps/cloud.md
+  - Automation:
+      - Overview: automation/index.md
+      - Infrastructure: automation/infrastructure.md
+      - Cloud: automation/cloud.md
+  - Security:
+      - Overview: security/index.md
+      - Infrastructure: security/infrastructure.md
+      - Cloud: security/cloud.md
+  - Monitoring & Operations:
+      - Overview: monitoring-operations/index.md
+      - Infrastructure: monitoring-operations/infrastructure.md
+      - Cloud: monitoring-operations/cloud.md
+  - Troubleshooting:
+      - Overview: troubleshooting/index.md
+      - Infrastructure: troubleshooting/infrastructure.md
+      - Cloud: troubleshooting/cloud.md
+  - Runbooks:
+      - Overview: runbooks/index.md
+      - Infrastructure: runbooks/infrastructure.md
+      - Cloud: runbooks/cloud.md
+
+markdown_extensions:
+  - admonition
+  - tables
+  - fenced_code
+  - toc:
+      permalink: true
