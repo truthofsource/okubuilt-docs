@@ -1,0 +1,25 @@
+# docs/wp-pages.yml
+#
+# GitHub Markdown -> WordPress Page mapping.
+# Keep slugs flat for now. Avoid parent/child hierarchy until this works reliably.
+
+pages:
+  - source: docs/README.md
+    title: Technical Documentation
+    slug: technical-documentation
+
+  - source: docs/infrastructure/README.md
+    title: Infrastructure Documentation
+    slug: infrastructure-documentation
+
+  - source: docs/cloud/README.md
+    title: Cloud Documentation
+    slug: cloud-documentation
+
+  - source: docs/portfolio/README.md
+    title: Portfolio Documentation
+    slug: portfolio-documentation
+
+  - source: docs/reference/README.md
+    title: Documentation Reference
+    slug: documentation-reference
