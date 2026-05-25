@@ -2,7 +2,7 @@
 
 [Site Index](docs/index.md)
 
-Structured OkuBuilt homelab documentation.
+Structured OkuBuilt Portfolio Documentation.
 
 ## Main Sections
 

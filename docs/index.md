@@ -16,8 +16,6 @@ Cloud architecture and portfolio projects involving AWS, Azure, Terraform, CI/CD
 
 ## Main Sections
 
-## Main Sections
-
 - [Infrastructure](infrastructure/README.md) — Proxmox, Ceph, OPNsense, Docker, Traefik, NAS, networking, and recovery work.
 - [Cloud](cloud/README.md) — cloud architecture, security, automation, and project documentation.
 - [Portfolio](portfolio/README.md) — polished public-facing project pages and case studies.
