@@ -1,6 +1,6 @@
 # OkuBuilt Documentation
 
-[Site Index](index.md)
+[Site Index](docs/index.md)
 
 Structured OkuBuilt homelab documentation.
 
