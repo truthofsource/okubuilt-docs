@@ -1,0 +1,3644 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Infrastructure, cloud, automation, security, and operations documentation portfolio.">
+      
+      
+        <meta name="author" content="Kingsley Oku">
+      
+      
+      
+        <link rel="prev" href="../truenas-vm-zfs-hba-planning/">
+      
+      
+        <link rel="next" href="../vm100-docker-nas-offen-recovery-runbook/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>VM 100 CPU Change Led Into HA/QMP/Ceph-Related Startup Failure - OkuBuilt Infrastructure & Cloud Portfolio</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#vm-100-cpu-change-led-into-haqmpceph-related-startup-failure" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-header__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OkuBuilt Infrastructure & Cloud Portfolio
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              VM 100 CPU Change Led Into HA/QMP/Ceph-Related Startup Failure
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-nav__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OkuBuilt Infrastructure & Cloud Portfolio
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/proxmox-traefik-opnsense-ha-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox, Traefik, OPNsense HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Automation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cephfs-snips-cloudinit-vm100-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox CephFS Snips Cloud-Init VM100
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloud-init-docker-vm-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Docker VM Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-vm100-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker VM100 Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-cicustom-snippet-storage-ha/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init cicustom Snippet Storage HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/vm100-docker-startup-mountguard-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Startup Mount Guard Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compute
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/debian-docker-vm-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/home-assistant-os-proxmox-ceph-vm-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home Assistant OS Proxmox Ceph VM Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/homelab-vm100-rebuild-restore-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab VM100 Rebuild Restore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Containers & Apps
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Containers & Apps
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/debian-docker-vm-rebuild-cloudinit-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM Rebuild Cloud-Init
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-apps-offen-restore-gluetun-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Apps Offen Restore Gluetun Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-compose-memos-image-tag-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Compose Memos Image Tag Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/gluetun-corrupted-servers-permissions-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gluetun Corrupted Servers Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/proxmox-traefik-console-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Traefik Console Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-docker29-upgrade-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Docker Upgrade Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-proxy-docker-network-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Proxy Docker Network
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm100-docker-data-disk-recovery-cloud-init-hardening/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Data Disk Recovery Cloud-Init Hardening
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm110-provisioning-guest-agent-docker-appdata-permissions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM110 Provisioning Guest Agent Docker AppData Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring & Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Monitoring & Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-ceph-memtest-ram-fault-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Ceph Memtest RAM Fault
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-host-kernel-ram-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Host Kernel RAM Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-nuc-e1000e-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox NUC e1000e Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networking
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Networking
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/att-fiber-opnsense-outage-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AT&T Fiber OPNsense Outage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-lan-instability-storm-control-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN Instability Storm Control
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-lan-ip-dhcp-static-device-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN IP DHCP Static Device
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-opt2-lan-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense OPT2 LAN
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-web-gui-documentation-and-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense Web GUI Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/wireguard-ec2-proxmox-lxc-homelab-remote-access/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WireGuard EC2 Proxmox LXC Homelab Remote Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Security
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/homelab-ssh-ansible-nut-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab SSH Ansible NUT Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/proxmox-root-login-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Root Login Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_9" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_9" id="__nav_2_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Storage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_9_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Storage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ceph-mainframe-osd-mon-mgr-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Mainframe OSD MON MGR Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ceph-monitor-crash-loop-mainframe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Monitor Crash Loop Mainframe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../proxmox-ha-live-migration-ceph-vm-state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox HA Live Migration Ceph VM State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../truenas-vm-zfs-hba-planning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TrueNAS VM ZFS HBA Planning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Ceph Gluetun Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Ceph Gluetun Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vm100-docker-nas-offen-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker NAS Offen Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Runbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runbooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_11" id="__nav_2_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting Incidents
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting Incidents
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting-incidents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloud
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cloud
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cloud/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portfolio
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Portfolio
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../portfolio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/documentation-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation Standards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/placement-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Placement Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/recurring-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recurring Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/command-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="vm-100-cpu-change-led-into-haqmpceph-related-startup-failure">VM 100 CPU Change Led Into HA/QMP/Ceph-Related Startup Failure<a class="headerlink" href="#vm-100-cpu-change-led-into-haqmpceph-related-startup-failure" title="Permanent link">&para;</a></h1>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>VM 100 (<code>debian-docker</code>) was being adjusted to use 4 vCPUs. During the change, reset and stop/start attempts ran into HA-managed control flow, QMP socket timeouts, stale lock behavior, and a larger underlying Ceph health problem. The VM eventually became unable to start normally until Ceph health was restored.</p>
+<h2 id="environment">Environment<a class="headerlink" href="#environment" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Proxmox VE cluster</li>
+<li>Host/node involved: <code>mainframe</code></li>
+<li>VM: <code>100</code> (<code>debian-docker</code>)</li>
+<li>HA-managed VM resource at the start of the incident</li>
+<li>Ceph cluster:</li>
+<li>5 monitors configured</li>
+<li><code>mon.mainframe</code> out of quorum</li>
+<li>5 OSDs up/in</li>
+<li>slow ops on <code>osd.0</code>, <code>osd.1</code>, <code>osd.2</code></li>
+<li>VM storage backed by Ceph</li>
+<li>Cloud-init attached to VM 100</li>
+</ul>
+<h2 id="problem">Problem<a class="headerlink" href="#problem" title="Permanent link">&para;</a></h2>
+<p>A routine change to VM 100 CPU topology exposed multiple operational issues:
+1. HA-controlled VM operations conflicted with manual <code>qm</code> commands.
+2. QMP became unavailable during reset/stop attempts.
+3. Ceph was degraded and blocking I/O.
+4. VM startup later hung while generating the cloud-init ISO.</p>
+<h2 id="symptoms">Symptoms<a class="headerlink" href="#symptoms" title="Permanent link">&para;</a></h2>
+<ul>
+<li>CPU change was applied, but VM operations failed afterward.</li>
+<li>Errors seen:</li>
+<li><code>VM 100 qmp command 'system_reset' failed - got timeout</code></li>
+<li><code>unable to connect to VM 100 qmp socket - timeout after 51 retries</code></li>
+<li><code>Requesting HA stop for VM 100</code></li>
+<li><code>can't lock file '/var/lock/qemu-server/lock-100.conf' - got timeout</code></li>
+<li>Ceph health warnings:</li>
+<li><code>1/5 mons down</code></li>
+<li><code>mon.mainframe ... is down (out of quorum)</code></li>
+<li><code>768 slow ops, oldest one blocked for ...</code></li>
+<li>Later VM start failure:</li>
+<li><code>generating cloud-init ISO</code></li>
+<li><code>timeout waiting on systemd</code></li>
+</ul>
+<h2 id="actions-taken">Actions Taken<a class="headerlink" href="#actions-taken" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Changed VM 100 CPU topology.</li>
+</ol>
+<pre><code class="language-bash">qm set 100 --sockets 1 --cores 4
+</code></pre>
+<p>Purpose: set VM 100 to 4 vCPUs using 1 socket and 4 cores.</p>
+<ol>
+<li>Additional CPU topology changes were attempted while the VM was already unstable.</li>
+</ol>
+<pre><code class="language-bash">qm set 100 --sockets 1 --cores 8
+</code></pre>
+<p>Purpose: temporary adjustment while trying to recover VM startup.</p>
+<ol>
+<li>Attempted resets and stops from <code>qm</code>, which failed due to HA/QMP issues.</li>
+</ol>
+<pre><code class="language-bash">qm reset 100
+qm stop 100
+qm start 100
+</code></pre>
+<p>Purpose: try to restart the VM cleanly.</p>
+<ol>
+<li>
+<p>Confirmed HA interactions and that <code>qm start</code> was being redirected through HA control.</p>
+</li>
+<li>
+<p>Investigated Ceph health.</p>
+</li>
+</ol>
+<pre><code class="language-bash">ceph -s
+ceph health detail
+</code></pre>
+<p>Purpose: determine whether storage health was preventing VM startup.</p>
+<ol>
+<li>
+<p>Identified failed monitor and lagging OSD state on Ceph.</p>
+</li>
+<li>
+<p>Attempted monitor service recovery on <code>mainframe</code>.</p>
+</li>
+</ol>
+<pre><code class="language-bash">systemctl status ceph-mon@mainframe --no-pager -l
+timedatectl
+systemctl restart ceph-mon@mainframe
+</code></pre>
+<p>Purpose: restore the failed monitor and rule out time-sync related quorum issues.</p>
+<ol>
+<li>
+<p>Found that <code>ceph-mon@mainframe</code> was failed and systemd on <code>mainframe</code> later became unstable enough to return DBus errors.</p>
+</li>
+<li>
+<p>Protected Ceph during recovery.</p>
+</li>
+</ol>
+<pre><code class="language-bash">ceph osd set noout
+ceph mgr fail mainframe
+</code></pre>
+<p>Purpose: avoid rebalancing while the node was being recovered and move active manager duties away from the unhealthy node.</p>
+<ol>
+<li>Removed stale/broken <code>mon.mainframe</code> entry from the Ceph monmap.</li>
+</ol>
+<pre><code class="language-bash">ceph mon dump
+ceph mon remove mainframe || ceph mon rm mainframe
+ceph mon dump
+</code></pre>
+<p>Purpose: remove the dead monitor from cluster state so it could be recreated cleanly.</p>
+<ol>
+<li>Removed the old local monitor store and recreated the monitor on <code>mainframe</code>.</li>
+</ol>
+<pre><code class="language-bash">rm -rf /var/lib/ceph/mon/ceph-mainframe
+pveceph mon create
+systemctl start ceph-mon@mainframe
+systemctl status ceph-mon@mainframe --no-pager -l
+</code></pre>
+<p>Purpose: rebuild the local Ceph monitor instance on <code>mainframe</code>.</p>
+<ol>
+<li>Verified cluster state after recovery.</li>
+</ol>
+<pre><code class="language-bash">ceph osd unset noout
+ceph -s
+</code></pre>
+<p>Purpose: return Ceph to normal operation after the cluster was stable.</p>
+<ol>
+<li>Retried starting VM 100 once Ceph returned to healthy state.</li>
+</ol>
+<pre><code class="language-bash">qm start 100
+qm status 100
+</code></pre>
+<ol>
+<li>Observed cloud-init ISO generation timeout and later worked around cloud-init-related startup issues conceptually by considering removal of the CI drive for recovery.</li>
+</ol>
+<h2 id="key-findings">Key Findings<a class="headerlink" href="#key-findings" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The initial VM issue was not only a CPU configuration problem. It was compounded by:</li>
+<li>HA-managed resource behavior</li>
+<li>stuck/stale QMP state</li>
+<li>Ceph monitor outage</li>
+<li>Ceph slow ops on multiple OSDs</li>
+<li><code>mon.mainframe</code> had been removed from the monmap and needed to be recreated locally.</li>
+<li>Once the Ceph monitor issue was addressed and <code>noout</code> was later unset, the cluster returned to:</li>
+<li><code>HEALTH_OK</code></li>
+<li>33 PGs <code>active+clean</code></li>
+<li>The VM startup issue then shifted from storage health to cloud-init ISO generation timing.</li>
+</ul>
+<h2 id="resolution">Resolution<a class="headerlink" href="#resolution" title="Permanent link">&para;</a></h2>
+<p>The core storage-side outage was resolved by repairing Ceph rather than continuing to force VM restarts:
+- <code>mon.mainframe</code> was removed from the cluster map.
+- The local monitor store on <code>mainframe</code> was recreated.
+- Ceph recovered to <code>HEALTH_OK</code>.
+- VM 100 could run again, though cloud-init ISO generation remained a separate operational concern.</p>
+<h2 id="validation">Validation<a class="headerlink" href="#validation" title="Permanent link">&para;</a></h2>
+<p>Successful validation included:
+- <code>ceph -s</code> showing:
+  - <code>HEALTH_OK</code>
+  - all OSDs up/in
+  - PGs <code>active+clean</code>
+- <code>ceph-mon@mainframe</code> showing as active locally
+- VM 100 reaching <code>status: running</code>
+- VM 100 responding on the network:</p>
+<pre><code class="language-bash">ping -c1 192.168.16.3
+nc -vz 192.168.16.3 22
+</code></pre>
+<p>SSH port 22 was reachable, confirming the guest was alive even though QEMU guest agent remained unavailable.</p>
+<h2 id="follow-up-tasks">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Revisit VM 100 CPU topology once the environment is stable and perform the change with a clean shutdown.</li>
+<li>Investigate why cloud-init ISO generation timed out.</li>
+<li>Stabilize QEMU guest agent on VM 100.</li>
+<li>Review HA handling workflow for HA-managed VMs before issuing direct <code>qm</code> reset/stop commands.</li>
+<li>Consider adding additional safeguards around Ceph monitor recovery and health checks.</li>
+</ul>
+<h2 id="lessons-learned">Lessons Learned<a class="headerlink" href="#lessons-learned" title="Permanent link">&para;</a></h2>
+<ul>
+<li>A VM startup failure on Proxmox can be a storage-cluster issue, not just a VM config issue.</li>
+<li>HA-managed VMs should be handled through HA-aware workflows first.</li>
+<li>QMP socket timeouts often indicate a deeper process, lock, or storage-state problem.</li>
+<li>Ceph monitor recovery can be non-destructive when quorum still exists on other nodes.</li>
+<li><code>noout</code> is useful during controlled node recovery, but it must be unset afterward.</li>
+</ul>
+<hr />
+<h1 id="ceph-fully-stabilized-and-vm-100-network-reachability-confirmed">Ceph Fully Stabilized and VM 100 Network Reachability Confirmed<a class="headerlink" href="#ceph-fully-stabilized-and-vm-100-network-reachability-confirmed" title="Permanent link">&para;</a></h1>
+<h2 id="summary_1">Summary<a class="headerlink" href="#summary_1" title="Permanent link">&para;</a></h2>
+<p>After the prior day’s Ceph repair work, the cluster was checked again and confirmed healthy. VM 100 was running, reachable by IP, and accepting TCP connections on port 22. The remaining issue shifted from storage failure to guest-side access and tooling reliability.</p>
+<h2 id="environment_1">Environment<a class="headerlink" href="#environment_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Proxmox VE host: <code>mainframe</code></li>
+<li>VM 100: <code>debian-docker</code></li>
+<li>Ceph cluster healthy</li>
+<li>Guest IP observed: <code>192.168.16.3</code></li>
+<li>QEMU Guest Agent not functioning inside the guest</li>
+</ul>
+<h2 id="problem_1">Problem<a class="headerlink" href="#problem_1" title="Permanent link">&para;</a></h2>
+<p>Even though VM 100 was running, the QEMU guest agent was not available, and SSH usability was still under question.</p>
+<h2 id="symptoms_1">Symptoms<a class="headerlink" href="#symptoms_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>qm status 100</code> reported the VM as running.</li>
+<li><code>qm agent 100 ping</code> returned:</li>
+<li><code>QEMU guest agent is not running</code></li>
+<li>Network tests from the Proxmox host succeeded:</li>
+<li>ping worked</li>
+<li>TCP 22 was open</li>
+</ul>
+<h2 id="actions-taken_1">Actions Taken<a class="headerlink" href="#actions-taken_1" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Verified VM state and attempted guest agent calls.</li>
+</ol>
+<pre><code class="language-bash">qm status 100
+qm agent 100 ping
+qm agent 100 network-get-interfaces
+</code></pre>
+<p>Purpose: confirm whether the guest was alive and whether QGA was functioning.</p>
+<ol>
+<li>Identified VM MAC from config.</li>
+</ol>
+<pre><code class="language-bash">qm config 100 | grep -E '^net0:'
+</code></pre>
+<p>Purpose: correlate guest networking if needed.</p>
+<ol>
+<li>Tested network reachability directly.</li>
+</ol>
+<pre><code class="language-bash">ping -c1 192.168.16.3
+nc -vz 192.168.16.3 22
+</code></pre>
+<p>Purpose: verify whether the guest was reachable independently of QGA.</p>
+<h2 id="key-findings_1">Key Findings<a class="headerlink" href="#key-findings_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>VM 100 was alive and reachable on the network.</li>
+<li>Port 22 was open, so the VM was not dead or storage-blocked at that point.</li>
+<li>The remaining problem was likely guest-side SSH login/authentication and/or guest agent service availability rather than host networking or Proxmox storage.</li>
+</ul>
+<h2 id="resolution_1">Resolution<a class="headerlink" href="#resolution_1" title="Permanent link">&para;</a></h2>
+<p>No final QEMU guest agent fix was completed in this session, but the critical state changed from “VM won’t start” to “VM is running and reachable.” The incident moved into guest-service troubleshooting rather than platform outage recovery.</p>
+<h2 id="validation_1">Validation<a class="headerlink" href="#validation_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>qm status 100</code> showed <code>running</code></li>
+<li>ICMP ping succeeded</li>
+<li><code>nc -vz 192.168.16.3 22</code> reported SSH port open</li>
+</ul>
+<h2 id="follow-up-tasks_1">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Repair <code>qemu-guest-agent</code> inside VM 100</li>
+<li>Validate actual SSH login path, not just port reachability</li>
+<li>Review guest service startup order after reboot</li>
+<li>Review cloud-init impact on networking and SSH provisioning</li>
+</ul>
+<h2 id="lessons-learned_1">Lessons Learned<a class="headerlink" href="#lessons-learned_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>QEMU guest agent absence does not mean the guest is down.</li>
+<li>Network reachability tests are a better immediate truth source than agent state during recovery.</li>
+<li>Separate platform health from guest-service health when troubleshooting.</li>
+</ul>
+<hr />
+<h1 id="gluetun-vpn-stack-repaired-for-deluge-qbittorrent-and-sabnzbd">Gluetun VPN Stack Repaired for Deluge, qBittorrent, and SABnzbd<a class="headerlink" href="#gluetun-vpn-stack-repaired-for-deluge-qbittorrent-and-sabnzbd" title="Permanent link">&para;</a></h1>
+<h2 id="summary_2">Summary<a class="headerlink" href="#summary_2" title="Permanent link">&para;</a></h2>
+<p>A Docker VPN stack using Gluetun with Mullvad WireGuard was failing due to multiple configuration and state issues: a broken healthcheck assumption, invalid or missing WireGuard key handling, and a corrupted <code>servers.json</code> in the Gluetun config volume. The stack was repaired and brought back online. Remaining warnings pointed to CIFS/NAS write-permission or filename-handling issues on SABnzbd download paths.</p>
+<h2 id="environment_2">Environment<a class="headerlink" href="#environment_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>VM 100: Debian Docker VM</li>
+<li>Docker Compose stack under <code>/opt/compose/gluetun_stack/compose.yaml</code></li>
+<li>Containers:</li>
+<li><code>gluetun</code></li>
+<li><code>deluge-vpn</code></li>
+<li><code>qbittorrent-vpn</code></li>
+<li><code>sabnzbd-vpn</code></li>
+<li>VPN provider: Mullvad</li>
+<li>VPN type: WireGuard</li>
+<li>Shared Docker network: <code>traefik-proxy</code></li>
+<li>Reverse proxy: Traefik</li>
+<li>App config directories under <code>/opt/docker-apps</code></li>
+<li>Download paths on NAS/CIFS mounts under <code>/srv/remotemount/...</code></li>
+</ul>
+<h2 id="problem_2">Problem<a class="headerlink" href="#problem_2" title="Permanent link">&para;</a></h2>
+<p>The VPN-dependent Docker stack was unstable and unhealthy. Gluetun failed health checks and later crash-looped because of invalid VPN key handling and a corrupted server metadata file. Dependent containers were also being terminated when Gluetun restarted.</p>
+<h2 id="symptoms_2">Symptoms<a class="headerlink" href="#symptoms_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Gluetun marked unhealthy.</li>
+<li>Earlier healthcheck was targeting <code>127.0.0.1:8000</code> without confirmed control server alignment.</li>
+<li>Gluetun log errors included:</li>
+<li><code>Wireguard settings: private key is not set</code></li>
+<li><code>private key is not valid: ... illegal base64 data at input byte 0</code></li>
+<li><code>ERROR reading servers from file: decoding servers: invalid character 'l' after object key:value pair</code></li>
+<li>Dependent containers received shutdown signals:</li>
+<li><code>Catching signal: SIGTERM</code></li>
+<li>clean exits for Deluge and SABnzbd</li>
+<li>qBittorrent exited with code <code>137</code></li>
+<li>Later logs showed Gluetun healthy once repaired:</li>
+<li>control server listening on <code>:8000</code></li>
+<li>healthcheck healthy</li>
+<li>public IP resolved through Mullvad</li>
+</ul>
+<h2 id="actions-taken_2">Actions Taken<a class="headerlink" href="#actions-taken_2" title="Permanent link">&para;</a></h2>
+<ol>
+<li>
+<p>Reviewed the compose configuration for Gluetun and dependent containers.</p>
+</li>
+<li>
+<p>Identified that the healthcheck/control-server relationship needed to be aligned and that the stack needed a known-good Gluetun configuration.</p>
+</li>
+<li>
+<p>Updated the Gluetun service configuration to include:</p>
+</li>
+<li>WireGuard with Mullvad</li>
+<li>inline private key in YAML</li>
+<li>control server on port 8000</li>
+<li>startup stability settings</li>
+<li>explicit healthcheck against <code>/v1/health</code></li>
+<li>
+<p>broad server selection by country rather than pinning a single hostname during recovery</p>
+</li>
+<li>
+<p>Brought the stack down and removed corrupted server metadata.</p>
+</li>
+</ol>
+<pre><code class="language-bash">docker compose -f /opt/compose/gluetun_stack/compose.yaml down
+rm -f /opt/docker-apps/Gluetun/config/servers.json /opt/docker-apps/Gluetun/config/servers.json.tmp 2&gt;/dev/null || true
+</code></pre>
+<p>Purpose: fully stop the stack and delete the bad Gluetun server cache.</p>
+<ol>
+<li>Attempted ownership and permission repair on Gluetun config paths.</li>
+</ol>
+<pre><code class="language-bash">chown -R 1000:1000 /opt/docker-apps/Gluetun
+chmod -R 775 /opt/docker-apps/Gluetun
+</code></pre>
+<p>Purpose: normalize host-side file ownership for the Gluetun config volume.</p>
+<ol>
+<li>Those ownership changes failed because they were run as non-root:</li>
+<li>
+<p><code>Operation not permitted</code></p>
+</li>
+<li>
+<p>Started Gluetun alone for isolated validation.</p>
+</li>
+</ol>
+<pre><code class="language-bash">docker compose -f /opt/compose/gluetun_stack/compose.yaml up -d gluetun
+docker logs -f --tail=200 gluetun
+</code></pre>
+<p>Purpose: verify VPN connectivity and Gluetun health before starting dependent applications.</p>
+<ol>
+<li>Confirmed successful Gluetun startup:</li>
+<li>firewall enabled</li>
+<li>control server on port 8000</li>
+<li>healthcheck healthy</li>
+<li>Mullvad WireGuard connected</li>
+<li>
+<p>public IP reported in Canada</p>
+</li>
+<li>
+<p>Started Deluge, qBittorrent, and SABnzbd after Gluetun stabilized.</p>
+</li>
+</ol>
+<pre><code class="language-bash">docker compose -f /opt/compose/gluetun_stack/compose.yaml up -d deluge qbittorrent sabnzbd
+</code></pre>
+<p>Purpose: restore the full VPN stack after the shared network namespace anchor was healthy.</p>
+<h2 id="key-findings_2">Key Findings<a class="headerlink" href="#key-findings_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The corrupted <code>/gluetun/servers.json</code> was a hard blocker and caused repeated early exits.</li>
+<li>WireGuard key handling was briefly incorrect during configuration changes.</li>
+<li>Keeping the private key inline in YAML was workable as long as the value was quoted and valid.</li>
+<li>Once Gluetun stabilized, Deluge, qBittorrent, and SABnzbd all launched successfully through the shared namespace.</li>
+<li>qBittorrent WebUI came up on port 8880.</li>
+<li>Deluge daemon and Web UI started successfully.</li>
+<li>SABnzbd started successfully but warned that:</li>
+<li><code>/usenet-downloads/incomplete</code> was not writable with special character filenames</li>
+<li><code>/usenet-downloads/complete</code> was not writable with special character filenames</li>
+</ul>
+<h2 id="resolution_2">Resolution<a class="headerlink" href="#resolution_2" title="Permanent link">&para;</a></h2>
+<p>The Gluetun stack was successfully restored by:
+- deleting the corrupted <code>servers.json</code>
+- correcting WireGuard key handling
+- using a stable Gluetun configuration
+- bringing up Gluetun by itself first
+- starting dependent containers only after Gluetun became healthy</p>
+<p>The stack was operational at the end of the session.</p>
+<h2 id="validation_2">Validation<a class="headerlink" href="#validation_2" title="Permanent link">&para;</a></h2>
+<p>Validation came from:
+- Gluetun logs showing:
+  - firewall enabled
+  - healthcheck healthy
+  - DNS ready
+  - public VPN IP in Canada
+- qBittorrent logs showing WebUI startup on <code>localhost:8880</code>
+- Deluge logs showing daemon and UI availability
+- SABnzbd logs showing full service startup on port <code>8088</code></p>
+<h2 id="follow-up-tasks_2">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Fix SABnzbd download path writeability and special-character handling on NAS/CIFS mounts.</li>
+<li>Revisit whether DNS-over-TLS should remain enabled or temporarily disabled for stability.</li>
+<li>Run host-side permission changes with <code>sudo</code> if ownership normalization is still desired.</li>
+<li>Consider whether to repin to a specific Mullvad hostname only after long-term stability is confirmed.</li>
+<li>Rotate WireGuard private keys if any prior testing exposed or mishandled them.</li>
+</ul>
+<h2 id="lessons-learned_2">Lessons Learned<a class="headerlink" href="#lessons-learned_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Start Gluetun by itself first when debugging a VPN-dependent shared-namespace stack.</li>
+<li>A corrupted persistent metadata file can look like a networking problem when it is actually a storage/config-volume problem.</li>
+<li>When Gluetun is the network namespace owner, every dependent container inherits its lifecycle.</li>
+<li>Non-root host users cannot repair ownership on protected bind-mounted config paths.</li>
+<li>CIFS/NAS mount behavior can surface as application warnings even after the VPN stack itself is healthy.</li>
+</ul>
+<hr />
+<h1 id="command-reference">Command Reference<a class="headerlink" href="#command-reference" title="Permanent link">&para;</a></h1>
+<h2 id="command">Command<a class="headerlink" href="#command" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm set 100 --sockets 1 --cores 4
+</code></pre>
+<p><strong>What it does:</strong> Sets VM 100 CPU topology to 1 socket and 4 cores.<br />
+<strong>Important arguments:</strong><br />
+- <code>100</code>: VM ID<br />
+- <code>--sockets 1</code>: one CPU socket exposed to the guest<br />
+- <code>--cores 4</code>: four cores per socket<br />
+<strong>Why it was used:</strong> To change VM 100 to 4 vCPUs.<br />
+<strong>Expected result:</strong> VM config reflects 4 total vCPUs.<br />
+<strong>Success indicates:</strong> The config change was accepted.<br />
+<strong>Failure indicates:</strong> Proxmox config write or locking issue.</p>
+<h2 id="command_1">Command<a class="headerlink" href="#command_1" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm set 100 --sockets 1 --cores 8
+</code></pre>
+<p><strong>What it does:</strong> Changes VM CPU topology to 8 cores temporarily.<br />
+<strong>Why it was used:</strong> Recovery/testing while the VM was already unstable.<br />
+<strong>Risk:</strong> Changing CPU topology during instability can complicate troubleshooting.</p>
+<h2 id="command_2">Command<a class="headerlink" href="#command_2" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm reset 100
+</code></pre>
+<p><strong>What it does:</strong> Issues a hard reset to the VM through QMP.<br />
+<strong>Why it was used:</strong> To force a reboot when the guest was not responding normally.<br />
+<strong>Expected result:</strong> Immediate guest reset.<br />
+<strong>Failure indicates:</strong> QMP unavailable, stuck VM process, or host-side control path problem.<br />
+<strong>Risk:</strong> Equivalent to pulling power inside the guest.</p>
+<h2 id="command_3">Command<a class="headerlink" href="#command_3" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm stop 100
+</code></pre>
+<p><strong>What it does:</strong> Stops the VM from the Proxmox host.<br />
+<strong>Why it was used:</strong> To halt the guest during recovery.<br />
+<strong>Expected result:</strong> VM transitions to stopped.<br />
+<strong>Failure indicates:</strong> lock issue, HA interaction, or QMP/control-path problem.</p>
+<h2 id="command_4">Command<a class="headerlink" href="#command_4" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm start 100
+</code></pre>
+<p><strong>What it does:</strong> Starts VM 100.<br />
+<strong>Why it was used:</strong> To test whether the platform and storage were healthy enough to boot the guest.<br />
+<strong>Expected result:</strong> VM enters running state.<br />
+<strong>Failure indicates:</strong> storage, config, HA, lock, or runtime startup problem.</p>
+<h2 id="command_5">Command<a class="headerlink" href="#command_5" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ha-manager status
+</code></pre>
+<p><strong>What it does:</strong> Shows Proxmox HA resource status.<br />
+<strong>Why it was used:</strong> To determine whether VM 100 was HA-managed and whether HA was interfering with direct VM control.<br />
+<strong>Expected result:</strong> Resource state and node placement information.</p>
+<h2 id="command_6">Command<a class="headerlink" href="#command_6" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph -s
+</code></pre>
+<p><strong>What it does:</strong> Displays a concise Ceph cluster status summary.<br />
+<strong>Why it was used:</strong> To determine whether storage cluster health was blocking VM operations.<br />
+<strong>Expected result:</strong> cluster health, mon/mgr/osd state, PG state, and usage summary.<br />
+<strong>Success indicates:</strong> cluster responds and provides current health.<br />
+<strong>Failure indicates:</strong> cluster connectivity or CLI environment issue.</p>
+<h2 id="command_7">Command<a class="headerlink" href="#command_7" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph health detail
+</code></pre>
+<p><strong>What it does:</strong> Shows detailed Ceph health warnings and errors.<br />
+<strong>Why it was used:</strong> To identify specific monitor and OSD problems.<br />
+<strong>Expected result:</strong> exact warning classes such as <code>MON_DOWN</code> or <code>SLOW_OPS</code>.</p>
+<h2 id="command_8">Command<a class="headerlink" href="#command_8" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">systemctl status ceph-mon@mainframe --no-pager -l
+</code></pre>
+<p><strong>What it does:</strong> Shows detailed service status for the Ceph monitor on <code>mainframe</code>.<br />
+<strong>Important arguments:</strong><br />
+- <code>--no-pager</code>: prints directly to the terminal<br />
+- <code>-l</code>: full lines without truncation<br />
+<strong>Why it was used:</strong> To diagnose why <code>mon.mainframe</code> was out of quorum.<br />
+<strong>Expected result:</strong> active/running or failed state with log excerpts.</p>
+<h2 id="command_9">Command<a class="headerlink" href="#command_9" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">timedatectl
+</code></pre>
+<p><strong>What it does:</strong> Displays local time, time sync, and NTP status.<br />
+<strong>Why it was used:</strong> Time skew can break Ceph monitor quorum and elections.<br />
+<strong>Expected result:</strong> synchronized system clock.</p>
+<h2 id="command_10">Command<a class="headerlink" href="#command_10" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph osd set noout
+</code></pre>
+<p><strong>What it does:</strong> Sets the Ceph <code>noout</code> flag to prevent OSDs being marked out automatically.<br />
+<strong>Why it was used:</strong> To avoid cluster rebalance while recovering a node.<br />
+<strong>Expected result:</strong> cluster health mentions <code>noout</code>.<br />
+<strong>Risk:</strong> Should be unset after maintenance; leaving it enabled can hide real failures.</p>
+<h2 id="command_11">Command<a class="headerlink" href="#command_11" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph mgr fail mainframe
+</code></pre>
+<p><strong>What it does:</strong> Forces the active Ceph manager on <code>mainframe</code> to fail over to a standby manager.<br />
+<strong>Why it was used:</strong> To reduce dependency on the unhealthy node during recovery.<br />
+<strong>Expected result:</strong> another mgr becomes active.</p>
+<h2 id="command_12">Command<a class="headerlink" href="#command_12" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph mon dump
+</code></pre>
+<p><strong>What it does:</strong> Dumps the current monitor map.<br />
+<strong>Why it was used:</strong> To verify whether <code>mon.mainframe</code> was still registered in the cluster.<br />
+<strong>Expected result:</strong> monitor addresses and monmap epoch.</p>
+<h2 id="command_13">Command<a class="headerlink" href="#command_13" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph mon remove mainframe || ceph mon rm mainframe
+</code></pre>
+<p><strong>What it does:</strong> Removes <code>mon.mainframe</code> from the Ceph monitor map.<br />
+<strong>Why it was used:</strong> To cleanly remove the stale/broken monitor definition before recreating it.<br />
+<strong>Expected result:</strong> <code>mainframe</code> no longer appears in <code>ceph mon dump</code>.<br />
+<strong>Risk:</strong> Safe only because the remaining monitors already had quorum.</p>
+<h2 id="command_14">Command<a class="headerlink" href="#command_14" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">rm -rf /var/lib/ceph/mon/ceph-mainframe
+</code></pre>
+<p><strong>What it does:</strong> Deletes the local monitor data directory for <code>mainframe</code>.<br />
+<strong>Why it was used:</strong> To remove the broken local monitor store before recreating it.<br />
+<strong>Expected result:</strong> directory removed so a clean monitor can be created.<br />
+<strong>Risk:</strong> Destructive to the local monitor instance; appropriate only when recreating the monitor and cluster quorum already exists elsewhere.</p>
+<h2 id="command_15">Command<a class="headerlink" href="#command_15" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">pveceph mon create
+</code></pre>
+<p><strong>What it does:</strong> Creates a Ceph monitor on the local Proxmox node.<br />
+<strong>Why it was used:</strong> To recreate <code>mon.mainframe</code> after removing the stale entry and local data.<br />
+<strong>Expected result:</strong> local monitor service and data store are rebuilt.</p>
+<h2 id="command_16">Command<a class="headerlink" href="#command_16" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph osd unset noout
+</code></pre>
+<p><strong>What it does:</strong> Removes the Ceph <code>noout</code> maintenance flag.<br />
+<strong>Why it was used:</strong> To return the cluster to normal behavior after recovery.<br />
+<strong>Expected result:</strong> cluster health no longer reports <code>noout</code>.</p>
+<h2 id="command_17">Command<a class="headerlink" href="#command_17" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm status 100
+</code></pre>
+<p><strong>What it does:</strong> Shows whether VM 100 is running or stopped.<br />
+<strong>Why it was used:</strong> To validate guest state during recovery.</p>
+<h2 id="command_18">Command<a class="headerlink" href="#command_18" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm agent 100 ping
+</code></pre>
+<p><strong>What it does:</strong> Tests connectivity to the QEMU Guest Agent inside VM 100.<br />
+<strong>Why it was used:</strong> To check whether the guest agent was functioning.<br />
+<strong>Expected result:</strong> a successful ping response.<br />
+<strong>Failure indicates:</strong> guest agent not running, missing device, or guest-side service issue.</p>
+<h2 id="command_19">Command<a class="headerlink" href="#command_19" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm agent 100 network-get-interfaces
+</code></pre>
+<p><strong>What it does:</strong> Queries guest network interfaces through QEMU Guest Agent.<br />
+<strong>Why it was used:</strong> To discover the guest IP from Proxmox without logging into the VM.<br />
+<strong>Failure indicates:</strong> guest agent not available.</p>
+<h2 id="command_20">Command<a class="headerlink" href="#command_20" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm config 100 | grep -E '^net0:'
+</code></pre>
+<p><strong>What it does:</strong> Extracts the VM’s primary network interface definition from config.<br />
+<strong>Why it was used:</strong> To identify the MAC address for ARP/neighbor lookup.</p>
+<h2 id="command_21">Command<a class="headerlink" href="#command_21" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ping -c1 192.168.16.3
+</code></pre>
+<p><strong>What it does:</strong> Sends one ICMP echo request to the guest IP.<br />
+<strong>Why it was used:</strong> To confirm guest network reachability.<br />
+<strong>Success indicates:</strong> the guest responds on the network.<br />
+<strong>Failure indicates:</strong> guest networking, firewall, or host routing issue.</p>
+<h2 id="command_22">Command<a class="headerlink" href="#command_22" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">nc -vz 192.168.16.3 22
+</code></pre>
+<p><strong>What it does:</strong> Tests TCP connectivity to port 22 on the guest.<br />
+<strong>Important arguments:</strong><br />
+- <code>-v</code>: verbose<br />
+- <code>-z</code>: scan mode without sending payload<br />
+<strong>Why it was used:</strong> To check whether SSH was listening.<br />
+<strong>Success indicates:</strong> TCP port 22 open.<br />
+<strong>Failure indicates:</strong> SSH not listening, filtering, or routing issue.</p>
+<h2 id="command_23">Command<a class="headerlink" href="#command_23" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">docker compose -f /opt/compose/gluetun_stack/compose.yaml down
+</code></pre>
+<p><strong>What it does:</strong> Stops and removes the services in the Gluetun stack.<br />
+<strong>Why it was used:</strong> To fully reset the VPN stack during repair.<br />
+<strong>Expected result:</strong> containers removed cleanly.</p>
+<h2 id="command_24">Command<a class="headerlink" href="#command_24" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">rm -f /opt/docker-apps/Gluetun/config/servers.json /opt/docker-apps/Gluetun/config/servers.json.tmp 2&gt;/dev/null || true
+</code></pre>
+<p><strong>What it does:</strong> Removes Gluetun’s cached server metadata files.<br />
+<strong>Why it was used:</strong> The file was corrupted and causing Gluetun startup failure.<br />
+<strong>Expected result:</strong> Gluetun regenerates a valid <code>servers.json</code> on next startup.</p>
+<h2 id="command_25">Command<a class="headerlink" href="#command_25" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">chown -R 1000:1000 /opt/docker-apps/Gluetun
+</code></pre>
+<p><strong>What it does:</strong> Recursively changes ownership of the Gluetun config directory.<br />
+<strong>Why it was used:</strong> To align host file ownership with the container’s runtime UID/GID.<br />
+<strong>Expected result:</strong> Gluetun can read/write config files as user 1000.<br />
+<strong>Failure indicates:</strong> insufficient privileges or filesystem restrictions.<br />
+<strong>Risk:</strong> Recursive ownership changes should be used carefully on shared paths.</p>
+<h2 id="command_26">Command<a class="headerlink" href="#command_26" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">chmod -R 775 /opt/docker-apps/Gluetun
+</code></pre>
+<p><strong>What it does:</strong> Recursively sets directory/file permissions to group-writable/readable/executable as appropriate.<br />
+<strong>Why it was used:</strong> To ensure Gluetun could write its config cache and state.<br />
+<strong>Failure indicates:</strong> insufficient privileges or filesystem restrictions.</p>
+<h2 id="command_27">Command<a class="headerlink" href="#command_27" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">docker compose -f /opt/compose/gluetun_stack/compose.yaml up -d gluetun
+</code></pre>
+<p><strong>What it does:</strong> Starts only the Gluetun service in detached mode.<br />
+<strong>Why it was used:</strong> To validate the VPN container independently before starting dependent apps.<br />
+<strong>Expected result:</strong> Gluetun reaches healthy state and remains running.</p>
+<h2 id="command_28">Command<a class="headerlink" href="#command_28" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">docker logs -f --tail=200 gluetun
+</code></pre>
+<p><strong>What it does:</strong> Follows the most recent 200 lines of Gluetun logs.<br />
+<strong>Why it was used:</strong> To monitor startup, VPN initialization, DNS, healthcheck, and exit reasons in real time.</p>
+<h2 id="command_29">Command<a class="headerlink" href="#command_29" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">docker compose -f /opt/compose/gluetun_stack/compose.yaml up -d deluge qbittorrent sabnzbd
+</code></pre>
+<p><strong>What it does:</strong> Starts the VPN-dependent application containers after Gluetun is healthy.<br />
+<strong>Why it was used:</strong> To restore the rest of the stack once the shared network namespace owner was stable.</p>
+<h2 id="command_30">Command<a class="headerlink" href="#command_30" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+</code></pre>
+<p><strong>What it does:</strong> Shows running containers with names, status, and published ports in table form.<br />
+<strong>Why it was used:</strong> To quickly verify container state after recovery.</p>
+<h2 id="command_31">Command<a class="headerlink" href="#command_31" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">curl -fsS http://127.0.0.1:8000/v1/health
+</code></pre>
+<p><strong>What it does:</strong> Queries the Gluetun control/health endpoint.<br />
+<strong>Important arguments:</strong><br />
+- <code>-f</code>: fail on HTTP errors<br />
+- <code>-sS</code>: quiet normal output but show errors<br />
+<strong>Why it was used:</strong> To confirm Gluetun health from inside the host/container namespace.<br />
+<strong>Expected result:</strong> successful HTTP response.</p>
+<h2 id="command_32">Command<a class="headerlink" href="#command_32" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">docker exec -it gluetun sh -c 'wg show; wget -qO- https://ipinfo.io/ip || curl -s https://ipinfo.io/ip'
+</code></pre>
+<p><strong>What it does:</strong> Runs WireGuard status and public IP checks inside the Gluetun container.<br />
+<strong>Why it was used:</strong> To verify VPN tunnel state and the public egress IP.</p>
+<h2 id="command_33">Command<a class="headerlink" href="#command_33" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo chown -R 1000:1000 /opt/docker-apps/{Deluge,qBittorrent,SABnzbd}
+</code></pre>
+<p><strong>Likely command used.</strong><br />
+<strong>What it does:</strong> Corrects ownership of LinuxServer.io app config directories.<br />
+<strong>Why it was recommended:</strong> Those containers run as UID/GID 1000.<br />
+<strong>Expected result:</strong> apps can read/write their config and state correctly.</p>
+<h2 id="command_34">Command<a class="headerlink" href="#command_34" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo chmod -R 775 /opt/docker-apps/{Deluge,qBittorrent,SABnzbd}
+</code></pre>
+<p><strong>Likely command used.</strong><br />
+<strong>What it does:</strong> Applies writable permissions to the app config directories.<br />
+<strong>Why it was recommended:</strong> To reduce config-write failures for LinuxServer.io containers.</p>
+<h2 id="command_35">Command<a class="headerlink" href="#command_35" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo mount -a
+</code></pre>
+<p><strong>Likely command used.</strong><br />
+<strong>What it does:</strong> Mounts all filesystems listed in <code>/etc/fstab</code> that are not already mounted.<br />
+<strong>Why it was recommended:</strong> To apply corrected CIFS mount options for NAS-backed download directories.<br />
+<strong>Expected result:</strong> updated mount options become active without full reboot.<br />
+<strong>Risk:</strong> A bad <code>/etc/fstab</code> entry can cause mount failures or boot problems later if not validated carefully.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

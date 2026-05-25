@@ -14,46 +14,80 @@ theme:
 
 nav:
   - Home: index.md
-  - Architecture:
-      - Overview: architecture/index.md
-      - Infrastructure: architecture/infrastructure.md
-      - Cloud: architecture/cloud.md
-  - Compute:
-      - Overview: compute/index.md
-      - Infrastructure: compute/infrastructure.md
-      - Cloud: compute/cloud.md
-  - Networking:
-      - Overview: networking/index.md
-      - Infrastructure: networking/infrastructure.md
-      - Cloud: networking/cloud.md
-  - Storage:
-      - Overview: storage/index.md
-      - Infrastructure: storage/infrastructure.md
-      - Cloud: storage/cloud.md
-  - Containers & Apps:
-      - Overview: containers-apps/index.md
-      - Infrastructure: containers-apps/infrastructure.md
-      - Cloud: containers-apps/cloud.md
-  - Automation:
-      - Overview: automation/index.md
-      - Infrastructure: automation/infrastructure.md
-      - Cloud: automation/cloud.md
-  - Security:
-      - Overview: security/index.md
-      - Infrastructure: security/infrastructure.md
-      - Cloud: security/cloud.md
-  - Monitoring & Operations:
-      - Overview: monitoring-operations/index.md
-      - Infrastructure: monitoring-operations/infrastructure.md
-      - Cloud: monitoring-operations/cloud.md
-  - Troubleshooting:
-      - Overview: troubleshooting/index.md
-      - Infrastructure: troubleshooting/infrastructure.md
-      - Cloud: troubleshooting/cloud.md
-  - Runbooks:
-      - Overview: runbooks/index.md
-      - Infrastructure: runbooks/infrastructure.md
-      - Cloud: runbooks/cloud.md
+
+  - Infrastructure:
+      - Overview: infrastructure/README.md
+      - Architecture:
+          - Overview: infrastructure/architecture/README.md
+          - Proxmox, Traefik, OPNsense HA: infrastructure/architecture/proxmox-traefik-opnsense-ha-runbook.md
+      - Automation:
+          - Overview: infrastructure/automation/README.md
+          - Proxmox CephFS Snips Cloud-Init VM100: infrastructure/automation/proxmox-cephfs-snips-cloudinit-vm100-runbook.md
+          - Proxmox Cloud-Init Docker VM Troubleshooting: infrastructure/automation/proxmox-cloud-init-docker-vm-troubleshooting.md
+          - Proxmox Cloud-Init Ceph Docker: infrastructure/automation/proxmox-cloudinit-ceph-docker-runbook.md
+          - Proxmox Cloud-Init Ceph Docker VM100 Troubleshooting: infrastructure/automation/proxmox-cloudinit-ceph-docker-vm100-troubleshooting-runbook.md
+          - Proxmox Cloud-Init cicustom Snippet Storage HA: infrastructure/automation/proxmox-cloudinit-cicustom-snippet-storage-ha.md
+          - VM100 Docker Startup Mount Guard Troubleshooting: infrastructure/automation/vm100-docker-startup-mountguard-troubleshooting.md
+      - Compute:
+          - Overview: infrastructure/compute/README.md
+          - Debian Docker VM: infrastructure/compute/debian-docker-vm-runbook.md
+          - Home Assistant OS Proxmox Ceph VM Deployment: infrastructure/compute/home-assistant-os-proxmox-ceph-vm-deployment.md
+          - Homelab VM100 Rebuild Restore: infrastructure/compute/homelab-vm100-rebuild-restore-runbook.md
+      - Containers & Apps:
+          - Overview: infrastructure/containers-apps/README.md
+          - Debian Docker VM Rebuild Cloud-Init: infrastructure/containers-apps/debian-docker-vm-rebuild-cloudinit-runbook.md
+          - Docker Apps Offen Restore Gluetun Recovery: infrastructure/containers-apps/docker-apps-offen-restore-gluetun-recovery-runbook.md
+          - Docker Compose Memos Image Tag Troubleshooting: infrastructure/containers-apps/docker-compose-memos-image-tag-troubleshooting.md
+          - Gluetun Corrupted Servers Permissions: infrastructure/containers-apps/gluetun-corrupted-servers-permissions-runbook.md
+          - Proxmox Traefik Console Troubleshooting: infrastructure/containers-apps/proxmox-traefik-console-troubleshooting-runbook.md
+          - Traefik Docker Upgrade Troubleshooting: infrastructure/containers-apps/traefik-docker29-upgrade-troubleshooting-runbook.md
+          - Traefik Proxy Docker Network: infrastructure/containers-apps/traefik-proxy-docker-network-runbook.md
+          - VM100 Docker Data Disk Recovery Cloud-Init Hardening: infrastructure/containers-apps/vm100-docker-data-disk-recovery-cloud-init-hardening.md
+          - VM110 Provisioning Guest Agent Docker AppData Permissions: infrastructure/containers-apps/vm110-provisioning-guest-agent-docker-appdata-permissions.md
+      - Monitoring & Operations:
+          - Overview: infrastructure/monitoring-operations/README.md
+          - Proxmox Ceph Memtest RAM Fault: infrastructure/monitoring-operations/proxmox-ceph-memtest-ram-fault-runbook.md
+          - Proxmox Host Kernel RAM Instability: infrastructure/monitoring-operations/proxmox-host-kernel-ram-instability-runbook.md
+          - Proxmox NUC e1000e Instability: infrastructure/monitoring-operations/proxmox-nuc-e1000e-instability-runbook.md
+      - Networking:
+          - Overview: infrastructure/networking/README.md
+          - AT&T Fiber OPNsense Outage: infrastructure/networking/att-fiber-opnsense-outage-runbook.md
+          - OPNsense LAN Instability Storm Control: infrastructure/networking/opnsense-lan-instability-storm-control-runbook.md
+          - OPNsense LAN IP DHCP Static Device: infrastructure/networking/opnsense-lan-ip-dhcp-static-device-runbook.md
+          - OPNsense OPT2 LAN: infrastructure/networking/opnsense-opt2-lan-runbook.md
+          - OPNsense Web GUI Documentation: infrastructure/networking/opnsense-web-gui-documentation-and-runbook.md
+          - WireGuard EC2 Proxmox LXC Homelab Remote Access: infrastructure/networking/wireguard-ec2-proxmox-lxc-homelab-remote-access.md
+      - Security:
+          - Overview: infrastructure/security/README.md
+          - Homelab SSH Ansible NUT Documentation: infrastructure/security/homelab-ssh-ansible-nut-documentation.md
+          - Proxmox Root Login Recovery: infrastructure/security/proxmox-root-login-recovery-runbook.md
+      - Storage:
+          - Overview: infrastructure/storage/README.md
+          - Ceph Mainframe OSD MON MGR Recovery: infrastructure/storage/ceph-mainframe-osd-mon-mgr-recovery-runbook.md
+          - Ceph Monitor Crash Loop Mainframe: infrastructure/storage/ceph-monitor-crash-loop-mainframe.md
+          - Proxmox HA Live Migration Ceph VM State: infrastructure/storage/proxmox-ha-live-migration-ceph-vm-state.md
+          - TrueNAS VM ZFS HBA Planning: infrastructure/storage/truenas-vm-zfs-hba-planning.md
+          - VM100 Ceph Gluetun Troubleshooting: infrastructure/storage/vm100-ceph-gluetun-troubleshooting-runbook-15.md
+          - VM100 Docker NAS Offen Recovery: infrastructure/storage/vm100-docker-nas-offen-recovery-runbook.md
+      - Runbooks:
+          - Overview: infrastructure/runbooks/README.md
+      - Troubleshooting Incidents:
+          - Overview: infrastructure/troubleshooting-incidents/README.md
+
+  - Cloud:
+      - Overview: cloud/README.md
+
+  - Portfolio:
+      - Overview: portfolio/README.md
+
+  - Reference:
+      - Overview: reference/README.md
+      - Documentation Standards: reference/documentation-standards.md
+      - Placement Rules: reference/placement-rules.md
+      - Recurring Patterns: reference/recurring-patterns.md
+      - Command Reference: reference/command-reference.md
+      - Glossary: reference/glossary.md
+      - Backlog: reference/backlog.md
 
 markdown_extensions:
   - admonition

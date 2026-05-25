@@ -1,0 +1,4059 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Infrastructure, cloud, automation, security, and operations documentation portfolio.">
+      
+      
+        <meta name="author" content="Kingsley Oku">
+      
+      
+      
+        <link rel="prev" href="../vm100-ceph-gluetun-troubleshooting-runbook-15/">
+      
+      
+        <link rel="next" href="../../runbooks/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Recover VM 100 from Emergency Mode with a Helper VM - OkuBuilt Infrastructure & Cloud Portfolio</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#recover-vm-100-from-emergency-mode-with-a-helper-vm" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-header__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OkuBuilt Infrastructure & Cloud Portfolio
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Recover VM 100 from Emergency Mode with a Helper VM
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-nav__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OkuBuilt Infrastructure & Cloud Portfolio
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/proxmox-traefik-opnsense-ha-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox, Traefik, OPNsense HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Automation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cephfs-snips-cloudinit-vm100-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox CephFS Snips Cloud-Init VM100
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloud-init-docker-vm-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Docker VM Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-vm100-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker VM100 Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-cicustom-snippet-storage-ha/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init cicustom Snippet Storage HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/vm100-docker-startup-mountguard-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Startup Mount Guard Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compute
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/debian-docker-vm-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/home-assistant-os-proxmox-ceph-vm-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home Assistant OS Proxmox Ceph VM Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/homelab-vm100-rebuild-restore-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab VM100 Rebuild Restore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Containers & Apps
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Containers & Apps
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/debian-docker-vm-rebuild-cloudinit-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM Rebuild Cloud-Init
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-apps-offen-restore-gluetun-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Apps Offen Restore Gluetun Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-compose-memos-image-tag-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Compose Memos Image Tag Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/gluetun-corrupted-servers-permissions-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gluetun Corrupted Servers Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/proxmox-traefik-console-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Traefik Console Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-docker29-upgrade-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Docker Upgrade Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-proxy-docker-network-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Proxy Docker Network
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm100-docker-data-disk-recovery-cloud-init-hardening/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Data Disk Recovery Cloud-Init Hardening
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm110-provisioning-guest-agent-docker-appdata-permissions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM110 Provisioning Guest Agent Docker AppData Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring & Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Monitoring & Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-ceph-memtest-ram-fault-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Ceph Memtest RAM Fault
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-host-kernel-ram-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Host Kernel RAM Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-nuc-e1000e-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox NUC e1000e Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networking
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Networking
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/att-fiber-opnsense-outage-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AT&T Fiber OPNsense Outage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-lan-instability-storm-control-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN Instability Storm Control
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-lan-ip-dhcp-static-device-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN IP DHCP Static Device
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-opt2-lan-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense OPT2 LAN
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-web-gui-documentation-and-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense Web GUI Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/wireguard-ec2-proxmox-lxc-homelab-remote-access/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WireGuard EC2 Proxmox LXC Homelab Remote Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Security
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/homelab-ssh-ansible-nut-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab SSH Ansible NUT Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/proxmox-root-login-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Root Login Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_9" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_9" id="__nav_2_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Storage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_9_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Storage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ceph-mainframe-osd-mon-mgr-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Mainframe OSD MON MGR Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ceph-monitor-crash-loop-mainframe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Monitor Crash Loop Mainframe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../proxmox-ha-live-migration-ceph-vm-state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox HA Live Migration Ceph VM State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../truenas-vm-zfs-hba-planning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TrueNAS VM ZFS HBA Planning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vm100-ceph-gluetun-troubleshooting-runbook-15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Ceph Gluetun Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker NAS Offen Recovery
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker NAS Offen Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Runbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runbooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_11" id="__nav_2_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting Incidents
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting Incidents
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting-incidents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloud
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cloud
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cloud/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portfolio
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Portfolio
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../portfolio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/documentation-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation Standards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/placement-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Placement Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/recurring-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recurring Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/command-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="recover-vm-100-from-emergency-mode-with-a-helper-vm">Recover VM 100 from Emergency Mode with a Helper VM<a class="headerlink" href="#recover-vm-100-from-emergency-mode-with-a-helper-vm" title="Permanent link">&para;</a></h1>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>VM 100 entered emergency mode again. A helper VM workflow was used to attach VM 100’s disk, inspect the root filesystem offline, and repair configuration issues that were preventing normal boot.</p>
+<h2 id="environment">Environment<a class="headerlink" href="#environment" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Proxmox VE</li>
+<li>VM 100: Debian-based Docker VM</li>
+<li>Helper VM: VM 101</li>
+<li>Storage:</li>
+<li><code>cephpool:vm-100-disk-0</code></li>
+<li>prior failed assumption of <code>local-lvm:vm-100-disk-0</code></li>
+<li>Guest filesystem:</li>
+<li>ext4 root partition</li>
+<li>EFI partition present</li>
+<li>Access methods discussed:</li>
+<li>Proxmox VNC/console</li>
+<li>SSH</li>
+<li>serial console concepts</li>
+</ul>
+<h2 id="problem">Problem<a class="headerlink" href="#problem" title="Permanent link">&para;</a></h2>
+<p>VM 100 failed to boot normally and dropped into emergency mode.</p>
+<h2 id="symptoms">Symptoms<a class="headerlink" href="#symptoms" title="Permanent link">&para;</a></h2>
+<ul>
+<li>VM 100 entered emergency mode again.</li>
+<li>Initial attempt to attach VM 100’s disk to the helper VM failed with:</li>
+<li><code>no such logical volume pve/vm-100-disk-0</code></li>
+<li>Hostname confusion occurred later, making the active VM appear to be <code>helper-vm</code>.</li>
+<li>Password/login recovery work was also needed after the filesystem work.</li>
+</ul>
+<h2 id="actions-taken">Actions Taken<a class="headerlink" href="#actions-taken" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Attempted to attach VM 100’s disk to helper VM 101 using an incorrect storage target.</li>
+<li>Corrected the disk attachment to Ceph-backed storage.</li>
+<li>Installed and enabled SSH server on the helper VM so commands could be pasted more easily than through VNC.</li>
+<li>Used <code>lsblk</code> to identify the attached disk and partitions.</li>
+<li>Determined that the attached VM 100 root filesystem was on <code>/dev/sda1</code> in the helper VM context.</li>
+<li>Mounted the root filesystem and later bind-mounted <code>/dev</code>, <code>/proc</code>, <code>/sys</code>, and <code>/run</code> for chroot access.</li>
+<li>Entered a chroot to repair login-related configuration and user access.</li>
+</ol>
+<p>Important commands used:</p>
+<pre><code class="language-bash">qm set 101 -scsi1 cephpool:vm-100-disk-0
+</code></pre>
+<p>Attach VM 100’s Ceph-backed disk to helper VM 101.</p>
+<pre><code class="language-bash">lsblk -o NAME,SIZE,FSTYPE,TYPE,MOUNTPOINT
+</code></pre>
+<p>Identify the attached disk and its partitions.</p>
+<pre><code class="language-bash">sudo mount /dev/sda1 /mnt/vm100
+for d in dev proc sys run; do sudo mount --bind /$d /mnt/vm100/$d; done
+sudo chroot /mnt/vm100 /bin/bash
+</code></pre>
+<p>Mount the offline root filesystem and enter it for repair.</p>
+<h2 id="key-findings">Key Findings<a class="headerlink" href="#key-findings" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The VM 100 disk was not on <code>local-lvm</code>; it was on <code>cephpool</code>.</li>
+<li>The helper VM saw:</li>
+<li>its own disk as <code>sdb</code></li>
+<li>VM 100’s root disk as <code>sda</code></li>
+<li>The actual root filesystem was on the partition <code>/dev/sda1</code>, not the whole disk device.</li>
+<li>Offline repair through chroot was possible once the correct partition was mounted.</li>
+</ul>
+<h2 id="resolution">Resolution<a class="headerlink" href="#resolution" title="Permanent link">&para;</a></h2>
+<p>The helper VM workflow succeeded once the correct Ceph disk was attached and the correct root partition was mounted.</p>
+<h2 id="validation">Validation<a class="headerlink" href="#validation" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>lsblk</code> showed a normal Linux filesystem hierarchy after mounting <code>/dev/sda1</code>.</li>
+<li>Chroot launched successfully:</li>
+<li><code>root@helper-vm:/#</code></li>
+</ul>
+<h2 id="follow-up-tasks">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Detach VM 100’s disk from the helper VM after repairs.</li>
+<li>Document the correct Ceph-backed helper VM procedure.</li>
+<li>Keep a known-good helper VM with SSH enabled for future recovery.</li>
+</ul>
+<h2 id="lessons-learned">Lessons Learned<a class="headerlink" href="#lessons-learned" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Always verify the VM disk’s real Proxmox storage backend before attaching it to a helper VM.</li>
+<li>In helper VM recovery work, expect to mount a partition such as <code>/dev/sdX1</code>, not the parent disk.</li>
+<li>SSH access to the helper VM is much easier than relying on pasted commands in VNC.</li>
+</ul>
+<h1 id="restore-console-and-user-access-on-vm-100">Restore Console and User Access on VM 100<a class="headerlink" href="#restore-console-and-user-access-on-vm-100" title="Permanent link">&para;</a></h1>
+<h2 id="summary_1">Summary<a class="headerlink" href="#summary_1" title="Permanent link">&para;</a></h2>
+<p>After offline access to VM 100 was obtained, login recovery work focused on restoring usable local credentials and removing confusion caused by broken or partial recovery attempts.</p>
+<h2 id="environment_1">Environment<a class="headerlink" href="#environment_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>VM 100 Debian guest</li>
+<li>Helper VM chroot into VM 100 root filesystem</li>
+<li>Users involved:</li>
+<li><code>debian</code></li>
+<li><code>rescue</code></li>
+<li>SSH configuration file:</li>
+<li><code>/etc/ssh/sshd_config</code></li>
+</ul>
+<h2 id="problem_1">Problem<a class="headerlink" href="#problem_1" title="Permanent link">&para;</a></h2>
+<p>The expected password was no longer working for console login, and earlier password reset attempts did not succeed.</p>
+<h2 id="symptoms_1">Symptoms<a class="headerlink" href="#symptoms_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Passwords were not working at the console.</li>
+<li><code>qm set 100 -ciuser debian -cipassword ...</code> did not solve the issue.</li>
+<li>Earlier chroot attempts were interrupted or mangled.</li>
+<li>One repair attempt showed:</li>
+<li><code>passwd: user 'debian' does not exist</code></li>
+<li><code>chpasswd: (user debian) pam_chauthtok() failed</code></li>
+<li>Another attempt showed:</li>
+<li><code>useradd: command not found</code></li>
+<li>A pasted command corrupted the SSH config update line.</li>
+</ul>
+<h2 id="actions-taken_1">Actions Taken<a class="headerlink" href="#actions-taken_1" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Determined that cloud-init password injection was not a reliable fix for the current state.</li>
+<li>Entered chroot again, this time with the correct bind mounts and a fixed <code>PATH</code>.</li>
+<li>Removed <code>/etc/nologin</code> if present.</li>
+<li>Ensured the <code>sudo</code> group existed.</li>
+<li>Created or reset a <code>rescue</code> account.</li>
+<li>Reset the <code>debian</code> password.</li>
+<li>Corrected SSH password authentication directives in <code>sshd_config</code>.</li>
+</ol>
+<p>Important commands used:</p>
+<pre><code class="language-bash">export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+</code></pre>
+<p>Restore admin tools inside the chroot environment.</p>
+<pre><code class="language-bash">rm -f /etc/nologin || true
+getent group sudo &gt;/dev/null || groupadd sudo
+</code></pre>
+<p>Ensure local logins are not blocked and sudo group exists.</p>
+<pre><code class="language-bash">id -u rescue &gt;/dev/null 2&gt;&amp;1 || /usr/sbin/useradd -m -s /bin/bash -G sudo rescue
+echo 'rescue:Docker123' | /usr/sbin/chpasswd
+
+id -u debian &gt;/dev/null 2&gt;&amp;1 || /usr/sbin/useradd -m -s /bin/bash -G sudo debian
+echo 'debian:Docker123' | /usr/sbin/chpasswd
+</code></pre>
+<p>Create/reset local administrative accounts.</p>
+<pre><code class="language-bash">sed -i -E 's/^\s*#?\s*PasswordAuthentication\s+.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+sed -i -E 's/^\s*#?\s*(KbdInteractiveAuthentication|ChallengeResponseAuthentication)\s+.*/KbdInteractiveAuthentication yes/' /etc/ssh/sshd_config
+/usr/sbin/sshd -t
+</code></pre>
+<p>Repair SSH password-auth directives and validate the SSH config syntax.</p>
+<h2 id="key-findings_1">Key Findings<a class="headerlink" href="#key-findings_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The earlier cloud-init password approach was not the right recovery path.</li>
+<li>The chroot environment initially lacked a working admin <code>PATH</code>, which caused <code>useradd</code> not to be found.</li>
+<li>Pasted multi-line commands could corrupt config-editing lines if entered carelessly.</li>
+<li>Once the chroot environment was prepared correctly, account repair succeeded.</li>
+</ul>
+<h2 id="resolution_1">Resolution<a class="headerlink" href="#resolution_1" title="Permanent link">&para;</a></h2>
+<p>A clean chroot session with a proper <code>PATH</code> was used to reset the local login environment and restore administrative access.</p>
+<h2 id="validation_1">Validation<a class="headerlink" href="#validation_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>chpasswd</code> succeeded for both <code>rescue</code> and <code>debian</code>.</li>
+<li><code>sshd -t</code> passed.</li>
+<li>The chroot exit completed cleanly after the account work.</li>
+</ul>
+<h2 id="follow-up-tasks_1">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Log into VM 100 using the restored account and immediately set a known-good permanent password.</li>
+<li>Remove the temporary rescue account once stable access is confirmed.</li>
+<li>Review whether cloud-init should continue to manage login credentials for this VM.</li>
+</ul>
+<h2 id="lessons-learned_1">Lessons Learned<a class="headerlink" href="#lessons-learned_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>For broken Linux guests, offline chroot repair is often more reliable than trying to force cloud-init password changes.</li>
+<li>Always set a valid <code>PATH</code> in rescue/chroot sessions.</li>
+<li>Test SSH configuration with <code>sshd -t</code> before rebooting or relying on it.</li>
+</ul>
+<h1 id="diagnose-hostname-confusion-and-cloud-init-behavior-on-vm-100">Diagnose Hostname Confusion and Cloud-Init Behavior on VM 100<a class="headerlink" href="#diagnose-hostname-confusion-and-cloud-init-behavior-on-vm-100" title="Permanent link">&para;</a></h1>
+<h2 id="summary_2">Summary<a class="headerlink" href="#summary_2" title="Permanent link">&para;</a></h2>
+<p>During recovery, VM 100 appeared to rename itself to <code>helper-vm</code>. Investigation showed cloud-init was still active and the system hostname state was inconsistent.</p>
+<h2 id="environment_2">Environment<a class="headerlink" href="#environment_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>VM 100 Debian guest</li>
+<li>cloud-init enabled</li>
+<li>Files examined:</li>
+<li><code>/etc/hostname</code></li>
+<li><code>/etc/hosts</code></li>
+<li><code>/etc/cloud/cloud.cfg</code></li>
+<li><code>/etc/cloud/cloud.cfg.d/*</code></li>
+</ul>
+<h2 id="problem_2">Problem<a class="headerlink" href="#problem_2" title="Permanent link">&para;</a></h2>
+<p>VM 100 appeared to be running with the wrong hostname.</p>
+<h2 id="symptoms_2">Symptoms<a class="headerlink" href="#symptoms_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>hostnamectl</code> reported:</li>
+<li><code>Static hostname: helper-vm</code></li>
+<li><code>/etc/hostname</code> contained <code>helper-vm</code></li>
+<li><code>cloud-init</code> logs showed it was active on boot.</li>
+<li><code>preserve_hostname: false</code> was set.</li>
+</ul>
+<h2 id="actions-taken_2">Actions Taken<a class="headerlink" href="#actions-taken_2" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Checked hostname status and local hostname files.</li>
+<li>Queried cloud-init state and logs.</li>
+<li>Considered using cloud-init clean + reapplying cicustom data later.</li>
+</ol>
+<p>Important commands used:</p>
+<pre><code class="language-bash">hostnamectl
+cat /etc/hostname
+sed -n '1,40p' /etc/hosts
+</code></pre>
+<p>Inspect current hostname state.</p>
+<pre><code class="language-bash">sudo journalctl -b | grep -Ei 'set hostname|cloud-ini|dhcp|dhclient|networkd.*hostname'
+systemctl is-enabled cloud-init || true
+cloud-init status || true
+grep -i preserve_hostname /etc/cloud/cloud.cfg || true
+ls -1 /etc/cloud/cloud.cfg.d/ || true
+</code></pre>
+<p>Check cloud-init activity and hostname-related behavior.</p>
+<h2 id="key-findings_2">Key Findings<a class="headerlink" href="#key-findings_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>cloud-init was still enabled and had run on boot.</li>
+<li><code>preserve_hostname: false</code> meant cloud-init was allowed to rewrite hostname state.</li>
+<li>The VM identity and hostname state had become inconsistent during recovery work.</li>
+</ul>
+<h2 id="resolution_2">Resolution<a class="headerlink" href="#resolution_2" title="Permanent link">&para;</a></h2>
+<p>No final hostname remediation was completed in this session, but the cause was narrowed to cloud-init-managed hostname behavior.</p>
+<h2 id="validation_2">Validation<a class="headerlink" href="#validation_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Hostname drift was confirmed through both <code>hostnamectl</code> and file inspection.</li>
+<li>cloud-init’s active role was confirmed through logs and status.</li>
+</ul>
+<h2 id="follow-up-tasks_2">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Decide whether to disable cloud-init after the VM is rebuilt or stabilized.</li>
+<li>Reassert the intended hostname through the VM’s cloud-init data or guest config.</li>
+<li>Verify machine identity and cloud-init seed behavior.</li>
+</ul>
+<h2 id="lessons-learned_2">Lessons Learned<a class="headerlink" href="#lessons-learned_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Cloud-init can reapply identity state during recovery if left enabled.</li>
+<li>Hostname anomalies after clone/helper workflows should always prompt a cloud-init review.</li>
+</ul>
+<h1 id="diagnose-docker-mount-and-bind-issues-on-vm-100">Diagnose Docker Mount and Bind Issues on VM 100<a class="headerlink" href="#diagnose-docker-mount-and-bind-issues-on-vm-100" title="Permanent link">&para;</a></h1>
+<h2 id="summary_3">Summary<a class="headerlink" href="#summary_3" title="Permanent link">&para;</a></h2>
+<p>After basic guest recovery, attention shifted to Docker storage paths. <code>/opt/compose</code> and <code>/opt/docker-apps</code> were expected to be backed by <code>/var/lib/docker/compose</code> and <code>/var/lib/docker/appdata</code>, but the mount state and bind direction were inconsistent.</p>
+<h2 id="environment_3">Environment<a class="headerlink" href="#environment_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>VM 100 Debian Docker VM</li>
+<li>Docker root on <code>/var/lib/docker</code></li>
+<li>Expected bind layout:</li>
+<li><code>/var/lib/docker/appdata</code></li>
+<li><code>/var/lib/docker/compose</code></li>
+<li><code>/opt/docker-apps</code></li>
+<li><code>/opt/compose</code></li>
+<li>systemd unit:</li>
+<li><code>docker-verify.mountguard.service</code></li>
+</ul>
+<h2 id="problem_3">Problem<a class="headerlink" href="#problem_3" title="Permanent link">&para;</a></h2>
+<p>Docker-related bind mounts were not behaving as expected, and <code>/opt/compose</code> appeared empty.</p>
+<h2 id="symptoms_3">Symptoms<a class="headerlink" href="#symptoms_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>findmnt</code> initially showed no active mounts for the expected paths.</li>
+<li><code>/etc/fstab</code> did not contain the <code>/var/lib/docker</code> mount entry at one point.</li>
+<li><code>docker-verify.mountguard.service</code> did not start because:</li>
+<li><code>ConditionPathIsMountPoint=/var/lib/docker was not met</code></li>
+<li><code>docker.service</code> still ran even though <code>/var/lib/docker</code> was not a mountpoint.</li>
+<li><code>/opt/compose</code> appeared empty.</li>
+<li>Bind test files proved the bind relationship worked only after repair.</li>
+<li>Attempts to inspect mounted paths without root produced <code>Permission denied</code>.</li>
+</ul>
+<h2 id="actions-taken_3">Actions Taken<a class="headerlink" href="#actions-taken_3" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Checked active mount state.</li>
+<li>Reviewed current <code>/etc/fstab</code>.</li>
+<li>Repaired the guard script typo.</li>
+<li>Added missing <code>/var/lib/docker</code> and bind mount entries.</li>
+<li>Disabled the guard temporarily when it blocked startup.</li>
+<li>Wrote a new Docker systemd override.</li>
+<li>Verified bind behavior with test files.</li>
+</ol>
+<p>Important commands used:</p>
+<pre><code class="language-bash">findmnt /var/lib/docker /var/lib/docker/appdata /var/lib/docker/compose || true
+grep -Ev '^\s*#|^\s*$' /etc/fstab | sed -n '1,200p'
+systemctl status docker-verify.mountguard.service --no-pager || true
+systemctl status docker --no-pager || true
+</code></pre>
+<p>Check mount state, fstab contents, and Docker/guard unit status.</p>
+<pre><code class="language-bash">sudo mount -a
+findmnt /var/lib/docker
+</code></pre>
+<p>Apply fstab mounts and verify Docker root state.</p>
+<pre><code class="language-bash">sudo bash -lc 'touch /opt/compose/.bindtest &amp;&amp; ls -la /var/lib/docker/compose | grep bindtest || echo &quot;compose bind not active&quot;'
+sudo bash -lc 'touch /opt/docker-apps/.bindtest &amp;&amp; ls -la /var/lib/docker/appdata | grep bindtest || echo &quot;appdata bind not active&quot;'
+</code></pre>
+<p>Prove bind relationships by creating test files on one side and reading them on the other.</p>
+<h2 id="key-findings_3">Key Findings<a class="headerlink" href="#key-findings_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>/var/lib/docker</code> was at one point just part of the root filesystem, not a dedicated mount.</li>
+<li>The guard unit correctly refused to run when <code>/var/lib/docker</code> was not a mountpoint.</li>
+<li>A malformed or incomplete fstab and guard script contributed to confusion.</li>
+<li>The bind directions had to be carefully reviewed to match the intended layout.</li>
+<li><code>/opt/compose</code> was functionally empty except for <code>.bindtest</code> and a small <code>dockge</code> directory.</li>
+</ul>
+<h2 id="resolution_3">Resolution<a class="headerlink" href="#resolution_3" title="Permanent link">&para;</a></h2>
+<p>The bind relationships were brought back into a working state for the current session, but the absence of expected compose content suggested that the compose files were either elsewhere or already lost.</p>
+<h2 id="validation_3">Validation<a class="headerlink" href="#validation_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>docker info</code> reported <code>Root=/var/lib/docker</code>.</li>
+<li>Bind tests showed <code>.bindtest</code> on both sides of the bind.</li>
+<li><code>df -h /var/lib/docker</code> showed the filesystem in use.</li>
+</ul>
+<h2 id="follow-up-tasks_3">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Confirm the intended canonical path direction and keep it consistent.</li>
+<li>Remove temporary <code>.bindtest</code> files.</li>
+<li>Revisit whether the guard should be re-enabled after the rebuild.</li>
+<li>Rebuild missing compose directories from backup or prior exports.</li>
+</ul>
+<h2 id="lessons-learned_3">Lessons Learned<a class="headerlink" href="#lessons-learned_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>A working Docker daemon does not prove the Docker data disk is mounted correctly.</li>
+<li><code>findmnt</code> and test files are the fastest way to prove whether a bind mount is real.</li>
+<li>systemd guard units are useful, but only when the underlying mount logic is correct.</li>
+</ul>
+<h1 id="restore-nas-cifs-mount-reliability-and-symlink-support">Restore NAS CIFS Mount Reliability and Symlink Support<a class="headerlink" href="#restore-nas-cifs-mount-reliability-and-symlink-support" title="Permanent link">&para;</a></h1>
+<h2 id="summary_4">Summary<a class="headerlink" href="#summary_4" title="Permanent link">&para;</a></h2>
+<p>A CIFS-mounted NAS share was needed for backups, but backups failed with CIFS timeouts and symlink-related errors. The NAS mount was rebuilt with a clean credentials file and proper mount options, including <code>mfsymlinks</code>.</p>
+<h2 id="environment_4">Environment<a class="headerlink" href="#environment_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Debian guest VM</li>
+<li>NAS share:</li>
+<li><code>//192.168.16.21/Media</code></li>
+<li>Mountpoint:</li>
+<li><code>/srv/remotemount/NAS</code></li>
+<li>Credentials file:</li>
+<li><code>/root/.smbcredentials</code></li>
+<li>systemd-generated units from <code>/etc/fstab</code>:</li>
+<li><code>srv-remotemount-NAS.automount</code></li>
+<li><code>srv-remotemount-NAS.mount</code></li>
+</ul>
+<h2 id="problem_4">Problem<a class="headerlink" href="#problem_4" title="Permanent link">&para;</a></h2>
+<p>Backups to the NAS failed because the share had both connectivity issues and symlink incompatibilities.</p>
+<h2 id="symptoms_4">Symptoms<a class="headerlink" href="#symptoms_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li>rsync errors like:</li>
+<li><code>Input/output error (5)</code> on symlink creation</li>
+<li>kernel logs:</li>
+<li><code>CIFS: VFS: \\192.168.16.21 has not responded in 180 seconds. Reconnecting...</code></li>
+<li>Duplicate fstab entries caused:</li>
+<li><code>Duplicate entry in '/etc/fstab'?</code></li>
+<li>Systemd initially could not show the generated units until the fstab state was corrected.</li>
+</ul>
+<h2 id="actions-taken_4">Actions Taken<a class="headerlink" href="#actions-taken_4" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Confirmed the mount lacked the right options.</li>
+<li>Created a root-only SMB credentials file.</li>
+<li>Mounted the share manually with <code>mfsymlinks</code>.</li>
+<li>Verified read/write access, ownership mapping, and symlink behavior.</li>
+<li>Added a single canonical CIFS automount line to <code>/etc/fstab</code>.</li>
+<li>Removed duplicate fstab entries and regenerated systemd units.</li>
+<li>Verified the generated automount and mount units were active.</li>
+</ol>
+<p>Important commands used:</p>
+<pre><code class="language-bash">sudo install -m 600 -o root -g root /dev/null /root/.smbcredentials
+sudo bash -lc 'cat &gt; /root/.smbcredentials &lt;&lt;EOF
+username=admin
+password=Kingsley1
+# domain=WORKGROUP
+EOF'
+</code></pre>
+<p>Create a protected SMB credentials file for CIFS mounts.</p>
+<pre><code class="language-bash">sudo mount -t cifs //192.168.16.21/Media /srv/remotemount/NAS \
+  -o rw,vers=3.1.1,credentials=/root/.smbcredentials,uid=1000,gid=1000,iocharset=utf8,mfsymlinks,noperm,noserverino,dir_mode=0775,file_mode=0664,actimeo=1,cache=none
+</code></pre>
+<p>Mount the NAS manually with symlink emulation and explicit ownership mapping.</p>
+<pre><code class="language-bash">ln -s target.txt /srv/remotemount/NAS/_cifs_test/link-to-target
+readlink /srv/remotemount/NAS/_cifs_test/link-to-target
+cat /srv/remotemount/NAS/_cifs_test/link-to-target
+</code></pre>
+<p>Validate that symlink behavior works over CIFS.</p>
+<pre><code class="language-bash">systemctl list-units 'srv-remotemount-NAS.*' --all
+systemctl status srv-remotemount-NAS.automount srv-remotemount-NAS.mount
+</code></pre>
+<p>Validate the fstab-generated automount units.</p>
+<h2 id="key-findings_4">Key Findings<a class="headerlink" href="#key-findings_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>mfsymlinks</code> was necessary for Linux symlink behavior over SMB.</li>
+<li>The share could be mounted with expected ownership as UID/GID 1000.</li>
+<li>Duplicate fstab lines caused systemd generator conflicts.</li>
+<li>Once cleaned up, the automount worked normally.</li>
+</ul>
+<h2 id="resolution_4">Resolution<a class="headerlink" href="#resolution_4" title="Permanent link">&para;</a></h2>
+<p>The NAS mount was rebuilt using a dedicated credentials file and a single correct <code>/etc/fstab</code> entry with systemd automount support and <code>mfsymlinks</code>.</p>
+<h2 id="validation_4">Validation<a class="headerlink" href="#validation_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Files could be created on the share as <code>debian:debian</code>.</li>
+<li>Symlink creation and dereferencing worked.</li>
+<li><code>srv-remotemount-NAS.automount</code> and <code>srv-remotemount-NAS.mount</code> both appeared as loaded/generated and active.</li>
+</ul>
+<h2 id="follow-up-tasks_4">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Consider increasing the idle timeout from 60 seconds if reconnects remain annoying.</li>
+<li>Monitor for further CIFS reconnect events.</li>
+<li>Reuse the same mount pattern for other shares if needed.</li>
+</ul>
+<h2 id="lessons-learned_4">Lessons Learned<a class="headerlink" href="#lessons-learned_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li>CIFS path issues and symlink issues should be solved before running bulk rsync jobs.</li>
+<li>Keep only one canonical fstab entry per mountpoint.</li>
+<li>systemd automounts are reliable once the generator input is clean.</li>
+</ul>
+<h1 id="backup-docker-appdata-and-compose-to-nas">Backup Docker Appdata and Compose to NAS<a class="headerlink" href="#backup-docker-appdata-and-compose-to-nas" title="Permanent link">&para;</a></h1>
+<h2 id="summary_5">Summary<a class="headerlink" href="#summary_5" title="Permanent link">&para;</a></h2>
+<p>The goal shifted from fixing VM 100 in place to preserving Docker state for a future rebuild. Backups of <code>/opt/docker-apps</code> and <code>/opt/compose</code> were attempted to the NAS.</p>
+<h2 id="environment_5">Environment<a class="headerlink" href="#environment_5" title="Permanent link">&para;</a></h2>
+<ul>
+<li>VM 100 (<code>debian-docker</code>)</li>
+<li>Docker appdata:</li>
+<li><code>/opt/docker-apps</code></li>
+<li>Compose directory:</li>
+<li><code>/opt/compose</code></li>
+<li>NAS target:</li>
+<li><code>/srv/remotemount/NAS/Backups/docker-VM</code></li>
+</ul>
+<h2 id="problem_5">Problem<a class="headerlink" href="#problem_5" title="Permanent link">&para;</a></h2>
+<p>A full backup of Docker appdata and compose needed to be created before rebuilding the VM.</p>
+<h2 id="symptoms_5">Symptoms<a class="headerlink" href="#symptoms_5" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Initial backup attempts using more complex approaches led to confusion.</li>
+<li><code>/opt/compose</code> appeared nearly empty:</li>
+<li><code>.bindtest</code></li>
+<li><code>dockge</code></li>
+<li>Initial snapshot verification showed:</li>
+<li>appdata source about 811 MB</li>
+<li>backup snapshot about 779 MB</li>
+<li>compose source 8 KB</li>
+<li>compose snapshot effectively empty</li>
+<li>CIFS read-ahead messages appeared during copy:</li>
+<li><code>CIFS: __readahead_batch() returned 257/1024</code></li>
+</ul>
+<h2 id="actions-taken_5">Actions Taken<a class="headerlink" href="#actions-taken_5" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Determined the canonical live source directories were:</li>
+<li><code>/opt/docker-apps</code></li>
+<li><code>/opt/compose</code></li>
+<li>Created backup roots on the NAS.</li>
+<li>Created an rsync exclude file for logs, caches, and temp data.</li>
+<li>Created timestamped snapshots using rsync.</li>
+<li>Performed size and file-count comparisons.</li>
+<li>Spot-checked large files to confirm they existed in the backup.</li>
+</ol>
+<p>Important commands used:</p>
+<pre><code class="language-bash">APPDATA_SRC=&quot;/opt/docker-apps&quot;
+COMPOSE_SRC=&quot;/opt/compose&quot;
+</code></pre>
+<p>Set the actual source paths for backup.</p>
+<pre><code class="language-bash">TS=&quot;$(date +%F_%H%M%S)&quot;
+DEST_APP=&quot;$BASE/appdata/snap-$TS&quot;
+DEST_CMP=&quot;$BASE/compose/snap-$TS&quot;
+mkdir -p &quot;$DEST_APP&quot; &quot;$DEST_CMP&quot;
+
+rsync -aHAX --delete --numeric-ids $EXC &quot;$APPDATA_SRC&quot;/ &quot;$DEST_APP&quot;/
+rsync -aHAX --delete --numeric-ids $EXC &quot;$COMPOSE_SRC&quot;/ &quot;$DEST_CMP&quot;/
+</code></pre>
+<p>Create snapshot-style backups of appdata and compose.</p>
+<h2 id="key-findings_5">Key Findings<a class="headerlink" href="#key-findings_5" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The live compose directory on the VM was effectively empty except for minimal content.</li>
+<li>Appdata backup largely succeeded; missing items were later traced to exclusions and SMB restore complexity.</li>
+<li>The small compose snapshot was real, not just a display artifact.</li>
+</ul>
+<h2 id="resolution_5">Resolution<a class="headerlink" href="#resolution_5" title="Permanent link">&para;</a></h2>
+<p>A usable appdata backup path was established on the NAS. Compose recovery remained unresolved because the source compose directory was mostly empty.</p>
+<h2 id="validation_5">Validation<a class="headerlink" href="#validation_5" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Appdata snapshots existed on the NAS with many expected app directories.</li>
+<li>Spot checks confirmed large appdata files existed in the snapshot.</li>
+<li>Size and file-count comparisons were close enough to show the backup was mostly successful.</li>
+</ul>
+<h2 id="follow-up-tasks_5">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_5" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Rebuild missing compose files from prior exports, backups, or previous chats.</li>
+<li>Consider archive-based backups instead of raw rsync to CIFS.</li>
+<li>Add verification steps to future backup jobs.</li>
+</ul>
+<h2 id="lessons-learned_5">Lessons Learned<a class="headerlink" href="#lessons-learned_5" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Appdata and compose should be backed up separately and verified separately.</li>
+<li>A nearly empty compose tree should be treated as a real recovery problem, not just a mount bug.</li>
+<li>Raw rsync to CIFS works, but archive-first workflows are safer for large restores.</li>
+</ul>
+<h1 id="restore-appdata-from-offen-backup-archive">Restore Appdata from Offen Backup Archive<a class="headerlink" href="#restore-appdata-from-offen-backup-archive" title="Permanent link">&para;</a></h1>
+<h2 id="summary_6">Summary<a class="headerlink" href="#summary_6" title="Permanent link">&para;</a></h2>
+<p>A large Offen backup archive was restored back into <code>/opt/docker-apps</code> after missing files were discovered in the earlier NAS snapshot. The recovery focused on restoring all appdata content from a <code>tar.gz</code> archive.</p>
+<h2 id="environment_6">Environment<a class="headerlink" href="#environment_6" title="Permanent link">&para;</a></h2>
+<ul>
+<li>VM 100 (<code>debian-docker</code>)</li>
+<li>Backup source:</li>
+<li><code>/srv/remotemount/NAS/Tools/Backups/Docker/offen/backup-[date removed].tar.gz</code></li>
+<li>Restore target:</li>
+<li><code>/opt/docker-apps</code></li>
+<li>Temporary extraction paths:</li>
+<li><code>/tmp/offen-restore-*</code></li>
+<li><code>/var/tmp/offen-restore</code></li>
+<li>Backup tool used originally:</li>
+<li>Offen Docker Volume Backup</li>
+</ul>
+<h2 id="problem_6">Problem<a class="headerlink" href="#problem_6" title="Permanent link">&para;</a></h2>
+<p>Files were still missing after earlier backup and restore work. A complete restore from the older Offen archive was needed, and the archive layout was initially misunderstood.</p>
+<h2 id="symptoms_6">Symptoms<a class="headerlink" href="#symptoms_6" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Early restore attempts failed because:</li>
+<li>the wrong <code>.tar</code> versus <code>.tar.gz</code> extension was assumed</li>
+<li>archive extraction commands relied on lost shell variables after logout</li>
+<li>restore attempts incorrectly targeted <code>/opt/docker-apps/Offen</code></li>
+<li>One tar attempt failed with:</li>
+<li><code>tar (child): /archive.tar.gz: Cannot open: No such file or directory</code></li>
+<li>Another tar path attempt failed with:</li>
+<li><code>tar: backup/my-app-backup: Not found in archive</code></li>
+<li>The archive repeatedly showed:</li>
+<li><code>tar: Removing leading '/' from member names</code></li>
+<li>CIFS messages appeared during copy:</li>
+<li><code>CIFS: __readahead_batch() returned 257/1024</code></li>
+</ul>
+<h2 id="actions-taken_6">Actions Taken<a class="headerlink" href="#actions-taken_6" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Confirmed the archive was really a <code>.tar.gz</code>.</li>
+<li>Verified the archive with <code>gzip -t</code>.</li>
+<li>Listed archive contents with <code>tar -tzf</code>.</li>
+<li>Confirmed the archive root structure was:</li>
+<li><code>/backup/my-app-backup/...</code></li>
+<li>Copied the archive locally before extraction to avoid CIFS issues.</li>
+<li>Extracted the payload into <code>/opt/docker-apps</code> using strip logic.</li>
+<li>Observed that some content first landed under:</li>
+<li><code>/opt/docker-apps/backup/my-app-backup</code></li>
+<li>Moved payload contents up into <code>/opt/docker-apps</code>.</li>
+<li>Used a staging workflow and later re-extracted the entire payload directly into <code>/opt/docker-apps</code>.</li>
+<li>Considered overwrite semantics to restore deleted JSON, YAML, and DB files.</li>
+</ol>
+<p>Important commands used:</p>
+<pre><code class="language-bash">gzip -t &quot;$TMP/archive.tar.gz&quot; &amp;&amp; echo &quot;gzip OK&quot;
+tar -tzf &quot;$TMP/archive.tar.gz&quot; | head -20
+</code></pre>
+<p>Validate archive integrity and inspect internal path layout.</p>
+<pre><code class="language-bash">sudo tar -xzpf &quot;$TMP/archive.tar.gz&quot; \
+  -C &quot;$DEST&quot; \
+  --strip-components=2 \
+  /backup/my-app-backup
+</code></pre>
+<p>Extract the backup payload into the appdata root while dropping the wrapper path.</p>
+<pre><code class="language-bash">sudo rsync -a --remove-source-files /opt/docker-apps/backup/my-app-backup/ /opt/docker-apps/
+</code></pre>
+<p>Move restored payload contents up one level after an earlier wrapper-path extraction.</p>
+<h2 id="key-findings_6">Key Findings<a class="headerlink" href="#key-findings_6" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The backup archive was valid.</li>
+<li>The archive layout used an absolute top-level path:</li>
+<li><code>/backup/my-app-backup/...</code></li>
+<li>The restore destination was the full <code>/opt/docker-apps</code> tree, not an <code>Offen</code> subdirectory.</li>
+<li>Missing files could still occur if they were not in the specific backup date being restored, or if later confusion about destination structure hid them.</li>
+</ul>
+<h2 id="resolution_6">Resolution<a class="headerlink" href="#resolution_6" title="Permanent link">&para;</a></h2>
+<p>A full appdata restore from the Offen archive into <code>/opt/docker-apps</code> was completed. The restored tree showed many expected application directories, including:
+- <code>Radarr-ES</code>
+- <code>Monica</code>
+- <code>Overseerr</code>
+- <code>Plex</code>
+- <code>Traefik</code>
+- <code>Notifiarr</code>
+- and many others</p>
+<h2 id="validation_6">Validation<a class="headerlink" href="#validation_6" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>gzip -t</code> returned <code>gzip OK</code>.</li>
+<li><code>tar -tzf</code> showed expected app directories under <code>/backup/my-app-backup</code>.</li>
+<li><code>du -sh /opt/docker-apps</code> returned 45 GB after restore.</li>
+<li><code>find /opt/docker-apps -maxdepth 2 -type d</code> showed many recovered application directories.</li>
+</ul>
+<h2 id="follow-up-tasks_6">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_6" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Confirm whether all expected per-app files are present by checking specific known-missing JSON, YAML, and DB files.</li>
+<li>Restore <code>/opt/compose</code> separately, because this Offen archive was appdata-only.</li>
+<li>Decide whether to rebuild compose files manually or from other backups.</li>
+<li>Consider a safer future backup format:</li>
+<li>archive-first locally</li>
+<li>then transfer the archive to NAS</li>
+</ul>
+<h2 id="lessons-learned_6">Lessons Learned<a class="headerlink" href="#lessons-learned_6" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Always confirm the exact archive type and internal path structure before restoring.</li>
+<li>Shell variables are lost after logout; long restore workflows should be rerun from a fresh, self-contained set of commands.</li>
+<li>For large SMB-backed restores, copying the archive locally first is more reliable than extracting directly from the mounted share.</li>
+<li>Offen appdata backups do not automatically solve missing compose files.</li>
+</ul>
+<h1 id="command-reference">Command Reference<a class="headerlink" href="#command-reference" title="Permanent link">&para;</a></h1>
+<h2 id="command">Command<a class="headerlink" href="#command" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm set 101 -scsi1 cephpool:vm-100-disk-0
+</code></pre>
+<h3 id="what-it-does">What it does<a class="headerlink" href="#what-it-does" title="Permanent link">&para;</a></h3>
+<p>Attaches VM 100’s Ceph-backed disk to helper VM 101 as an extra SCSI disk.</p>
+<h3 id="important-flags-or-arguments">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>qm set</code>: Modify a Proxmox VM config.</li>
+<li><code>101</code>: Helper VM ID.</li>
+<li><code>-scsi1</code>: Attach the disk as the second SCSI device.</li>
+<li><code>cephpool:vm-100-disk-0</code>: The existing VM disk on Ceph storage.</li>
+</ul>
+<h3 id="why-it-was-used">Why it was used<a class="headerlink" href="#why-it-was-used" title="Permanent link">&para;</a></h3>
+<p>To mount and repair VM 100 offline from a helper VM.</p>
+<h3 id="expected-result">Expected result<a class="headerlink" href="#expected-result" title="Permanent link">&para;</a></h3>
+<p>VM 101 gains visibility of VM 100’s disk.</p>
+<h3 id="success-or-failure-meaning">Success or failure meaning<a class="headerlink" href="#success-or-failure-meaning" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: the disk appears in helper VM block devices.</li>
+<li>Failure: wrong storage backend or wrong disk identifier was used.</li>
+</ul>
+<h3 id="risk">Risk<a class="headerlink" href="#risk" title="Permanent link">&para;</a></h3>
+<p>Moderate. Attaching the wrong disk can risk modifying the wrong VM’s data.</p>
+<h3 id="safer-alternative">Safer alternative<a class="headerlink" href="#safer-alternative" title="Permanent link">&para;</a></h3>
+<p>Double-check with Proxmox VM config and storage listing before attaching.</p>
+<h2 id="command_1">Command<a class="headerlink" href="#command_1" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">lsblk -o NAME,SIZE,FSTYPE,TYPE,MOUNTPOINT
+</code></pre>
+<h3 id="what-it-does_1">What it does<a class="headerlink" href="#what-it-does_1" title="Permanent link">&para;</a></h3>
+<p>Lists block devices, partitions, filesystems, and mountpoints.</p>
+<h3 id="important-flags-or-arguments_1">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>-o</code>: Select output columns.</li>
+</ul>
+<h3 id="why-it-was-used_1">Why it was used<a class="headerlink" href="#why-it-was-used_1" title="Permanent link">&para;</a></h3>
+<p>To identify which device and partition belonged to the offline VM root disk.</p>
+<h3 id="expected-result_1">Expected result<a class="headerlink" href="#expected-result_1" title="Permanent link">&para;</a></h3>
+<p>A readable map of disks and partitions.</p>
+<h3 id="success-or-failure-meaning_1">Success or failure meaning<a class="headerlink" href="#success-or-failure-meaning_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: the correct root partition can be identified.</li>
+<li>Failure: attached disk missing or helper VM does not see the disk.</li>
+</ul>
+<h3 id="risk_1">Risk<a class="headerlink" href="#risk_1" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h3 id="safer-alternative_1">Safer alternative<a class="headerlink" href="#safer-alternative_1" title="Permanent link">&para;</a></h3>
+<p>None needed; this is a standard inspection command.</p>
+<h2 id="command_2">Command<a class="headerlink" href="#command_2" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo mount /dev/sda1 /mnt/vm100
+for d in dev proc sys run; do sudo mount --bind /$d /mnt/vm100/$d; done
+sudo chroot /mnt/vm100 /bin/bash
+</code></pre>
+<h3 id="what-it-does_2">What it does<a class="headerlink" href="#what-it-does_2" title="Permanent link">&para;</a></h3>
+<p>Mounts the offline guest root filesystem, bind-mounts critical pseudo-filesystems, and enters a chroot.</p>
+<h3 id="important-flags-or-arguments_2">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>mount --bind</code>: Makes host pseudo-filesystems available inside the chroot.</li>
+<li><code>chroot</code>: Changes the apparent root directory of the current shell.</li>
+</ul>
+<h3 id="why-it-was-used_2">Why it was used<a class="headerlink" href="#why-it-was-used_2" title="Permanent link">&para;</a></h3>
+<p>To repair VM 100 as if logged into its own root filesystem.</p>
+<h3 id="expected-result_2">Expected result<a class="headerlink" href="#expected-result_2" title="Permanent link">&para;</a></h3>
+<p>A root shell inside the mounted guest filesystem.</p>
+<h3 id="success-or-failure-meaning_2">Success or failure meaning<a class="headerlink" href="#success-or-failure-meaning_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: admin tools and configuration files can be edited in place.</li>
+<li>Failure: wrong partition mounted or missing bind mounts.</li>
+</ul>
+<h3 id="risk_2">Risk<a class="headerlink" href="#risk_2" title="Permanent link">&para;</a></h3>
+<p>High. This directly edits another system’s root filesystem.</p>
+<h3 id="safer-alternative_2">Safer alternative<a class="headerlink" href="#safer-alternative_2" title="Permanent link">&para;</a></h3>
+<p>Mount read-only first for inspection, then remount read-write only when ready.</p>
+<h2 id="command_3">Command<a class="headerlink" href="#command_3" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+</code></pre>
+<h3 id="what-it-does_3">What it does<a class="headerlink" href="#what-it-does_3" title="Permanent link">&para;</a></h3>
+<p>Sets a full administrative command path inside the current shell.</p>
+<h3 id="important-flags-or-arguments_3">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_3" title="Permanent link">&para;</a></h3>
+<p>No flags.</p>
+<h3 id="why-it-was-used_3">Why it was used<a class="headerlink" href="#why-it-was-used_3" title="Permanent link">&para;</a></h3>
+<p>The rescue shell or chroot session did not have admin tools in the path.</p>
+<h3 id="expected-result_3">Expected result<a class="headerlink" href="#expected-result_3" title="Permanent link">&para;</a></h3>
+<p>Commands such as <code>useradd</code>, <code>groupadd</code>, and <code>chpasswd</code> become available.</p>
+<h3 id="success-or-failure-meaning_3">Success or failure meaning<a class="headerlink" href="#success-or-failure-meaning_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: admin commands can be executed.</li>
+<li>Failure: binaries may be missing from the chrooted system.</li>
+</ul>
+<h3 id="risk_3">Risk<a class="headerlink" href="#risk_3" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h2 id="command_4">Command<a class="headerlink" href="#command_4" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">rm -f /etc/nologin || true
+getent group sudo &gt;/dev/null || groupadd sudo
+</code></pre>
+<h3 id="what-it-does_4">What it does<a class="headerlink" href="#what-it-does_4" title="Permanent link">&para;</a></h3>
+<p>Removes a file that blocks logins and ensures the <code>sudo</code> group exists.</p>
+<h3 id="important-flags-or-arguments_4">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>-f</code>: Ignore missing file.</li>
+<li><code>|| true</code>: Avoid aborting on benign failure.</li>
+</ul>
+<h3 id="why-it-was-used_4">Why it was used<a class="headerlink" href="#why-it-was-used_4" title="Permanent link">&para;</a></h3>
+<p>To restore login access in the recovered VM.</p>
+<h3 id="expected-result_4">Expected result<a class="headerlink" href="#expected-result_4" title="Permanent link">&para;</a></h3>
+<p>No login-block file and a valid <code>sudo</code> group.</p>
+<h3 id="success-or-failure-meaning_4">Success or failure meaning<a class="headerlink" href="#success-or-failure-meaning_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: local login barriers are removed.</li>
+<li>Failure: filesystem or chroot issues remain.</li>
+</ul>
+<h3 id="risk_4">Risk<a class="headerlink" href="#risk_4" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h2 id="command_5">Command<a class="headerlink" href="#command_5" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">id -u rescue &gt;/dev/null 2&gt;&amp;1 || /usr/sbin/useradd -m -s /bin/bash -G sudo rescue
+echo 'rescue:Docker123' | /usr/sbin/chpasswd
+
+id -u debian &gt;/dev/null 2&gt;&amp;1 || /usr/sbin/useradd -m -s /bin/bash -G sudo debian
+echo 'debian:Docker123' | /usr/sbin/chpasswd
+</code></pre>
+<h3 id="what-it-does_5">What it does<a class="headerlink" href="#what-it-does_5" title="Permanent link">&para;</a></h3>
+<p>Creates or resets local users and passwords.</p>
+<h3 id="important-flags-or-arguments_5">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>useradd -m</code>: Create a home directory.</li>
+<li><code>-s /bin/bash</code>: Set shell.</li>
+<li><code>-G sudo</code>: Add user to the sudo group.</li>
+<li><code>chpasswd</code>: Set password from stdin.</li>
+</ul>
+<h3 id="why-it-was-used_5">Why it was used<a class="headerlink" href="#why-it-was-used_5" title="Permanent link">&para;</a></h3>
+<p>To restore console and admin access.</p>
+<h3 id="expected-result_5">Expected result<a class="headerlink" href="#expected-result_5" title="Permanent link">&para;</a></h3>
+<p>Working local credentials for recovery.</p>
+<h3 id="success-or-failure-meaning_5">Success or failure meaning<a class="headerlink" href="#success-or-failure-meaning_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: passwords reset and user accounts exist.</li>
+<li>Failure: broken passwd/shadow state, bad chroot, or missing tools.</li>
+</ul>
+<h3 id="risk_5">Risk<a class="headerlink" href="#risk_5" title="Permanent link">&para;</a></h3>
+<p>Moderate. Password resets directly affect guest authentication.</p>
+<h2 id="command_6">Command<a class="headerlink" href="#command_6" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sed -i -E 's/^\s*#?\s*PasswordAuthentication\s+.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+sed -i -E 's/^\s*#?\s*(KbdInteractiveAuthentication|ChallengeResponseAuthentication)\s+.*/KbdInteractiveAuthentication yes/' /etc/ssh/sshd_config
+/usr/sbin/sshd -t
+</code></pre>
+<h3 id="what-it-does_6">What it does<a class="headerlink" href="#what-it-does_6" title="Permanent link">&para;</a></h3>
+<p>Enables SSH password-based authentication settings and validates the SSH daemon config.</p>
+<h3 id="important-flags-or-arguments_6">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_6" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>sed -i</code>: Edit file in place.</li>
+<li><code>-E</code>: Extended regex.</li>
+<li><code>sshd -t</code>: Syntax check only.</li>
+</ul>
+<h3 id="why-it-was-used_6">Why it was used<a class="headerlink" href="#why-it-was-used_6" title="Permanent link">&para;</a></h3>
+<p>To repair password-auth SSH access after login problems.</p>
+<h3 id="expected-result_6">Expected result<a class="headerlink" href="#expected-result_6" title="Permanent link">&para;</a></h3>
+<p>A valid SSH config allowing password auth.</p>
+<h3 id="success-or-failure-meaning_6">Success or failure meaning<a class="headerlink" href="#success-or-failure-meaning_6" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: <code>sshd -t</code> exits cleanly.</li>
+<li>Failure: config file corruption or bad syntax remains.</li>
+</ul>
+<h3 id="risk_6">Risk<a class="headerlink" href="#risk_6" title="Permanent link">&para;</a></h3>
+<p>Moderate. A bad SSH config can lock out remote access.</p>
+<h3 id="safer-alternative_3">Safer alternative<a class="headerlink" href="#safer-alternative_3" title="Permanent link">&para;</a></h3>
+<p>Back up <code>sshd_config</code> before editing.</p>
+<h2 id="command_7">Command<a class="headerlink" href="#command_7" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">hostnamectl
+cat /etc/hostname
+sed -n '1,40p' /etc/hosts
+</code></pre>
+<h3 id="what-it-does_7">What it does<a class="headerlink" href="#what-it-does_7" title="Permanent link">&para;</a></h3>
+<p>Inspects hostname state and static host mappings.</p>
+<h3 id="important-flags-or-arguments_7">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_7" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>sed -n '1,40p'</code>: Print the first 40 lines.</li>
+</ul>
+<h3 id="why-it-was-used_7">Why it was used<a class="headerlink" href="#why-it-was-used_7" title="Permanent link">&para;</a></h3>
+<p>To understand why VM 100 appeared as <code>helper-vm</code>.</p>
+<h3 id="expected-result_7">Expected result<a class="headerlink" href="#expected-result_7" title="Permanent link">&para;</a></h3>
+<p>The current static hostname and local host configuration are displayed.</p>
+<h3 id="success-or-failure-meaning_7">Success or failure meaning<a class="headerlink" href="#success-or-failure-meaning_7" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: hostname drift is visible.</li>
+<li>Failure: deeper system corruption or missing tools.</li>
+</ul>
+<h3 id="risk_7">Risk<a class="headerlink" href="#risk_7" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h2 id="command_8">Command<a class="headerlink" href="#command_8" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo journalctl -b | grep -Ei 'set hostname|cloud-ini|dhcp|dhclient|networkd.*hostname'
+systemctl is-enabled cloud-init || true
+cloud-init status || true
+grep -i preserve_hostname /etc/cloud/cloud.cfg || true
+ls -1 /etc/cloud/cloud.cfg.d/ || true
+</code></pre>
+<h3 id="what-it-does_8">What it does<a class="headerlink" href="#what-it-does_8" title="Permanent link">&para;</a></h3>
+<p>Checks whether cloud-init or networking changed the hostname during boot.</p>
+<h3 id="important-flags-or-arguments_8">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_8" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>journalctl -b</code>: Current boot logs.</li>
+<li><code>grep -Ei</code>: Case-insensitive extended matching.</li>
+</ul>
+<h3 id="why-it-was-used_8">Why it was used<a class="headerlink" href="#why-it-was-used_8" title="Permanent link">&para;</a></h3>
+<p>To confirm whether cloud-init was still controlling hostname behavior.</p>
+<h3 id="expected-result_8">Expected result<a class="headerlink" href="#expected-result_8" title="Permanent link">&para;</a></h3>
+<p>Evidence of cloud-init activity and relevant settings.</p>
+<h3 id="success-or-failure-meaning_8">Success or failure meaning<a class="headerlink" href="#success-or-failure-meaning_8" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: root cause of hostname drift becomes visible.</li>
+<li>Failure: incomplete logs or missing cloud-init.</li>
+</ul>
+<h3 id="risk_8">Risk<a class="headerlink" href="#risk_8" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h2 id="command_9">Command<a class="headerlink" href="#command_9" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">findmnt /var/lib/docker /var/lib/docker/appdata /var/lib/docker/compose || true
+grep -Ev '^\s*#|^\s*$' /etc/fstab | sed -n '1,200p'
+systemctl status docker-verify.mountguard.service --no-pager || true
+systemctl status docker --no-pager || true
+</code></pre>
+<h3 id="what-it-does_9">What it does<a class="headerlink" href="#what-it-does_9" title="Permanent link">&para;</a></h3>
+<p>Checks actual mount state, active fstab entries, and Docker-related systemd unit status.</p>
+<h3 id="important-flags-or-arguments_9">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_9" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>findmnt</code>: Shows real mount relationships.</li>
+<li><code>grep -Ev</code>: Filters out comments and blank lines.</li>
+<li><code>--no-pager</code>: Print full unit status directly.</li>
+</ul>
+<h3 id="why-it-was-used_9">Why it was used<a class="headerlink" href="#why-it-was-used_9" title="Permanent link">&para;</a></h3>
+<p>To diagnose why Docker root and bind mounts were inconsistent.</p>
+<h3 id="expected-result_9">Expected result<a class="headerlink" href="#expected-result_9" title="Permanent link">&para;</a></h3>
+<p>A clear picture of whether <code>/var/lib/docker</code> is really mounted and whether Docker guard logic is behaving.</p>
+<h3 id="success-or-failure-meaning_9">Success or failure meaning<a class="headerlink" href="#success-or-failure-meaning_9" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: mount state becomes clear.</li>
+<li>Failure: path confusion persists or units are broken.</li>
+</ul>
+<h3 id="risk_9">Risk<a class="headerlink" href="#risk_9" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h2 id="command_10">Command<a class="headerlink" href="#command_10" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo mount -a
+findmnt /var/lib/docker
+</code></pre>
+<h3 id="what-it-does_10">What it does<a class="headerlink" href="#what-it-does_10" title="Permanent link">&para;</a></h3>
+<p>Applies all fstab mounts and then confirms whether Docker root is mounted.</p>
+<h3 id="important-flags-or-arguments_10">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_10" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>mount -a</code>: Mount all eligible entries from fstab.</li>
+</ul>
+<h3 id="why-it-was-used_10">Why it was used<a class="headerlink" href="#why-it-was-used_10" title="Permanent link">&para;</a></h3>
+<p>To apply repaired mount definitions.</p>
+<h3 id="expected-result_10">Expected result<a class="headerlink" href="#expected-result_10" title="Permanent link">&para;</a></h3>
+<p><code>/var/lib/docker</code> appears as a real mountpoint if fstab is correct.</p>
+<h3 id="success-or-failure-meaning_10">Success or failure meaning<a class="headerlink" href="#success-or-failure-meaning_10" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: dedicated Docker data mount is active.</li>
+<li>Failure: fstab entry wrong, device missing, or mount failed.</li>
+</ul>
+<h3 id="risk_10">Risk<a class="headerlink" href="#risk_10" title="Permanent link">&para;</a></h3>
+<p>Moderate. Bad fstab entries can cause boot or mount issues.</p>
+<h2 id="command_11">Command<a class="headerlink" href="#command_11" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo bash -lc 'touch /opt/compose/.bindtest &amp;&amp; ls -la /var/lib/docker/compose | grep bindtest || echo &quot;compose bind not active&quot;'
+sudo bash -lc 'touch /opt/docker-apps/.bindtest &amp;&amp; ls -la /var/lib/docker/appdata | grep bindtest || echo &quot;appdata bind not active&quot;'
+</code></pre>
+<h3 id="what-it-does_11">What it does<a class="headerlink" href="#what-it-does_11" title="Permanent link">&para;</a></h3>
+<p>Creates a test file on one side of the bind and checks whether it appears on the other side.</p>
+<h3 id="important-flags-or-arguments_11">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_11" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>bash -lc</code>: Run a login-like shell command string.</li>
+<li><code>touch</code>: Create a file if missing.</li>
+</ul>
+<h3 id="why-it-was-used_11">Why it was used<a class="headerlink" href="#why-it-was-used_11" title="Permanent link">&para;</a></h3>
+<p>To prove whether the bind mounts were actually working.</p>
+<h3 id="expected-result_11">Expected result<a class="headerlink" href="#expected-result_11" title="Permanent link">&para;</a></h3>
+<p>The test file appears on the opposite path.</p>
+<h3 id="success-or-failure-meaning_11">Success or failure meaning<a class="headerlink" href="#success-or-failure-meaning_11" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: real bind relationship exists.</li>
+<li>Failure: bind not active or path direction wrong.</li>
+</ul>
+<h3 id="risk_11">Risk<a class="headerlink" href="#risk_11" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h2 id="command_12">Command<a class="headerlink" href="#command_12" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo install -m 600 -o root -g root /dev/null /root/.smbcredentials
+sudo bash -lc 'cat &gt; /root/.smbcredentials &lt;&lt;EOF
+username=admin
+password=Kingsley1
+# domain=WORKGROUP
+EOF'
+</code></pre>
+<h3 id="what-it-does_12">What it does<a class="headerlink" href="#what-it-does_12" title="Permanent link">&para;</a></h3>
+<p>Creates a protected SMB credentials file.</p>
+<h3 id="important-flags-or-arguments_12">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_12" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>install -m 600</code>: Create file with strict permissions.</li>
+<li><code>-o root -g root</code>: Root ownership.</li>
+</ul>
+<h3 id="why-it-was-used_12">Why it was used<a class="headerlink" href="#why-it-was-used_12" title="Permanent link">&para;</a></h3>
+<p>CIFS mounts needed credentials without exposing them in command history or fstab.</p>
+<h3 id="expected-result_12">Expected result<a class="headerlink" href="#expected-result_12" title="Permanent link">&para;</a></h3>
+<p>A root-readable-only credentials file.</p>
+<h3 id="success-or-failure-meaning_12">Success or failure meaning<a class="headerlink" href="#success-or-failure-meaning_12" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: CIFS mounts can authenticate.</li>
+<li>Failure: mount auth errors continue.</li>
+</ul>
+<h3 id="risk_12">Risk<a class="headerlink" href="#risk_12" title="Permanent link">&para;</a></h3>
+<p>High. Contains plaintext credentials.</p>
+<h3 id="safer-alternative_4">Safer alternative<a class="headerlink" href="#safer-alternative_4" title="Permanent link">&para;</a></h3>
+<p>Use a separate secret-management method if available.</p>
+<h2 id="command_13">Command<a class="headerlink" href="#command_13" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo mount -t cifs //192.168.16.21/Media /srv/remotemount/NAS \
+  -o rw,vers=3.1.1,credentials=/root/.smbcredentials,uid=1000,gid=1000,iocharset=utf8,mfsymlinks,noperm,noserverino,dir_mode=0775,file_mode=0664,actimeo=1,cache=none
+</code></pre>
+<h3 id="what-it-does_13">What it does<a class="headerlink" href="#what-it-does_13" title="Permanent link">&para;</a></h3>
+<p>Mounts the NAS share manually over SMB/CIFS.</p>
+<h3 id="important-flags-or-arguments_13">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_13" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>vers=3.1.1</code>: SMB protocol version.</li>
+<li><code>credentials=...</code>: Use stored SMB credentials.</li>
+<li><code>uid/gid=1000</code>: Present files as owned by the Debian user.</li>
+<li><code>mfsymlinks</code>: Emulate Linux symlinks on SMB.</li>
+<li><code>cache=none</code>: Minimize caching for correctness.</li>
+<li><code>actimeo=1</code>: Keep attribute cache lifetime short.</li>
+</ul>
+<h3 id="why-it-was-used_13">Why it was used<a class="headerlink" href="#why-it-was-used_13" title="Permanent link">&para;</a></h3>
+<p>To validate a working mount before committing the config to fstab.</p>
+<h3 id="expected-result_13">Expected result<a class="headerlink" href="#expected-result_13" title="Permanent link">&para;</a></h3>
+<p>A working NAS mount with file ownership and symlink behavior matching Linux expectations.</p>
+<h3 id="success-or-failure-meaning_13">Success or failure meaning<a class="headerlink" href="#success-or-failure-meaning_13" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: NAS is accessible and Linux workflows work.</li>
+<li>Failure: credentials, share path, or SMB options are wrong.</li>
+</ul>
+<h3 id="risk_13">Risk<a class="headerlink" href="#risk_13" title="Permanent link">&para;</a></h3>
+<p>Moderate. A bad mount command can mask path issues or hang on network problems.</p>
+<h2 id="command_14">Command<a class="headerlink" href="#command_14" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ln -s target.txt /srv/remotemount/NAS/_cifs_test/link-to-target
+readlink /srv/remotemount/NAS/_cifs_test/link-to-target
+cat /srv/remotemount/NAS/_cifs_test/link-to-target
+</code></pre>
+<h3 id="what-it-does_14">What it does<a class="headerlink" href="#what-it-does_14" title="Permanent link">&para;</a></h3>
+<p>Creates and tests a symlink on the mounted NAS share.</p>
+<h3 id="important-flags-or-arguments_14">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_14" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>ln -s</code>: Create symbolic link.</li>
+<li><code>readlink</code>: Show link target.</li>
+</ul>
+<h3 id="why-it-was-used_14">Why it was used<a class="headerlink" href="#why-it-was-used_14" title="Permanent link">&para;</a></h3>
+<p>To prove <code>mfsymlinks</code> solved the SMB symlink problem.</p>
+<h3 id="expected-result_14">Expected result<a class="headerlink" href="#expected-result_14" title="Permanent link">&para;</a></h3>
+<p>The symlink resolves and file contents are readable through it.</p>
+<h3 id="success-or-failure-meaning_14">Success or failure meaning<a class="headerlink" href="#success-or-failure-meaning_14" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: SMB symlink emulation works.</li>
+<li>Failure: mount options are insufficient.</li>
+</ul>
+<h3 id="risk_14">Risk<a class="headerlink" href="#risk_14" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h2 id="command_15">Command<a class="headerlink" href="#command_15" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">systemctl list-units 'srv-remotemount-NAS.*' --all
+systemctl status srv-remotemount-NAS.automount srv-remotemount-NAS.mount
+</code></pre>
+<h3 id="what-it-does_15">What it does<a class="headerlink" href="#what-it-does_15" title="Permanent link">&para;</a></h3>
+<p>Checks the fstab-generated systemd automount and mount units.</p>
+<h3 id="important-flags-or-arguments_15">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_15" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>--all</code>: Include inactive units.</li>
+<li><code>status</code>: Show current unit state and logs.</li>
+</ul>
+<h3 id="why-it-was-used_15">Why it was used<a class="headerlink" href="#why-it-was-used_15" title="Permanent link">&para;</a></h3>
+<p>To validate the automount behavior after fixing <code>/etc/fstab</code>.</p>
+<h3 id="expected-result_15">Expected result<a class="headerlink" href="#expected-result_15" title="Permanent link">&para;</a></h3>
+<p>The automount unit is active and the mount unit activates on access.</p>
+<h3 id="success-or-failure-meaning_15">Success or failure meaning<a class="headerlink" href="#success-or-failure-meaning_15" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: the NAS mount is persistent and on-demand.</li>
+<li>Failure: fstab or systemd generator input is still wrong.</li>
+</ul>
+<h3 id="risk_15">Risk<a class="headerlink" href="#risk_15" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h2 id="command_16">Command<a class="headerlink" href="#command_16" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">rsync -aHAX --delete --numeric-ids &quot;$APPDATA_SRC&quot;/ &quot;$DEST_APP&quot;/
+rsync -aHAX --delete --numeric-ids &quot;$COMPOSE_SRC&quot;/ &quot;$DEST_CMP&quot;/
+</code></pre>
+<h3 id="what-it-does_16">What it does<a class="headerlink" href="#what-it-does_16" title="Permanent link">&para;</a></h3>
+<p>Copies appdata and compose trees to backup destinations while preserving metadata.</p>
+<h3 id="important-flags-or-arguments_16">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_16" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>-a</code>: Archive mode.</li>
+<li><code>-H</code>: Preserve hard links.</li>
+<li><code>-A</code>: Preserve ACLs.</li>
+<li><code>-X</code>: Preserve extended attributes.</li>
+<li><code>--delete</code>: Remove files from destination not present in source.</li>
+<li><code>--numeric-ids</code>: Preserve numeric ownership.</li>
+</ul>
+<h3 id="why-it-was-used_16">Why it was used<a class="headerlink" href="#why-it-was-used_16" title="Permanent link">&para;</a></h3>
+<p>To create restorable NAS snapshots of Docker state.</p>
+<h3 id="expected-result_16">Expected result<a class="headerlink" href="#expected-result_16" title="Permanent link">&para;</a></h3>
+<p>Backup snapshot directories matching the source tree.</p>
+<h3 id="success-or-failure-meaning_16">Success or failure meaning<a class="headerlink" href="#success-or-failure-meaning_16" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: backup snapshots are usable for restore.</li>
+<li>Failure: SMB or permission issues interrupt the copy.</li>
+</ul>
+<h3 id="risk_16">Risk<a class="headerlink" href="#risk_16" title="Permanent link">&para;</a></h3>
+<p>Moderate. <code>--delete</code> can erase destination content if paths are reversed.</p>
+<h2 id="command_17">Command<a class="headerlink" href="#command_17" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">gzip -t &quot;$TMP/archive.tar.gz&quot; &amp;&amp; echo &quot;gzip OK&quot;
+tar -tzf &quot;$TMP/archive.tar.gz&quot; | head -20
+</code></pre>
+<h3 id="what-it-does_17">What it does<a class="headerlink" href="#what-it-does_17" title="Permanent link">&para;</a></h3>
+<p>Tests archive integrity and lists the first few archive entries.</p>
+<h3 id="important-flags-or-arguments_17">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_17" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>gzip -t</code>: Validate gzip compression layer.</li>
+<li><code>tar -tzf</code>: List contents of a gzip-compressed tar archive.</li>
+</ul>
+<h3 id="why-it-was-used_17">Why it was used<a class="headerlink" href="#why-it-was-used_17" title="Permanent link">&para;</a></h3>
+<p>To confirm the Offen backup archive was valid and to inspect its internal path layout.</p>
+<h3 id="expected-result_17">Expected result<a class="headerlink" href="#expected-result_17" title="Permanent link">&para;</a></h3>
+<p><code>gzip OK</code> and visible archive entries.</p>
+<h3 id="success-or-failure-meaning_17">Success or failure meaning<a class="headerlink" href="#success-or-failure-meaning_17" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: archive is readable and path structure is known.</li>
+<li>Failure: corrupted archive or wrong file format.</li>
+</ul>
+<h3 id="risk_17">Risk<a class="headerlink" href="#risk_17" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h2 id="command_18">Command<a class="headerlink" href="#command_18" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo tar -xzpf &quot;$TMP/archive.tar.gz&quot; \
+  -C &quot;$DEST&quot; \
+  --strip-components=2 \
+  /backup/my-app-backup
+</code></pre>
+<h3 id="what-it-does_18">What it does<a class="headerlink" href="#what-it-does_18" title="Permanent link">&para;</a></h3>
+<p>Extracts the backup payload directly into the appdata destination while discarding wrapper path components.</p>
+<h3 id="important-flags-or-arguments_18">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_18" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>-x</code>: Extract.</li>
+<li><code>-z</code>: Gzip-compressed archive.</li>
+<li><code>-p</code>: Preserve permissions.</li>
+<li><code>-f</code>: Archive file.</li>
+<li><code>-C "$DEST"</code>: Extract into destination directory.</li>
+<li><code>--strip-components=2</code>: Remove the first two path components.</li>
+</ul>
+<h3 id="why-it-was-used_18">Why it was used<a class="headerlink" href="#why-it-was-used_18" title="Permanent link">&para;</a></h3>
+<p>The archive root was <code>/backup/my-app-backup/...</code>, but the desired restore target was <code>/opt/docker-apps/...</code>.</p>
+<h3 id="expected-result_18">Expected result<a class="headerlink" href="#expected-result_18" title="Permanent link">&para;</a></h3>
+<p>App directories are restored directly into <code>/opt/docker-apps</code>.</p>
+<h3 id="success-or-failure-meaning_18">Success or failure meaning<a class="headerlink" href="#success-or-failure-meaning_18" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: payload lands at the desired depth.</li>
+<li>Failure: wrong archive path or wrong strip depth.</li>
+</ul>
+<h3 id="risk_18">Risk<a class="headerlink" href="#risk_18" title="Permanent link">&para;</a></h3>
+<p>High. A bad strip value can place files into the wrong location.</p>
+<h2 id="command_19">Command<a class="headerlink" href="#command_19" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo rsync -a --remove-source-files /opt/docker-apps/backup/my-app-backup/ /opt/docker-apps/
+</code></pre>
+<h3 id="what-it-does_19">What it does<a class="headerlink" href="#what-it-does_19" title="Permanent link">&para;</a></h3>
+<p>Moves restored contents out of an accidentally nested wrapper directory into the real appdata root.</p>
+<h3 id="important-flags-or-arguments_19">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_19" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>--remove-source-files</code>: Delete source files after successful copy.</li>
+</ul>
+<h3 id="why-it-was-used_19">Why it was used<a class="headerlink" href="#why-it-was-used_19" title="Permanent link">&para;</a></h3>
+<p>An earlier restore left the payload nested under <code>/opt/docker-apps/backup/my-app-backup</code>.</p>
+<h3 id="expected-result_19">Expected result<a class="headerlink" href="#expected-result_19" title="Permanent link">&para;</a></h3>
+<p>Files move up into the correct root while the nested wrapper becomes empty.</p>
+<h3 id="success-or-failure-meaning_19">Success or failure meaning<a class="headerlink" href="#success-or-failure-meaning_19" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: restored tree ends up in the expected location.</li>
+<li>Failure: source and destination remain inconsistent.</li>
+</ul>
+<h3 id="risk_19">Risk<a class="headerlink" href="#risk_19" title="Permanent link">&para;</a></h3>
+<p>Moderate. Using remove-source semantics is risky if source and destination are wrong.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

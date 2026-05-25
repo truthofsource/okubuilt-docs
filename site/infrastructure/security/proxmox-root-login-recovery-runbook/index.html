@@ -1,0 +1,3534 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Infrastructure, cloud, automation, security, and operations documentation portfolio.">
+      
+      
+        <meta name="author" content="Kingsley Oku">
+      
+      
+      
+        <link rel="prev" href="../homelab-ssh-ansible-nut-documentation/">
+      
+      
+        <link rel="next" href="../../storage/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Proxmox Root Login Failure After Package Upgrade - OkuBuilt Infrastructure & Cloud Portfolio</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#proxmox-root-login-failure-after-package-upgrade" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-header__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OkuBuilt Infrastructure & Cloud Portfolio
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Proxmox Root Login Failure After Package Upgrade
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-nav__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OkuBuilt Infrastructure & Cloud Portfolio
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/proxmox-traefik-opnsense-ha-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox, Traefik, OPNsense HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Automation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cephfs-snips-cloudinit-vm100-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox CephFS Snips Cloud-Init VM100
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloud-init-docker-vm-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Docker VM Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-vm100-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker VM100 Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-cicustom-snippet-storage-ha/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init cicustom Snippet Storage HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/vm100-docker-startup-mountguard-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Startup Mount Guard Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compute
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/debian-docker-vm-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/home-assistant-os-proxmox-ceph-vm-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home Assistant OS Proxmox Ceph VM Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/homelab-vm100-rebuild-restore-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab VM100 Rebuild Restore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Containers & Apps
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Containers & Apps
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/debian-docker-vm-rebuild-cloudinit-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM Rebuild Cloud-Init
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-apps-offen-restore-gluetun-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Apps Offen Restore Gluetun Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-compose-memos-image-tag-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Compose Memos Image Tag Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/gluetun-corrupted-servers-permissions-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gluetun Corrupted Servers Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/proxmox-traefik-console-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Traefik Console Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-docker29-upgrade-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Docker Upgrade Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-proxy-docker-network-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Proxy Docker Network
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm100-docker-data-disk-recovery-cloud-init-hardening/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Data Disk Recovery Cloud-Init Hardening
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm110-provisioning-guest-agent-docker-appdata-permissions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM110 Provisioning Guest Agent Docker AppData Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring & Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Monitoring & Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-ceph-memtest-ram-fault-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Ceph Memtest RAM Fault
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-host-kernel-ram-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Host Kernel RAM Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-nuc-e1000e-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox NUC e1000e Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networking
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Networking
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/att-fiber-opnsense-outage-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AT&T Fiber OPNsense Outage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-lan-instability-storm-control-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN Instability Storm Control
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-lan-ip-dhcp-static-device-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN IP DHCP Static Device
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-opt2-lan-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense OPT2 LAN
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-web-gui-documentation-and-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense Web GUI Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/wireguard-ec2-proxmox-lxc-homelab-remote-access/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WireGuard EC2 Proxmox LXC Homelab Remote Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_8" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Security
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../homelab-ssh-ansible-nut-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab SSH Ansible NUT Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Root Login Recovery
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Root Login Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_9" id="__nav_2_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Storage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Storage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/ceph-mainframe-osd-mon-mgr-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Mainframe OSD MON MGR Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/ceph-monitor-crash-loop-mainframe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Monitor Crash Loop Mainframe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/proxmox-ha-live-migration-ceph-vm-state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox HA Live Migration Ceph VM State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/truenas-vm-zfs-hba-planning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TrueNAS VM ZFS HBA Planning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/vm100-ceph-gluetun-troubleshooting-runbook-15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Ceph Gluetun Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/vm100-docker-nas-offen-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker NAS Offen Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Runbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runbooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_11" id="__nav_2_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting Incidents
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting Incidents
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting-incidents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloud
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cloud
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cloud/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portfolio
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Portfolio
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../portfolio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/documentation-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation Standards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/placement-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Placement Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/recurring-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recurring Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/command-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="proxmox-root-login-failure-after-package-upgrade">Proxmox Root Login Failure After Package Upgrade<a class="headerlink" href="#proxmox-root-login-failure-after-package-upgrade" title="Permanent link">&para;</a></h1>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>A Proxmox host became inaccessible through the <code>root</code> account after running package maintenance. The troubleshooting focused on root authentication, boot-time recovery methods, and password reset workflows. The session also clarified why a recovery shell launched with <code>init=/bin/bash</code> was extremely minimal, why some commands were unavailable there, and what alternative recovery approaches were available.</p>
+<h2 id="environment">Environment<a class="headerlink" href="#environment" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Platform: Proxmox VE host</li>
+<li>Access paths discussed:</li>
+<li>Local/physical console</li>
+<li>GRUB boot parameter editing</li>
+<li>SSH configuration and authentication path</li>
+<li>Linux components involved:</li>
+<li><code>root</code> account</li>
+<li>PAM (Pluggable Authentication Modules)</li>
+<li><code>systemd</code></li>
+<li>GRUB kernel boot parameters</li>
+<li>Filesystems and mount state</li>
+<li>Security-related message observed:</li>
+<li><code>L1TF: CPU bug present and SMT on, data leak possible</code></li>
+</ul>
+<h2 id="problem">Problem<a class="headerlink" href="#problem" title="Permanent link">&para;</a></h2>
+<p>After running package updates, the <code>root</code> account could no longer be used to log into the Proxmox host.</p>
+<h2 id="symptoms">Symptoms<a class="headerlink" href="#symptoms" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Root login failure after <code>apt update</code> and <code>apt upgrade</code></li>
+<li>In recovery mode, <code>mount</code> returned:
+  <code>bash
+  mount: command not found</code></li>
+<li>In the same recovery context, <code>systemd</code>-based tooling returned:
+  <code>text
+  System has not been booted with systemd as init system (PID 1). Can't operate.</code></li>
+<li>A boot-time CPU vulnerability notice appeared:
+  <code>text
+  L1TF: CPU bug present and SMT on, data leak possible</code></li>
+</ul>
+<h2 id="actions-taken">Actions Taken<a class="headerlink" href="#actions-taken" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Identified likely root-authentication troubleshooting areas:</li>
+<li>SSH root login policy</li>
+<li>PAM configuration</li>
+<li>Root shell assignment</li>
+<li>Root account lock status</li>
+<li>
+<p>Password reset from recovery mode</p>
+</li>
+<li>
+<p>A direct boot recovery method was proposed using the GRUB kernel parameter below to bypass normal startup and drop into a shell early in boot:
+   <code>bash
+   init=/bin/bash</code>
+   Purpose: start a Bash shell as PID 1 instead of the normal init system.</p>
+</li>
+<li>
+<p>In that shell, the intended next step was to remount the root filesystem read-write before changing the password:
+   <code>bash
+   mount -o remount,rw /</code>
+   Purpose: allow writes to system files such as <code>/etc/shadow</code>.</p>
+</li>
+<li>
+<p>The host returned <code>mount: command not found</code>, which indicated the recovery shell environment was much more minimal than a normal rescue or multi-user boot.</p>
+</li>
+<li>
+<p>Alternative command paths and fallback ideas were discussed:
+   <code>bash
+   /bin/mount -o remount,rw /
+   busybox mount -o remount,rw /</code>
+   Purpose: try absolute-path or BusyBox-provided versions of <code>mount</code>.</p>
+</li>
+<li>
+<p>It was established that <code>init=/bin/bash</code> launches only a bare shell, not a full booted system. That explained:</p>
+</li>
+<li>Minimal <code>PATH</code></li>
+<li>Missing helper tools</li>
+<li>Read-only root mount by default</li>
+<li>No <code>systemd</code></li>
+<li>
+<p>No normal services</p>
+</li>
+<li>
+<p>Alternative recovery targets were proposed for a fuller rescue environment:
+   <code>bash
+   systemd.unit=rescue.target
+   systemd.unit=emergency.target</code>
+   Purpose: boot into recovery using <code>systemd</code>, with more standard tools available.</p>
+</li>
+<li>
+<p>A second recovery path using <code>chroot</code> from a live environment was documented:
+   <code>bash
+   mount /dev/sdXn /mnt
+   mount --bind /dev /mnt/dev
+   mount --bind /proc /mnt/proc
+   mount --bind /sys /mnt/sys
+   chroot /mnt
+   passwd
+   exit
+   reboot</code>
+   Purpose: boot from a rescue/live system, mount the installed Proxmox system, enter it, and reset the password from there.</p>
+</li>
+<li>
+<p>Additional authentication checks were suggested in case the issue was not only the password:
+   <code>bash
+   grep root /etc/passwd
+   sudo usermod -s /bin/bash root
+   sudo passwd -S root
+   sudo passwd -u root</code>
+   Purpose: verify root’s shell and whether the account was locked.</p>
+</li>
+<li>
+<p>SSH- and PAM-related checks were also suggested:
+   <code>bash
+   cat /etc/ssh/sshd_config
+   systemctl restart sshd
+   cat /etc/pam.d/common-auth
+   cat /etc/pam.d/proxmox
+   cat /etc/pam.d/login</code>
+   Purpose: verify whether root login policy or PAM changes from the upgrade affected authentication.</p>
+</li>
+<li>
+<p>Post-recovery diagnostic checks were suggested:
+   <code>bash
+   pveversion
+   journalctl -xe | grep login
+   cat /var/log/auth.log | grep root</code>
+   Purpose: verify package state and review authentication failures.</p>
+</li>
+<li>
+<p>The boot warning below was identified as a separate CPU security notice, not the primary cause of the login issue:
+   <code>text
+   L1TF: CPU bug present and SMT on, data leak possible</code></p>
+</li>
+</ol>
+<h2 id="key-findings">Key Findings<a class="headerlink" href="#key-findings" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Booting with <code>init=/bin/bash</code> does <strong>not</strong> provide a normal rescue environment. It replaces the normal init system with Bash as PID 1.</li>
+<li>In that mode, the root filesystem is typically mounted read-only, and command availability may be limited because the environment is intentionally stripped down.</li>
+<li>The error about <code>systemd</code> not being PID 1 is expected in an <code>init=/bin/bash</code> boot and does not by itself indicate another failure.</li>
+<li><code>passwd</code> can work in a Bash-only recovery environment, but only after the root filesystem is remounted read-write and the binary is reachable.</li>
+<li><code>chroot</code> is a viable fallback when boot-parameter recovery is too limited or inconvenient.</li>
+<li>The L1TF warning is a security advisory related to CPU vulnerability mitigation and SMT/Hyper-Threading, not evidence of a broken password database or authentication stack.</li>
+</ul>
+<h2 id="resolution">Resolution<a class="headerlink" href="#resolution" title="Permanent link">&para;</a></h2>
+<p>A final successful repair was <strong>not explicitly confirmed</strong> in the conversation. However, the documented recovery path is:</p>
+<ol>
+<li>Boot into recovery with either:</li>
+<li><code>init=/bin/bash</code> and manually remount <code>/</code> read-write, or</li>
+<li><code>systemd.unit=rescue.target</code> / <code>systemd.unit=emergency.target</code>, or</li>
+<li>a live ISO plus <code>chroot</code></li>
+<li>Run <code>passwd</code> to reset the root password</li>
+<li>Reboot normally</li>
+<li>If login still fails, check:</li>
+<li>root shell assignment</li>
+<li>account lock state</li>
+<li>SSH root login policy</li>
+<li>PAM configuration</li>
+<li>authentication logs</li>
+</ol>
+<h2 id="validation">Validation<a class="headerlink" href="#validation" title="Permanent link">&para;</a></h2>
+<p>Success was <strong>not confirmed</strong> in-chat.</p>
+<p>Expected validation steps after recovery:
+- Log in locally as <code>root</code>
+- Test web UI access if applicable
+- Test SSH only after confirming intended <code>PermitRootLogin</code> policy
+- Review recent auth failures and confirm they stop appearing
+- Confirm Proxmox package state with:
+  <code>bash
+  pveversion</code></p>
+<h2 id="follow-up-tasks">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Confirm whether the root password reset succeeded</li>
+<li>Review <code>/etc/ssh/sshd_config</code> for intentional root login policy</li>
+<li>Review PAM files for unexpected changes after the package upgrade</li>
+<li>Check whether the root account is locked or has a non-login shell</li>
+<li>Review authentication logs after the next successful boot</li>
+<li>Decide whether to address the L1TF/SMT security warning based on homelab threat model</li>
+<li>Record the actual Proxmox version and package changes involved in the failed login event</li>
+</ul>
+<h2 id="lessons-learned">Lessons Learned<a class="headerlink" href="#lessons-learned" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>init=/bin/bash</code> is powerful, but it is not the same thing as a full rescue mode.</li>
+<li>A missing <code>mount</code> command in early boot often reflects a minimal environment, not necessarily filesystem corruption.</li>
+<li>If <code>systemd</code> is not PID 1, <code>systemctl</code> and related tools are expected to fail.</li>
+<li>For repeatable recovery, <code>rescue.target</code>, <code>emergency.target</code>, or a live ISO with <code>chroot</code> are often easier to work with than a raw Bash-only boot.</li>
+<li>Security warnings shown during boot should be separated from the primary incident unless evidence links them directly.</li>
+</ul>
+<hr />
+<h1 id="command-reference">Command Reference<a class="headerlink" href="#command-reference" title="Permanent link">&para;</a></h1>
+<h2 id="command">Command<a class="headerlink" href="#command" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">apt update
+</code></pre>
+<p><strong>What it does:</strong> Refreshes APT package indexes from configured repositories.<br />
+<strong>Why it was used:</strong> As part of normal package maintenance before upgrade.<br />
+<strong>Expected result:</strong> Updated package lists.<br />
+<strong>Success indicates:</strong> The host can see repositories and package metadata is current.<br />
+<strong>Failure indicates:</strong> Repository, DNS, networking, or package source issues.<br />
+<strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_1">Command<a class="headerlink" href="#command_1" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">apt upgrade
+</code></pre>
+<p><strong>What it does:</strong> Installs available package upgrades for already installed packages.<br />
+<strong>Why it was used:</strong> Routine maintenance on the Proxmox host.<br />
+<strong>Expected result:</strong> Updated packages and possibly updated authentication, SSH, PAM, or boot-related components.<br />
+<strong>Success indicates:</strong> Packages installed cleanly.<br />
+<strong>Failure indicates:</strong> Dependency problems, interrupted package state, or post-install script failures.<br />
+<strong>Risk:</strong> Moderate on infrastructure hosts, because upgrades can affect authentication, services, kernels, or boot behavior.<br />
+<strong>Safer alternative:</strong> Review upgrade plan first, especially on Proxmox hosts.</p>
+<hr />
+<h2 id="command_2">Command<a class="headerlink" href="#command_2" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">cat /etc/ssh/sshd_config
+</code></pre>
+<p><strong>What it does:</strong> Displays the OpenSSH server configuration file.<br />
+<strong>Why it was used:</strong> To check whether root SSH login was intentionally disabled or changed.<br />
+<strong>Expected result:</strong> Review of directives such as <code>PermitRootLogin</code>.<br />
+<strong>Success indicates:</strong> SSH policy can be audited directly.<br />
+<strong>Failure indicates:</strong> Missing file or broken SSH package state.<br />
+<strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_3">Command<a class="headerlink" href="#command_3" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">systemctl restart sshd
+</code></pre>
+<p><strong>What it does:</strong> Restarts the SSH daemon under <code>systemd</code>.<br />
+<strong>Why it was used:</strong> To apply SSH config changes after editing <code>sshd_config</code>.<br />
+<strong>Expected result:</strong> SSH service reloads with new settings.<br />
+<strong>Success indicates:</strong> SSH config is valid and <code>systemd</code> is running.<br />
+<strong>Failure indicates:</strong> Invalid SSH config or no <code>systemd</code> environment.<br />
+<strong>Risk:</strong> Moderate on remote-only systems, because a bad config can cut off SSH access.</p>
+<hr />
+<h2 id="command_4">Command<a class="headerlink" href="#command_4" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">cat /etc/pam.d/common-auth
+</code></pre>
+<p><strong>What it does:</strong> Displays shared PAM authentication rules.<br />
+<strong>Why it was used:</strong> To inspect whether authentication flow changed after upgrade.<br />
+<strong>Expected result:</strong> A readable PAM policy stack.<br />
+<strong>Success indicates:</strong> PAM config exists and can be reviewed.<br />
+<strong>Failure indicates:</strong> Possible PAM package/config damage.<br />
+<strong>Risk:</strong> Low for reading.</p>
+<hr />
+<h2 id="command_5">Command<a class="headerlink" href="#command_5" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">cat /etc/pam.d/proxmox
+</code></pre>
+<p><strong>What it does:</strong> Displays Proxmox-specific PAM configuration if present.<br />
+<strong>Why it was used:</strong> To inspect whether Proxmox login/authentication flow was affected.<br />
+<strong>Expected result:</strong> PAM directives relevant to Proxmox auth path.<br />
+<strong>Success indicates:</strong> Proxmox auth configuration is available.<br />
+<strong>Failure indicates:</strong> Missing or damaged auth config.<br />
+<strong>Risk:</strong> Low for reading.</p>
+<hr />
+<h2 id="command_6">Command<a class="headerlink" href="#command_6" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">cat /etc/pam.d/login
+</code></pre>
+<p><strong>What it does:</strong> Displays PAM rules for local console login.<br />
+<strong>Why it was used:</strong> To compare console login policy with other auth paths.<br />
+<strong>Expected result:</strong> Standard login PAM stack.<br />
+<strong>Success indicates:</strong> Console auth path can be reviewed.<br />
+<strong>Failure indicates:</strong> Missing or broken login PAM config.<br />
+<strong>Risk:</strong> Low for reading.</p>
+<hr />
+<h2 id="command_7">Command<a class="headerlink" href="#command_7" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">grep root /etc/passwd
+</code></pre>
+<p><strong>What it does:</strong> Searches the account database for the <code>root</code> entry.<br />
+<strong>Why it was used:</strong> To verify the root account record and shell.<br />
+<strong>Expected result:</strong> A line similar to <code>root:x:0:0:root:/root:/bin/bash</code>.<br />
+<strong>Success indicates:</strong> Root account exists and its shell can be inspected.<br />
+<strong>Failure indicates:</strong> Corrupt or missing passwd entry.<br />
+<strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_8">Command<a class="headerlink" href="#command_8" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo usermod -s /bin/bash root
+</code></pre>
+<p><strong>What it does:</strong> Changes the login shell for <code>root</code> to <code>/bin/bash</code>.<br />
+<strong>Why it was used:</strong> To fix a case where root may have been assigned <code>/usr/sbin/nologin</code> or another non-interactive shell.<br />
+<strong>Expected result:</strong> Root shell becomes Bash.<br />
+<strong>Success indicates:</strong> Root should be able to start an interactive shell again.<br />
+<strong>Failure indicates:</strong> Account database issue or insufficient privileges.<br />
+<strong>Risk:</strong> Moderate, because modifying the root account incorrectly can worsen access problems.</p>
+<hr />
+<h2 id="command_9">Command<a class="headerlink" href="#command_9" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo passwd -S root
+</code></pre>
+<p><strong>What it does:</strong> Shows root password/account status.<br />
+<strong>Why it was used:</strong> To check whether the root account was locked.<br />
+<strong>Expected result:</strong> Status code such as <code>P</code> or <code>L</code>.<br />
+<strong>Success indicates:</strong> Account status is readable.<br />
+<strong>Failure indicates:</strong> PAM/account database or privilege issue.<br />
+<strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_10">Command<a class="headerlink" href="#command_10" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo passwd -u root
+</code></pre>
+<p><strong>What it does:</strong> Unlocks the root account.<br />
+<strong>Why it was used:</strong> To reverse an account lock if one existed.<br />
+<strong>Expected result:</strong> Root account becomes unlocked.<br />
+<strong>Success indicates:</strong> Login may resume if the password is valid.<br />
+<strong>Failure indicates:</strong> PAM/account database issues.<br />
+<strong>Risk:</strong> Moderate from a security perspective, because it re-enables root access.</p>
+<hr />
+<h2 id="command_11">Command<a class="headerlink" href="#command_11" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">init=/bin/bash
+</code></pre>
+<p><strong>What it does:</strong> Kernel boot parameter telling Linux to start <code>/bin/bash</code> as PID 1 instead of the normal init system.<br />
+<strong>Why it was used:</strong> To get direct low-level recovery access when normal boot/login was unavailable.<br />
+<strong>Expected result:</strong> A bare shell early in boot.<br />
+<strong>Success indicates:</strong> The kernel and root filesystem are bootable enough to start Bash.<br />
+<strong>Failure indicates:</strong> More serious boot or filesystem issues.<br />
+<strong>Risk:</strong> High if misunderstood, because it bypasses normal boot protections and leaves the system in a minimal state.<br />
+<strong>Safer alternative:</strong> <code>systemd.unit=rescue.target</code> or a live ISO plus <code>chroot</code>.</p>
+<hr />
+<h2 id="command_12">Command<a class="headerlink" href="#command_12" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">mount -o remount,rw /
+</code></pre>
+<p><strong>What it does:</strong> Remounts the currently mounted root filesystem as read-write.<br />
+<strong>Why it was used:</strong> Required before changing files such as <code>/etc/shadow</code> with <code>passwd</code>.<br />
+<strong>Important flags:</strong>
+- <code>-o remount,rw</code> = change existing mount options to read-write<br />
+- <code>/</code> = the root filesystem<br />
+<strong>Expected result:</strong> Root filesystem becomes writable.<br />
+<strong>Success indicates:</strong> Password and config changes can be saved.<br />
+<strong>Failure indicates:</strong> Missing command, minimal PATH, filesystem issue, or incompatible recovery environment.<br />
+<strong>Risk:</strong> Moderate, because it enables writes on a system booted in recovery mode.</p>
+<hr />
+<h2 id="command_13">Command<a class="headerlink" href="#command_13" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">/bin/mount -o remount,rw /
+</code></pre>
+<p><strong>What it does:</strong> Same as above, but uses the absolute path to <code>mount</code>.<br />
+<strong>Why it was used:</strong> In a minimal recovery shell, the <code>PATH</code> variable may not include <code>/bin</code>, so the command may not be found otherwise.<br />
+<strong>Expected result:</strong> Same as <code>mount -o remount,rw /</code>.<br />
+<strong>Success indicates:</strong> The binary exists; the earlier failure was likely just a PATH issue.<br />
+<strong>Failure indicates:</strong> The tool is unavailable in that environment.<br />
+<strong>Risk:</strong> Moderate.</p>
+<hr />
+<h2 id="command_14">Command<a class="headerlink" href="#command_14" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">busybox mount -o remount,rw /
+</code></pre>
+<p><strong>What it does:</strong> Uses the BusyBox implementation of <code>mount</code>.<br />
+<strong>Why it was used:</strong> As a fallback in ultra-minimal recovery environments.<br />
+<strong>Expected result:</strong> Root becomes writable even if the full util-linux <code>mount</code> command is unavailable.<br />
+<strong>Success indicates:</strong> BusyBox is present and functional.<br />
+<strong>Failure indicates:</strong> BusyBox is not available or the filesystem cannot be remounted.<br />
+<strong>Risk:</strong> Moderate.</p>
+<hr />
+<h2 id="command_15">Command<a class="headerlink" href="#command_15" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">systemd.unit=rescue.target
+</code></pre>
+<p><strong>What it does:</strong> Kernel boot parameter telling <code>systemd</code> to boot into rescue mode.<br />
+<strong>Why it was used:</strong> To get a fuller recovery environment than <code>init=/bin/bash</code>.<br />
+<strong>Expected result:</strong> Single-user/rescue shell with more standard tools and <code>systemd</code> available.<br />
+<strong>Success indicates:</strong> Easier recovery workflow with normal service management support.<br />
+<strong>Failure indicates:</strong> Boot path or systemd issue.<br />
+<strong>Risk:</strong> Lower than <code>init=/bin/bash</code>, but still a recovery-mode boot.</p>
+<hr />
+<h2 id="command_16">Command<a class="headerlink" href="#command_16" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">systemd.unit=emergency.target
+</code></pre>
+<p><strong>What it does:</strong> Kernel boot parameter telling <code>systemd</code> to boot into emergency mode.<br />
+<strong>Why it was used:</strong> To get a minimal but still <code>systemd</code>-managed recovery environment.<br />
+<strong>Expected result:</strong> Very limited environment, but still booted under <code>systemd</code>.<br />
+<strong>Success indicates:</strong> Access to a shell without completely bypassing init.<br />
+<strong>Failure indicates:</strong> Deeper boot issue.<br />
+<strong>Risk:</strong> Lower than raw init replacement, but still recovery-only.</p>
+<hr />
+<h2 id="command_17">Command<a class="headerlink" href="#command_17" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">passwd
+</code></pre>
+<p><strong>What it does:</strong> Changes the password for the current or specified account.<br />
+<strong>Why it was used:</strong> To reset the root password during recovery.<br />
+<strong>Expected result:</strong> Prompt for new password, then update to <code>/etc/shadow</code>.<br />
+<strong>Success indicates:</strong> New password stored successfully.<br />
+<strong>Failure indicates:</strong> Read-only filesystem, PAM/account issue, or missing binary.<br />
+<strong>Risk:</strong> Moderate, because setting an unknown or mistyped root password can prolong the outage.</p>
+<hr />
+<h2 id="command_18">Command<a class="headerlink" href="#command_18" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">/bin/passwd
+</code></pre>
+<p><strong>What it does:</strong> Same as <code>passwd</code>, but with the full binary path.<br />
+<strong>Why it was used:</strong> To work around PATH issues in a minimal shell.<br />
+<strong>Expected result:</strong> Same as <code>passwd</code>.<br />
+<strong>Success indicates:</strong> The problem was command lookup, not the tool itself.<br />
+<strong>Failure indicates:</strong> Missing binary or write/auth backend issue.<br />
+<strong>Risk:</strong> Moderate.</p>
+<hr />
+<h2 id="command_19">Command<a class="headerlink" href="#command_19" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">exec /sbin/init
+</code></pre>
+<p><strong>What it does:</strong> Replaces the current shell process with the normal init process.<br />
+<strong>Why it was used:</strong> As a way to continue booting cleanly after making changes in a Bash-only recovery environment.<br />
+<strong>Expected result:</strong> Control passes from the recovery shell to the normal init system.<br />
+<strong>Success indicates:</strong> System can continue startup without immediate reboot.<br />
+<strong>Failure indicates:</strong> Missing init path or broken init stack.<br />
+<strong>Risk:</strong> Moderate, because behavior depends on the exact system state.</p>
+<hr />
+<h2 id="command_20">Command<a class="headerlink" href="#command_20" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">reboot
+</code></pre>
+<p><strong>What it does:</strong> Restarts the system.<br />
+<strong>Why it was used:</strong> To boot back into normal operation after recovery changes.<br />
+<strong>Expected result:</strong> System restarts cleanly.<br />
+<strong>Success indicates:</strong> Recovery changes can be tested on next boot.<br />
+<strong>Failure indicates:</strong> Shutdown/reboot path issues.<br />
+<strong>Risk:</strong> Moderate during recovery, because unsaved changes or bad config may still exist.</p>
+<hr />
+<h2 id="command_21">Command<a class="headerlink" href="#command_21" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">mount /dev/sdXn /mnt
+</code></pre>
+<p><strong>Likely command used</strong></p>
+<p><strong>What it does:</strong> Mounts the installed system’s root partition under <code>/mnt</code>.<br />
+<strong>Why it was used:</strong> First step of a live-ISO <code>chroot</code> recovery workflow.<br />
+<strong>Important arguments:</strong>
+- <code>/dev/sdXn</code> = placeholder for the actual disk partition
+- <code>/mnt</code> = temporary mount point<br />
+<strong>Expected result:</strong> The installed OS becomes accessible under <code>/mnt</code>.<br />
+<strong>Success indicates:</strong> The root filesystem can be mounted externally.<br />
+<strong>Failure indicates:</strong> Wrong partition, filesystem issue, or damaged disk.<br />
+<strong>Risk:</strong> Moderate if mounted read-write on an already damaged filesystem.</p>
+<hr />
+<h2 id="command_22">Command<a class="headerlink" href="#command_22" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">mount --bind /dev /mnt/dev
+</code></pre>
+<p><strong>What it does:</strong> Makes the live environment’s <code>/dev</code> visible inside the mounted system.<br />
+<strong>Why it was used:</strong> Required for many commands to work properly inside <code>chroot</code>.<br />
+<strong>Expected result:</strong> Device nodes become available inside the chroot.<br />
+<strong>Success indicates:</strong> Better functional recovery environment.<br />
+<strong>Failure indicates:</strong> Incomplete chroot setup.<br />
+<strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_23">Command<a class="headerlink" href="#command_23" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">mount --bind /proc /mnt/proc
+</code></pre>
+<p><strong>What it does:</strong> Binds the running kernel’s <code>/proc</code> filesystem into the mounted target.<br />
+<strong>Why it was used:</strong> Needed for many system tools inside the chroot.<br />
+<strong>Expected result:</strong> Process/kernel info becomes visible in the chroot.<br />
+<strong>Success indicates:</strong> More complete recovery environment.<br />
+<strong>Failure indicates:</strong> Chroot will be limited.<br />
+<strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_24">Command<a class="headerlink" href="#command_24" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">mount --bind /sys /mnt/sys
+</code></pre>
+<p><strong>What it does:</strong> Binds the running kernel’s <code>/sys</code> into the mounted target.<br />
+<strong>Why it was used:</strong> Needed for hardware and kernel interface visibility inside the chroot.<br />
+<strong>Expected result:</strong> <code>/sys</code> is available in the chroot.<br />
+<strong>Success indicates:</strong> Better system tooling support inside recovery.<br />
+<strong>Failure indicates:</strong> Incomplete chroot.<br />
+<strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_25">Command<a class="headerlink" href="#command_25" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">chroot /mnt
+</code></pre>
+<p><strong>What it does:</strong> Changes the apparent root directory to <code>/mnt</code> for the current process.<br />
+<strong>Why it was used:</strong> To operate on the installed Proxmox system as if it were the currently booted OS.<br />
+<strong>Expected result:</strong> Commands like <code>passwd</code> affect the mounted system, not the live ISO.<br />
+<strong>Success indicates:</strong> Recovery commands are now targeting the installed OS.<br />
+<strong>Failure indicates:</strong> Missing binaries, incomplete bind mounts, or bad root mount.<br />
+<strong>Risk:</strong> Moderate, because actions now modify the installed system directly.</p>
+<hr />
+<h2 id="command_26">Command<a class="headerlink" href="#command_26" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">exit
+</code></pre>
+<p><strong>What it does:</strong> Leaves the current shell.<br />
+<strong>Why it was used:</strong> To leave the <code>chroot</code> shell after repairs.<br />
+<strong>Expected result:</strong> Return to the live environment shell.<br />
+<strong>Success indicates:</strong> Chroot session closed cleanly.<br />
+<strong>Failure indicates:</strong> Usually just wrong shell context.<br />
+<strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_27">Command<a class="headerlink" href="#command_27" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">pveversion
+</code></pre>
+<p><strong>What it does:</strong> Displays Proxmox version and package state information.<br />
+<strong>Why it was used:</strong> To verify whether Proxmox package state was healthy after upgrade/recovery.<br />
+<strong>Expected result:</strong> Installed Proxmox version details.<br />
+<strong>Success indicates:</strong> Proxmox tooling is present and readable.<br />
+<strong>Failure indicates:</strong> Package or PATH issue.<br />
+<strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_28">Command<a class="headerlink" href="#command_28" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">journalctl -xe | grep login
+</code></pre>
+<p><strong>What it does:</strong> Searches recent <code>systemd</code> journal output for login-related entries.<br />
+<strong>Why it was used:</strong> To inspect auth failures after recovery.<br />
+<strong>Expected result:</strong> Recent login/authentication messages.<br />
+<strong>Success indicates:</strong> Useful auth evidence in the journal.<br />
+<strong>Failure indicates:</strong> No <code>systemd</code> journal, no matching logs, or boot context without <code>systemd</code>.<br />
+<strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_29">Command<a class="headerlink" href="#command_29" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">cat /var/log/auth.log | grep root
+</code></pre>
+<p><strong>What it does:</strong> Searches the traditional authentication log for entries related to root.<br />
+<strong>Why it was used:</strong> To inspect whether PAM, SSH, or local login rejected root and why.<br />
+<strong>Expected result:</strong> Matching auth log entries.<br />
+<strong>Success indicates:</strong> You can trace root login failures historically.<br />
+<strong>Failure indicates:</strong> Different logging backend or missing file.<br />
+<strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_30">Command<a class="headerlink" href="#command_30" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">dmesg | grep -i l1tf
+</code></pre>
+<p><strong>What it does:</strong> Searches kernel boot messages for L1TF mitigation status.<br />
+<strong>Why it was used:</strong> To investigate the CPU vulnerability warning.<br />
+<strong>Expected result:</strong> Kernel messages describing mitigation state.<br />
+<strong>Success indicates:</strong> You can confirm how the kernel is handling L1TF.<br />
+<strong>Failure indicates:</strong> No matching messages or limited log access.<br />
+<strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_31">Command<a class="headerlink" href="#command_31" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">lscpu | grep Thread
+</code></pre>
+<p><strong>What it does:</strong> Displays CPU topology and filters for thread count per core.<br />
+<strong>Why it was used:</strong> To confirm whether SMT/Hyper-Threading is enabled.<br />
+<strong>Expected result:</strong> A line showing thread count.<br />
+<strong>Success indicates:</strong> You can verify whether SMT remains on.<br />
+<strong>Failure indicates:</strong> Missing utility or no match.<br />
+<strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_32">Command<a class="headerlink" href="#command_32" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">update-grub
+</code></pre>
+<p><strong>What it does:</strong> Regenerates GRUB boot configuration.<br />
+<strong>Why it was used:</strong> To apply persistent kernel boot parameters such as CPU mitigation settings.<br />
+<strong>Expected result:</strong> Updated GRUB config files.<br />
+<strong>Success indicates:</strong> New boot parameters will be used on next reboot.<br />
+<strong>Failure indicates:</strong> GRUB/package/config issue.<br />
+<strong>Risk:</strong> Moderate, because bad bootloader config can affect startup.</p>
+<hr />
+<h2 id="command_33">Command<a class="headerlink" href="#command_33" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">mitigations=auto,nosmt
+</code></pre>
+<p><strong>What it does:</strong> Kernel boot parameter enabling automatic mitigations and disabling SMT for security.<br />
+<strong>Why it was used:</strong> To reduce L1TF-related exposure.<br />
+<strong>Expected result:</strong> Security mitigations applied; SMT disabled after reboot.<br />
+<strong>Success indicates:</strong> Lower side-channel risk.<br />
+<strong>Failure indicates:</strong> Boot parameter not applied or unsupported setting.<br />
+<strong>Risk:</strong> Operational rather than destructive; it can reduce performance.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

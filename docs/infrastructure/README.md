@@ -12,16 +12,16 @@ Dates are removed from filenames, visible headings, indexes, generated metadata,
 
 ## Categories
 
-- [Architecture](architecture/)
-- [Compute](compute/)
-- [Networking](networking/)
-- [Storage](storage/)
-- [Containers & Apps](containers-apps/)
-- [Automation](automation/)
-- [Security](security/)
-- [Monitoring & Operations](monitoring-operations/)
-- [Troubleshooting & Incidents](troubleshooting-incidents/)
-- [Runbooks](runbooks/)
+- [Architecture](architecture/README.md)
+- [Compute](compute/README.md)
+- [Networking](networking/README.md)
+- [Storage](storage/README.md)
+- [Containers & Apps](containers-apps/README.md)
+- [Automation](automation/README.md)
+- [Security](security/README.md)
+- [Monitoring & Operations](monitoring-operations/README.md)
+- [Troubleshooting & Incidents](troubleshooting-incidents/README.md)
+- [Runbooks](runbooks/README.md)
 
 ## Source Index
 

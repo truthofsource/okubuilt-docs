@@ -1,0 +1,3709 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Infrastructure, cloud, automation, security, and operations documentation portfolio.">
+      
+      
+        <meta name="author" content="Kingsley Oku">
+      
+      
+      
+        <link rel="prev" href="../proxmox-cloudinit-cicustom-snippet-storage-ha/">
+      
+      
+        <link rel="next" href="../../compute/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>VM 100 Docker Startup Failure After Mount/Guard Changes - OkuBuilt Infrastructure & Cloud Portfolio</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#vm-100-docker-startup-failure-after-mountguard-changes" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-header__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OkuBuilt Infrastructure & Cloud Portfolio
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              VM 100 Docker Startup Failure After Mount/Guard Changes
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-nav__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OkuBuilt Infrastructure & Cloud Portfolio
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/proxmox-traefik-opnsense-ha-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox, Traefik, OPNsense HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Automation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../proxmox-cephfs-snips-cloudinit-vm100-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox CephFS Snips Cloud-Init VM100
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../proxmox-cloud-init-docker-vm-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Docker VM Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../proxmox-cloudinit-ceph-docker-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../proxmox-cloudinit-ceph-docker-vm100-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker VM100 Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../proxmox-cloudinit-cicustom-snippet-storage-ha/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init cicustom Snippet Storage HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Startup Mount Guard Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Startup Mount Guard Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Resolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#restored-during-the-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Restored during the session
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#current-status-at-end-of-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current status at end of session
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compute
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/debian-docker-vm-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/home-assistant-os-proxmox-ceph-vm-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home Assistant OS Proxmox Ceph VM Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/homelab-vm100-rebuild-restore-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab VM100 Rebuild Restore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Containers & Apps
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Containers & Apps
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/debian-docker-vm-rebuild-cloudinit-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM Rebuild Cloud-Init
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-apps-offen-restore-gluetun-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Apps Offen Restore Gluetun Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-compose-memos-image-tag-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Compose Memos Image Tag Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/gluetun-corrupted-servers-permissions-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gluetun Corrupted Servers Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/proxmox-traefik-console-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Traefik Console Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-docker29-upgrade-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Docker Upgrade Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-proxy-docker-network-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Proxy Docker Network
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm100-docker-data-disk-recovery-cloud-init-hardening/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Data Disk Recovery Cloud-Init Hardening
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm110-provisioning-guest-agent-docker-appdata-permissions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM110 Provisioning Guest Agent Docker AppData Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring & Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Monitoring & Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-ceph-memtest-ram-fault-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Ceph Memtest RAM Fault
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-host-kernel-ram-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Host Kernel RAM Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-nuc-e1000e-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox NUC e1000e Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networking
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Networking
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/att-fiber-opnsense-outage-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AT&T Fiber OPNsense Outage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-lan-instability-storm-control-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN Instability Storm Control
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-lan-ip-dhcp-static-device-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN IP DHCP Static Device
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-opt2-lan-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense OPT2 LAN
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-web-gui-documentation-and-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense Web GUI Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/wireguard-ec2-proxmox-lxc-homelab-remote-access/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WireGuard EC2 Proxmox LXC Homelab Remote Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Security
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/homelab-ssh-ansible-nut-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab SSH Ansible NUT Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/proxmox-root-login-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Root Login Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_9" id="__nav_2_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Storage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Storage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/ceph-mainframe-osd-mon-mgr-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Mainframe OSD MON MGR Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/ceph-monitor-crash-loop-mainframe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Monitor Crash Loop Mainframe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/proxmox-ha-live-migration-ceph-vm-state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox HA Live Migration Ceph VM State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/truenas-vm-zfs-hba-planning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TrueNAS VM ZFS HBA Planning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/vm100-ceph-gluetun-troubleshooting-runbook-15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Ceph Gluetun Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/vm100-docker-nas-offen-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker NAS Offen Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Runbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runbooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_11" id="__nav_2_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting Incidents
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting Incidents
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting-incidents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloud
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cloud
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cloud/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portfolio
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Portfolio
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../portfolio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/documentation-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation Standards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/placement-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Placement Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/recurring-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recurring Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/command-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Resolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#restored-during-the-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Restored during the session
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#current-status-at-end-of-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current status at end of session
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="vm-100-docker-startup-failure-after-mountguard-changes">VM 100 Docker Startup Failure After Mount/Guard Changes<a class="headerlink" href="#vm-100-docker-startup-failure-after-mountguard-changes" title="Permanent link">&para;</a></h1>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>Work was performed on <strong>VM 100 (<code>debian-docker</code>)</strong> to restore Docker after recent mount-guard and cloud-init cleanup changes. The main issue was that Docker did not start because its systemd dependency chain referenced a missing guard unit. After Docker was restored, additional validation showed that the <code>/opt/docker-apps</code> and <code>/opt/compose</code> bind mounts were active, but there were follow-up concerns about whether containers were using the intended appdata paths. Later in the same session, a reboot caused Docker to fail to come back automatically, indicating the boot-time dependency and mount ordering still needed further hardening.</p>
+<h2 id="environment">Environment<a class="headerlink" href="#environment" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Virtualization platform:</strong> Proxmox VE</li>
+<li><strong>VM:</strong> VM 100</li>
+<li><strong>Hostname:</strong> <code>debian-docker</code></li>
+<li><strong>Guest OS:</strong> Debian</li>
+<li><strong>Container runtime:</strong> Docker Engine Community 28.5.2</li>
+<li><strong>Docker API version:</strong> 1.51</li>
+<li><strong>Storage layout:</strong></li>
+<li><code>/var/lib/docker</code> mounted on a dedicated ext4 disk</li>
+<li>Expected UUID: <code>6ce44029-6b4b-4fe4-a78e-bec4402a0444</code></li>
+<li>Filesystem label also present: <code>docker-data</code></li>
+<li><strong>Bind mount design:</strong></li>
+<li><code>/var/lib/docker/appdata</code> → <code>/opt/docker-apps</code></li>
+<li><code>/var/lib/docker/compose</code> → <code>/opt/compose</code></li>
+<li><strong>Remote storage:</strong></li>
+<li>CIFS mounts under <code>/srv/remotemount/NAS</code> and <code>/srv/remotemount/wontonsoup</code></li>
+<li><strong>Container management:</strong> Docker Compose stacks under <code>/opt/compose</code></li>
+<li><strong>Related services/containers observed:</strong></li>
+<li><code>traefik</code></li>
+<li><code>dockersocket</code></li>
+<li><code>radarr</code>, <code>sonarr</code>, <code>lidarr</code>, <code>readarr</code>, <code>bazarr</code>, <code>prowlarr</code></li>
+<li><code>sabnzbd-vpn</code>, <code>qbittorrent-vpn</code>, <code>deluge-vpn</code>, <code>gluetun</code></li>
+<li><code>plexms</code>, <code>tautulli</code>, <code>overseerr</code></li>
+<li><code>flaresolverr</code>, <code>whoogle-search</code>, <code>uptime-kuma</code>, <code>komf</code></li>
+<li>multiple productivity/media stacks</li>
+</ul>
+<h2 id="problem">Problem<a class="headerlink" href="#problem" title="Permanent link">&para;</a></h2>
+<p>Docker commands such as <code>docker info</code> stalled and the Docker daemon did not come up reliably after mount/guard-related changes. Even after Docker was manually restored, there were concerns that containers may not have been using the intended appdata bind mounts, and a subsequent reboot caused Docker to fail again.</p>
+<h2 id="symptoms">Symptoms<a class="headerlink" href="#symptoms" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>docker info --format 'DockerRootDir={{.DockerRootDir}}'</code> stalled and returned nothing.</li>
+<li><code>timeout 5 docker version</code> showed Docker client information, followed by:</li>
+</ul>
+<pre><code class="language-text">daemon not responding
+</code></pre>
+<ul>
+<li><code>systemctl status docker</code> showed:</li>
+</ul>
+<pre><code class="language-text">Active: inactive (dead)
+</code></pre>
+<ul>
+<li>Repeated systemd failures:</li>
+</ul>
+<pre><code class="language-text">Dependency failed for docker.service - Docker Application Container Engine.
+docker.service: Job docker.service/start failed with result 'dependency'.
+</code></pre>
+<ul>
+<li>Missing guard unit:</li>
+</ul>
+<pre><code class="language-text">Unit docker-verify.mountguard.service could not be found.
+</code></pre>
+<ul>
+<li><code>/etc/fstab</code> on the live system still referenced:</li>
+</ul>
+<pre><code class="language-text">LABEL=docker-data /var/lib/docker ext4 ...
+</code></pre>
+<p>even though the active cloud-init YAML used a UUID-based mount.</p>
+<ul>
+<li><code>mount</code> reported:</li>
+</ul>
+<pre><code class="language-text">/var/lib/docker: /dev/sda already mounted or mount point busy.
+</code></pre>
+<ul>
+<li>systemd warning after editing <code>/etc/fstab</code>:</li>
+</ul>
+<pre><code class="language-text">your fstab has been modified, but systemd still uses the old version; use 'systemctl daemon-reload' to reload.
+</code></pre>
+<ul>
+<li>After Docker was restored, the user observed that containers appeared up but not obviously using the expected appdata paths.</li>
+<li>Later, after rebooting the VM, Docker again failed to come back automatically.</li>
+<li>Separate application-level symptom:</li>
+</ul>
+<pre><code class="language-text">PermissionError: [Errno 13] Permission denied: '/usenet-downloads/complete'
+</code></pre>
+<p>in SABnzbd, with similar behavior in qBittorrent.</p>
+<h2 id="actions-taken">Actions Taken<a class="headerlink" href="#actions-taken" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Confirmed that the Docker client was installed and the problem was daemon-side, not CLI-side.</li>
+<li>Collected systemd status and journal output for:</li>
+<li><code>docker.service</code></li>
+<li><code>docker.socket</code></li>
+<li><code>docker-verify.mountguard</code></li>
+<li>Checked live storage and mount state with:</li>
+<li><code>lsblk -f</code></li>
+<li><code>findmnt /var/lib/docker</code></li>
+<li><code>grep</code> of <code>/etc/fstab</code></li>
+<li>Identified a mismatch between the <strong>intended cloud-init configuration</strong> and the <strong>live system state</strong>:</li>
+<li>cloud-init YAML mounted <code>/var/lib/docker</code> by <strong>UUID</strong></li>
+<li>live <code>/etc/fstab</code> mounted <code>/var/lib/docker</code> by <strong>LABEL</strong></li>
+<li>Reviewed the current cloud-init YAML, which included:</li>
+<li>UUID-based Docker data mount</li>
+<li>a verification script at <code>/usr/local/sbin/verify-docker-data.sh</code></li>
+<li><code>docker-verify.mountguard.service</code></li>
+<li>a Docker systemd override requiring the guard and mount paths</li>
+<li>Determined that Docker was blocked because systemd expected <code>docker-verify.mountguard.service</code>, but the unit was missing on the running system.</li>
+<li>Recreated the Docker verification script using the expected UUID.</li>
+<li>Attempted to align <code>/etc/fstab</code> from <code>LABEL=docker-data</code> to the UUID-based mount entry.</li>
+<li>Recreated or restored the guard unit and Docker override.</li>
+<li>Reloaded systemd and restarted relevant services.</li>
+<li>Verified that Docker eventually came back and that <code>/var/lib/docker</code> was mounted:</li>
+</ol>
+<pre><code class="language-text">/var/lib/docker /dev/sda ext4 rw,relatime,discard
+DockerRootDir=/var/lib/docker
+</code></pre>
+<ol>
+<li>Confirmed many containers were running again with <code>docker ps -a</code>.</li>
+<li>Investigated whether containers were using the intended appdata by checking bind mounts and automount units.</li>
+<li>Triggered <code>/opt/docker-apps</code> and <code>/opt/compose</code> automounts by accessing those paths.</li>
+<li>Performed a bind test by creating <code>.bindtest</code> files under <code>/opt/docker-apps</code> and <code>/opt/compose</code> and confirming they appeared under:<ul>
+<li><code>/var/lib/docker/appdata</code></li>
+<li><code>/var/lib/docker/compose</code></li>
+</ul>
+</li>
+<li>Concluded that the bind mounts were active.</li>
+<li>Considered ownership correction on appdata paths, but the user chose not to apply it because the system appeared to be working.</li>
+<li>Documented the follow-up issue that Docker still failed to return automatically after a reboot, indicating the boot ordering problem was not fully resolved.</li>
+<li>Noted a separate permission issue affecting SABnzbd and qBittorrent download paths, but that issue was not fully resolved in this session.</li>
+</ol>
+<h2 id="key-findings">Key Findings<a class="headerlink" href="#key-findings" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The Docker CLI was healthy; the daemon was not starting.</li>
+<li>The root cause of the first outage was <strong>systemd dependency failure</strong>, not Docker engine corruption.</li>
+<li>Docker was blocked because:</li>
+<li><code>docker.service</code> depended on <code>docker-verify.mountguard.service</code></li>
+<li>that unit was <strong>missing</strong></li>
+<li>The current cloud-init YAML was <strong>UUID-based</strong>, but the live <code>/etc/fstab</code> initially still used <code>LABEL=docker-data</code>.</li>
+<li><code>/var/lib/docker</code> itself was successfully mounted on the dedicated ext4 disk once the system was corrected.</li>
+<li>The <code>/opt/docker-apps</code> and <code>/opt/compose</code> paths were managed with <code>x-systemd.automount</code>, which meant they were not mounted until first access.</li>
+<li>The bind mount test confirmed:</li>
+<li><code>/opt/docker-apps</code> correctly mapped to <code>/var/lib/docker/appdata</code></li>
+<li><code>/opt/compose</code> correctly mapped to <code>/var/lib/docker/compose</code></li>
+<li>Containers being "up" did not automatically prove they were using the intended host paths; mount validation was necessary.</li>
+<li>The environment still had unresolved boot-order reliability problems after reboot.</li>
+<li>Application-level permission failures on download directories likely involved CIFS mount permissions, NAS ACLs, or container UID/GID expectations, but that investigation remained incomplete.</li>
+</ul>
+<h2 id="resolution">Resolution<a class="headerlink" href="#resolution" title="Permanent link">&para;</a></h2>
+<h3 id="restored-during-the-session">Restored during the session<a class="headerlink" href="#restored-during-the-session" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Docker was manually restored by:</li>
+<li>recreating the Docker data verification script</li>
+<li>restoring the missing <code>docker-verify.mountguard.service</code></li>
+<li>reloading systemd</li>
+<li>aligning the intended mount strategy toward the UUID-based configuration</li>
+<li>restarting Docker and related units</li>
+<li>Docker resumed normal operation and containers started again.</li>
+<li>Bind mounts for appdata and compose storage were validated as active.</li>
+</ul>
+<h3 id="current-status-at-end-of-session">Current status at end of session<a class="headerlink" href="#current-status-at-end-of-session" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Docker was running</strong></li>
+<li><strong>Containers were running</strong></li>
+<li><strong>Bind mounts were confirmed active</strong></li>
+<li><strong>Automatic startup after reboot was still not fully fixed</strong></li>
+<li><strong>SABnzbd/qBittorrent permission issues were still open</strong></li>
+</ul>
+<h2 id="validation">Validation<a class="headerlink" href="#validation" title="Permanent link">&para;</a></h2>
+<p>Success during the live recovery was confirmed by:
+- Docker root directory returning successfully:</p>
+<pre><code class="language-bash">docker info --format 'DockerRootDir={{.DockerRootDir}}'
+</code></pre>
+<ul>
+<li>Docker showing active containers:</li>
+</ul>
+<pre><code class="language-bash">docker ps -a --format 'table {{.Names}}\t{{.Status}}'
+</code></pre>
+<ul>
+<li><code>/var/lib/docker</code> shown as mounted on the dedicated ext4 disk:</li>
+</ul>
+<pre><code class="language-bash">findmnt /var/lib/docker
+</code></pre>
+<ul>
+<li>Automount units shown active:</li>
+</ul>
+<pre><code class="language-bash">systemctl status opt-docker\x2dapps.automount opt-compose.automount
+</code></pre>
+<ul>
+<li>Bind test files created under <code>/opt/...</code> appearing under <code>/var/lib/docker/...</code>, confirming the bind relationship.</li>
+</ul>
+<h2 id="follow-up-tasks">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Fix Docker boot reliability after VM reboot.</li>
+<li>Verify that <code>docker-verify.mountguard.service</code> persists correctly across reboots.</li>
+<li>Confirm the final <code>/etc/fstab</code> entry for <code>/var/lib/docker</code> matches the chosen strategy:</li>
+<li>either UUID-based everywhere</li>
+<li>or label-based everywhere</li>
+<li>Re-check <code>systemctl cat docker</code> to confirm the final override is correct.</li>
+<li>Decide whether <code>RequiresMountsFor=/opt/docker-apps /opt/compose</code> should remain, or whether automount-only behavior is preferable.</li>
+<li>Validate that key Compose stacks are using bind mounts instead of anonymous Docker volumes.</li>
+<li>Resolve CIFS/NAS permissions for:</li>
+<li><code>/usenet-downloads/complete</code></li>
+<li>qBittorrent download paths</li>
+<li>Confirm container UID/GID expectations against CIFS mount options and NAS permissions.</li>
+<li>Test a clean reboot after final boot-order changes.</li>
+</ul>
+<h2 id="lessons-learned">Lessons Learned<a class="headerlink" href="#lessons-learned" title="Permanent link">&para;</a></h2>
+<ul>
+<li>If <code>docker info</code> hangs but the client responds, check <code>docker.service</code> and its systemd dependency chain first.</li>
+<li>A missing systemd dependency can completely block Docker startup while leaving <code>docker.socket</code> active.</li>
+<li>Cloud-init intent and live <code>/etc/fstab</code> state can drift; both must be checked.</li>
+<li>Using a UUID in one place and a label in another increases confusion during recovery.</li>
+<li><code>x-systemd.automount</code> can make bind mounts appear absent until they are first accessed.</li>
+<li>A successful container start does not prove that intended host paths are in use.</li>
+<li>For Docker-on-VM storage layouts, validating mounts is as important as validating the Docker daemon itself.</li>
+<li>Reboot behavior must be tested after storage and systemd dependency changes; a live recovery is not enough.</li>
+</ul>
+<hr />
+<h1 id="command-reference">Command Reference<a class="headerlink" href="#command-reference" title="Permanent link">&para;</a></h1>
+<h2 id="command">Command<a class="headerlink" href="#command" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">timeout 5 docker version || echo &quot;daemon not responding&quot;
+</code></pre>
+<p><strong>What it does:</strong><br />
+Runs <code>docker version</code> but limits it to 5 seconds.</p>
+<p><strong>Flags and arguments:</strong><br />
+- <code>timeout 5</code> stops the command after 5 seconds.
+- <code>|| echo ...</code> prints a message if the command times out or fails.</p>
+<p><strong>Why it was used:</strong><br />
+To determine whether the Docker client worked while the daemon was unresponsive.</p>
+<p><strong>Expected result:</strong><br />
+Client information prints quickly. If the daemon is unavailable, the command times out.</p>
+<p><strong>What success or failure indicates:</strong><br />
+- Client output plus timeout message means the Docker CLI works, but the daemon is not responding.
+- Full output means the daemon is reachable.</p>
+<p><strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_1">Command<a class="headerlink" href="#command_1" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">systemctl status docker -n 50 --no-pager
+</code></pre>
+<p><strong>What it does:</strong><br />
+Shows recent status and logs for <code>docker.service</code>.</p>
+<p><strong>Flags and arguments:</strong><br />
+- <code>-n 50</code> shows the last 50 log lines.
+- <code>--no-pager</code> prints directly to the terminal.</p>
+<p><strong>Why it was used:</strong><br />
+To see whether Docker was running and why it failed.</p>
+<p><strong>Expected result:</strong><br />
+Either an active service or clear dependency/startup errors.</p>
+<p><strong>What success or failure indicates:</strong><br />
+- <code>active (running)</code> means daemon is up.
+- <code>inactive (dead)</code> or dependency errors mean startup path is still broken.</p>
+<p><strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_2">Command<a class="headerlink" href="#command_2" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">systemctl status docker.socket --no-pager
+</code></pre>
+<p><strong>What it does:</strong><br />
+Shows whether Docker socket activation is enabled and listening.</p>
+<p><strong>Why it was used:</strong><br />
+To separate socket availability from actual daemon availability.</p>
+<p><strong>Expected result:</strong><br />
+Socket may be active even when <code>docker.service</code> is down.</p>
+<p><strong>What success or failure indicates:</strong><br />
+- Active socket plus dead service means the socket exists, but the daemon is blocked.
+- Both down indicates a broader Docker startup failure.</p>
+<p><strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_3">Command<a class="headerlink" href="#command_3" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">systemctl status docker-verify.mountguard --no-pager
+</code></pre>
+<p><strong>Likely command used:</strong><br />
+The actual unit name may have been <code>docker-verify.mountguard.service</code>.</p>
+<p><strong>What it does:</strong><br />
+Checks the status of the mount verification unit.</p>
+<p><strong>Why it was used:</strong><br />
+Docker depended on this unit.</p>
+<p><strong>Expected result:</strong><br />
+The unit should exist and succeed before Docker starts.</p>
+<p><strong>What success or failure indicates:</strong><br />
+- Success means the guard passed.
+- Missing unit means Docker dependency failure.
+- Failed unit means mount or UUID/label mismatch.</p>
+<p><strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_4">Command<a class="headerlink" href="#command_4" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">journalctl -u docker -b --no-pager | tail -n 200
+</code></pre>
+<p><strong>What it does:</strong><br />
+Shows Docker logs from the current boot.</p>
+<p><strong>Flags and arguments:</strong><br />
+- <code>-u docker</code> filters to Docker service logs.
+- <code>-b</code> restricts to the current boot.
+- <code>tail -n 200</code> shows the last 200 lines.</p>
+<p><strong>Why it was used:</strong><br />
+To identify repeated startup errors and dependency failures.</p>
+<p><strong>Expected result:</strong><br />
+Systemd and Docker daemon log lines related to startup.</p>
+<p><strong>What success or failure indicates:</strong><br />
+Repeated <code>Dependency failed</code> messages pointed to a unit/dependency issue, not a container issue.</p>
+<p><strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_5">Command<a class="headerlink" href="#command_5" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">journalctl -u docker-verify.mountguard -b --no-pager | tail -n 200
+</code></pre>
+<p><strong>What it does:</strong><br />
+Shows logs for the guard unit from the current boot.</p>
+<p><strong>Why it was used:</strong><br />
+To confirm whether the guard existed and whether it passed or failed.</p>
+<p><strong>Expected result:</strong><br />
+Guard validation output or a missing-unit condition.</p>
+<p><strong>What success or failure indicates:</strong><br />
+- Success means Docker data mount validation passed.
+- Failure means wrong mount, wrong device, or non-mountpoint.
+- No entries or missing unit means dependency target absent.</p>
+<p><strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_6">Command<a class="headerlink" href="#command_6" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">lsblk -f | grep -E 'sdb|6ce44029-6b4b-4fe4-a78e-bec4402a0444'
+</code></pre>
+<p><strong>What it does:</strong><br />
+Lists block devices and filters for the relevant device or UUID.</p>
+<p><strong>Why it was used:</strong><br />
+To identify which disk held the Docker ext4 filesystem.</p>
+<p><strong>Expected result:</strong><br />
+A line showing the device, filesystem type, label, and UUID.</p>
+<p><strong>What success or failure indicates:</strong><br />
+- Matching UUID present means the expected Docker data disk exists.
+- No match means disk/UUID mismatch or wrong assumption.</p>
+<p><strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_7">Command<a class="headerlink" href="#command_7" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">findmnt /var/lib/docker
+</code></pre>
+<p><strong>What it does:</strong><br />
+Shows the live mount backing <code>/var/lib/docker</code>.</p>
+<p><strong>Why it was used:</strong><br />
+To confirm whether Docker’s data root was actually mounted.</p>
+<p><strong>Expected result:</strong><br />
+The source device, mountpoint, filesystem type, and options.</p>
+<p><strong>What success or failure indicates:</strong><br />
+- Mounted means Docker storage path exists.
+- Not mounted means guard and Docker should fail.</p>
+<p><strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_8">Command<a class="headerlink" href="#command_8" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">grep -nE 'UUID=6ce44029-6b4b-4fe4-a78e-bec4402a0444|/var/lib/docker|/opt/(docker-apps|compose)' /etc/fstab
+</code></pre>
+<p><strong>What it does:</strong><br />
+Searches <code>/etc/fstab</code> for Docker storage and bind mount entries.</p>
+<p><strong>Why it was used:</strong><br />
+To compare intended mount configuration with live system state.</p>
+<p><strong>Expected result:</strong><br />
+Entries for <code>/var/lib/docker</code>, <code>/opt/docker-apps</code>, and <code>/opt/compose</code>.</p>
+<p><strong>What success or failure indicates:</strong><br />
+- UUID entry means mount configured by UUID.
+- LABEL entry means mount configured by label.
+- Duplicate or conflicting lines indicate possible boot problems.</p>
+<p><strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_9">Command<a class="headerlink" href="#command_9" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">docker info --format 'DockerRootDir={{.DockerRootDir}}'
+</code></pre>
+<p><strong>What it does:</strong><br />
+Queries Docker for its configured root directory.</p>
+<p><strong>Why it was used:</strong><br />
+To confirm that Docker was using <code>/var/lib/docker</code>.</p>
+<p><strong>Expected result:</strong><br />
+<code>DockerRootDir=/var/lib/docker</code></p>
+<p><strong>What success or failure indicates:</strong><br />
+- Correct output means daemon is up and using expected root.
+- Hanging or blank output means daemon is not responding or not fully started.</p>
+<p><strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_10">Command<a class="headerlink" href="#command_10" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo sed -i 's|^LABEL=docker-data[[:space:]]\+/var/lib/docker[[:space:]]\+ext4|UUID=6ce44029-6b4b-4fe4-a78e-bec4402a0444 /var/lib/docker ext4|' /etc/fstab
+</code></pre>
+<p><strong>What it does:</strong><br />
+Edits <code>/etc/fstab</code> in place to replace a label-based Docker data mount with a UUID-based one.</p>
+<p><strong>Flags and arguments:</strong><br />
+- <code>sed -i</code> edits the file directly.</p>
+<p><strong>Why it was used:</strong><br />
+To align the live system with the cloud-init YAML and guard logic.</p>
+<p><strong>Expected result:</strong><br />
+The <code>/var/lib/docker</code> line in <code>/etc/fstab</code> changes from <code>LABEL=</code> to <code>UUID=</code>.</p>
+<p><strong>What success or failure indicates:</strong><br />
+- Correct replacement means live config aligned with intended config.
+- No change means pattern mismatch or already corrected.</p>
+<p><strong>Risk:</strong> Medium.<br />
+Editing <code>/etc/fstab</code> incorrectly can break boot or mount behavior.</p>
+<p><strong>Safer alternative:</strong><br />
+Back up <code>/etc/fstab</code> before editing.</p>
+<hr />
+<h2 id="command_11">Command<a class="headerlink" href="#command_11" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo tee /usr/local/sbin/verify-docker-data.sh &gt;/dev/null &lt;&lt;'EOF'
+#!/bin/bash
+set -euo pipefail
+EXPECTED_UUID=&quot;6ce44029-6b4b-4fe4-a78e-bec4402a0444&quot;
+MP=&quot;/var/lib/docker&quot;
+if ! mountpoint -q &quot;$MP&quot;; then
+  echo &quot;ERROR: $MP is not a mountpoint.&quot; &gt;&amp;2; exit 1
+fi
+DEV=&quot;$(findmnt -no SOURCE &quot;$MP&quot; || true)&quot;
+UUID=&quot;$(blkid -s UUID -o value &quot;$DEV&quot; || true)&quot;
+if [ &quot;$UUID&quot; != &quot;$EXPECTED_UUID&quot; ]; then
+  echo &quot;ERROR: $MP is on $DEV (UUID=$UUID), expected UUID=$EXPECTED_UUID.&quot; &gt;&amp;2
+  exit 2
+fi
+EOF
+</code></pre>
+<p><strong>What it does:</strong><br />
+Creates a shell script that validates that <code>/var/lib/docker</code> is a mountpoint backed by the expected UUID.</p>
+<p><strong>Why it was used:</strong><br />
+To prevent Docker from starting on the wrong storage path.</p>
+<p><strong>Expected result:</strong><br />
+A guard script is created successfully.</p>
+<p><strong>What success or failure indicates:</strong><br />
+- Exit 0 means mount is correct.
+- Exit 1 means <code>/var/lib/docker</code> is not mounted.
+- Exit 2 means wrong device/UUID.</p>
+<p><strong>Risk:</strong> Medium.<br />
+This can intentionally block Docker startup if storage is not exactly as expected.</p>
+<hr />
+<h2 id="command_12">Command<a class="headerlink" href="#command_12" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo systemctl daemon-reload
+</code></pre>
+<p><strong>What it does:</strong><br />
+Reloads systemd unit definitions and regenerated mount interpretations from <code>/etc/fstab</code>.</p>
+<p><strong>Why it was used:</strong><br />
+Because <code>/etc/fstab</code> and systemd unit files were modified.</p>
+<p><strong>Expected result:</strong><br />
+No output or a clean return.</p>
+<p><strong>What success or failure indicates:</strong><br />
+Without this step, systemd may still use stale mount and service definitions.</p>
+<p><strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_13">Command<a class="headerlink" href="#command_13" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo systemctl enable --now docker-verify.mountguard.service
+</code></pre>
+<p><strong>What it does:</strong><br />
+Enables the guard service to start at boot and starts it immediately.</p>
+<p><strong>Why it was used:</strong><br />
+To restore the missing dependency and test it live.</p>
+<p><strong>Expected result:</strong><br />
+The service enables and runs successfully.</p>
+<p><strong>What success or failure indicates:</strong><br />
+- Success means guard exists and passed.
+- Failure means missing mount, wrong device, or broken service file.</p>
+<p><strong>Risk:</strong> Low to medium.<br />
+If the guard fails, Docker remains blocked.</p>
+<hr />
+<h2 id="command_14">Command<a class="headerlink" href="#command_14" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo systemctl restart docker.socket
+sudo systemctl start docker
+</code></pre>
+<p><strong>What it does:</strong><br />
+Restarts the Docker socket unit and starts the Docker daemon.</p>
+<p><strong>Why it was used:</strong><br />
+To bring Docker back after dependency and mount corrections.</p>
+<p><strong>Expected result:</strong><br />
+<code>docker.service</code> becomes active.</p>
+<p><strong>What success or failure indicates:</strong><br />
+- Success means Docker restored.
+- Failure means remaining dependency or mount issue.</p>
+<p><strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_15">Command<a class="headerlink" href="#command_15" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">docker ps -a --format 'table {{.Names}}\t{{.Status}}'
+</code></pre>
+<p><strong>What it does:</strong><br />
+Lists all containers with their names and statuses.</p>
+<p><strong>Why it was used:</strong><br />
+To verify that containers returned after Docker recovery.</p>
+<p><strong>Expected result:</strong><br />
+A table showing containers as <code>Up</code>, <code>Exited</code>, or <code>Restarting</code>.</p>
+<p><strong>What success or failure indicates:</strong><br />
+- Many <code>Up</code> containers means Docker recovery succeeded.
+- <code>Restarting</code> or <code>Exited</code> means container-level follow-up is needed.</p>
+<p><strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_16">Command<a class="headerlink" href="#command_16" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">systemctl status opt-docker\x2dapps.automount opt-compose.automount --no-pager
+</code></pre>
+<p><strong>What it does:</strong><br />
+Checks the automount units for <code>/opt/docker-apps</code> and <code>/opt/compose</code>.</p>
+<p><strong>Why it was used:</strong><br />
+Those paths were bind-mounted using automount semantics.</p>
+<p><strong>Expected result:</strong><br />
+Active automount units.</p>
+<p><strong>What success or failure indicates:</strong><br />
+- Active automounts mean first access should trigger the mounts.
+- Missing or inactive means bind paths may not activate automatically.</p>
+<p><strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_17">Command<a class="headerlink" href="#command_17" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo bash -lc 'stat /opt/docker-apps &gt;/dev/null; stat /opt/compose &gt;/dev/null'
+</code></pre>
+<p><strong>What it does:</strong><br />
+Accesses the <code>/opt</code> paths to trigger their automounts.</p>
+<p><strong>Why it was used:</strong><br />
+Because <code>x-systemd.automount</code> only mounts them on first access.</p>
+<p><strong>Expected result:</strong><br />
+No output; automounts should become active.</p>
+<p><strong>What success or failure indicates:</strong><br />
+- Successful access means the automount trigger executed.
+- Failure means path or mount issue.</p>
+<p><strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_18">Command<a class="headerlink" href="#command_18" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">findmnt /opt/docker-apps /opt/compose /var/lib/docker/appdata /var/lib/docker/compose
+</code></pre>
+<p><strong>What it does:</strong><br />
+Shows the live mount relationships for the appdata and compose bind paths.</p>
+<p><strong>Why it was used:</strong><br />
+To verify whether the intended bind mounts were actually active.</p>
+<p><strong>Expected result:</strong><br />
+Mount information for both <code>/opt</code> paths and their backing paths.</p>
+<p><strong>What success or failure indicates:</strong><br />
+- Mounted means bind path active.
+- Missing means containers may not be using intended host storage.</p>
+<p><strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_19">Command<a class="headerlink" href="#command_19" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo bash -lc 'touch /opt/docker-apps/.bindtest &amp;&amp; ls -la /var/lib/docker/appdata | grep bindtest'
+</code></pre>
+<p><strong>What it does:</strong><br />
+Creates a test file under <code>/opt/docker-apps</code> and verifies it appears in <code>/var/lib/docker/appdata</code>.</p>
+<p><strong>Why it was used:</strong><br />
+To prove the bind mount relationship rather than only trusting unit state.</p>
+<p><strong>Expected result:</strong><br />
+The <code>.bindtest</code> file is visible in the backing directory.</p>
+<p><strong>What success or failure indicates:</strong><br />
+- File visible means bind mount is active.
+- File absent means bind mount is not active or mapped elsewhere.</p>
+<p><strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_20">Command<a class="headerlink" href="#command_20" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo bash -lc 'touch /opt/compose/.bindtest &amp;&amp; ls -la /var/lib/docker/compose | grep bindtest'
+</code></pre>
+<p><strong>What it does:</strong><br />
+Creates a test file under <code>/opt/compose</code> and verifies it appears in <code>/var/lib/docker/compose</code>.</p>
+<p><strong>Why it was used:</strong><br />
+To validate the Compose directory bind mount.</p>
+<p><strong>Expected result:</strong><br />
+The <code>.bindtest</code> file appears in the backing directory.</p>
+<p><strong>What success or failure indicates:</strong><br />
+- Present means the bind is active.
+- Missing means the bind issue remains.</p>
+<p><strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_21">Command<a class="headerlink" href="#command_21" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">findmnt -no SOURCE /var/lib/docker
+blkid -s UUID -o value &quot;$(findmnt -no SOURCE /var/lib/docker)&quot;
+</code></pre>
+<p><strong>What it does:</strong><br />
+Finds the device behind <code>/var/lib/docker</code> and reads its UUID.</p>
+<p><strong>Why it was used:</strong><br />
+To compare the live backing device with the expected UUID.</p>
+<p><strong>Expected result:</strong><br />
+A source device path and the expected UUID value.</p>
+<p><strong>What success or failure indicates:</strong><br />
+- Matching UUID means Docker data is on the intended disk.
+- Different UUID means guard mismatch or wrong storage path.</p>
+<p><strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_22">Command<a class="headerlink" href="#command_22" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">systemctl cat docker | grep -E 'RequiresMountsFor|docker-verify.mountguard|ConditionPathIsMountPoint'
+</code></pre>
+<p><strong>Likely command used:</strong><br />
+This was discussed as a validation step for the final override.</p>
+<p><strong>What it does:</strong><br />
+Shows the effective Docker systemd unit and filters for mount-related directives.</p>
+<p><strong>Why it was used:</strong><br />
+To confirm that Docker’s startup behavior matched the intended design.</p>
+<p><strong>Expected result:</strong><br />
+Lines showing mount and guard dependencies.</p>
+<p><strong>What success or failure indicates:</strong><br />
+- Expected directives present means the override loaded correctly.
+- Missing directives mean Docker may not be protected on boot.</p>
+<p><strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_23">Command<a class="headerlink" href="#command_23" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">docker inspect -f '{{range .Mounts}}{{printf &quot;%-12s %-60s -&gt; %s\n&quot; .Type .Source .Destination}}{{end}}' sabnzbd-vpn
+</code></pre>
+<p><strong>Likely command used:</strong><br />
+A similar mount inspection command was proposed for SABnzbd and qBittorrent.</p>
+<p><strong>What it does:</strong><br />
+Shows container mount types, sources, and destinations.</p>
+<p><strong>Why it was used:</strong><br />
+To verify whether download paths were bind-mounted correctly.</p>
+<p><strong>Expected result:</strong><br />
+Bind mounts to the intended CIFS-backed paths.</p>
+<p><strong>What success or failure indicates:</strong><br />
+- <code>bind</code> mount to expected path means Docker side is correct.
+- <code>volume</code> or unexpected path means container is not using intended storage.</p>
+<p><strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_24">Command<a class="headerlink" href="#command_24" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">findmnt /srv/remotemount/NAS
+</code></pre>
+<p><strong>Likely command used:</strong><br />
+This was proposed for the SABnzbd/qBittorrent permissions issue.</p>
+<p><strong>What it does:</strong><br />
+Checks whether the NAS CIFS share is mounted.</p>
+<p><strong>Why it was used:</strong><br />
+Download path permission errors may be caused by the NAS share not being mounted or mounted incorrectly.</p>
+<p><strong>Expected result:</strong><br />
+A live mount entry for the NAS path.</p>
+<p><strong>What success or failure indicates:</strong><br />
+- Mounted means proceed to permissions/ACL checks.
+- Not mounted means Docker containers may be writing to the wrong local path or failing outright.</p>
+<p><strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_25">Command<a class="headerlink" href="#command_25" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo -u '#1000' bash -lc 'touch /srv/remotemount/NAS/Downloaders/SABnzbd/downloads/complete/.permtest'
+</code></pre>
+<p><strong>Likely command used:</strong><br />
+A similar UID-based write test was proposed.</p>
+<p><strong>What it does:</strong><br />
+Tests whether UID 1000 can write to the CIFS-mounted download directory.</p>
+<p><strong>Why it was used:</strong><br />
+LinuxServer-style containers commonly run as <code>PUID=1000</code>, so host-side testing with that UID is a direct way to validate write permissions.</p>
+<p><strong>Expected result:</strong><br />
+A test file is created successfully.</p>
+<p><strong>What success or failure indicates:</strong><br />
+- Success means host-side permissions are likely correct.
+- Permission denied means NAS ACL, CIFS options, or ownership issue.</p>
+<p><strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_26">Command<a class="headerlink" href="#command_26" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">docker exec -u 1000 sabnzbd-vpn sh -lc 'touch /usenet-downloads/complete/.writetest &amp;&amp; echo OK &amp;&amp; rm -f /usenet-downloads/complete/.writetest'
+</code></pre>
+<p><strong>Likely command used:</strong><br />
+A similar in-container permission test was proposed.</p>
+<p><strong>What it does:</strong><br />
+Tests whether the application container can write to its mapped download directory as UID 1000.</p>
+<p><strong>Why it was used:</strong><br />
+To confirm that the permission problem existed from the container’s perspective, not just the host’s.</p>
+<p><strong>Expected result:</strong><br />
+The file is created and then removed, printing <code>OK</code>.</p>
+<p><strong>What success or failure indicates:</strong><br />
+- Success means container can write.
+- Failure means volume mapping or permissions are still wrong.</p>
+<p><strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_27">Command<a class="headerlink" href="#command_27" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo chown -R 1000:1000 /var/lib/docker/appdata /var/lib/docker/compose
+</code></pre>
+<p><strong>What it does:</strong><br />
+Changes ownership of the appdata and compose directories to UID/GID 1000.</p>
+<p><strong>Why it was discussed:</strong><br />
+As a possible fix for permission mismatches on bind-mounted paths.</p>
+<p><strong>Expected result:</strong><br />
+Directories become owned by the Docker app user/group.</p>
+<p><strong>What success or failure indicates:</strong><br />
+May resolve container write failures if UID/GID mismatch was the cause.</p>
+<p><strong>Risk:</strong> Medium.<br />
+Recursive ownership changes can be disruptive if some data is intentionally owned by other users or services.</p>
+<p><strong>Safer alternative:</strong><br />
+Inspect ownership first with <code>stat</code> or <code>ls -la</code>, and change only affected subdirectories.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

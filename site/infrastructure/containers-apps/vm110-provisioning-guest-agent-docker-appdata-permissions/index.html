@@ -1,0 +1,3562 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Infrastructure, cloud, automation, security, and operations documentation portfolio.">
+      
+      
+        <meta name="author" content="Kingsley Oku">
+      
+      
+      
+        <link rel="prev" href="../vm100-docker-data-disk-recovery-cloud-init-hardening/">
+      
+      
+        <link rel="next" href="../../monitoring-operations/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>VM 110 Provisioning Alignment, Guest Agent Check, IP Conflict Discussion, and Docker Appdata Permissions - OkuBuilt Infrastructure & Cloud Portfolio</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#vm-110-provisioning-alignment-guest-agent-check-ip-conflict-discussion-and-docker-appdata-permissions" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-header__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OkuBuilt Infrastructure & Cloud Portfolio
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              VM 110 Provisioning Alignment, Guest Agent Check, IP Conflict Discussion, and Docker Appdata Permissions
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-nav__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OkuBuilt Infrastructure & Cloud Portfolio
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/proxmox-traefik-opnsense-ha-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox, Traefik, OPNsense HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Automation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cephfs-snips-cloudinit-vm100-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox CephFS Snips Cloud-Init VM100
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloud-init-docker-vm-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Docker VM Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-vm100-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker VM100 Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-cicustom-snippet-storage-ha/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init cicustom Snippet Storage HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/vm100-docker-startup-mountguard-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Startup Mount Guard Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compute
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/debian-docker-vm-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/home-assistant-os-proxmox-ceph-vm-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home Assistant OS Proxmox Ceph VM Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/homelab-vm100-rebuild-restore-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab VM100 Rebuild Restore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Containers & Apps
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Containers & Apps
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../debian-docker-vm-rebuild-cloudinit-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM Rebuild Cloud-Init
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docker-apps-offen-restore-gluetun-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Apps Offen Restore Gluetun Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docker-compose-memos-image-tag-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Compose Memos Image Tag Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gluetun-corrupted-servers-permissions-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gluetun Corrupted Servers Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../proxmox-traefik-console-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Traefik Console Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../traefik-docker29-upgrade-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Docker Upgrade Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../traefik-proxy-docker-network-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Proxy Docker Network
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vm100-docker-data-disk-recovery-cloud-init-hardening/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Data Disk Recovery Cloud-Init Hardening
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM110 Provisioning Guest Agent Docker AppData Permissions
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM110 Provisioning Guest Agent Docker AppData Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring & Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Monitoring & Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-ceph-memtest-ram-fault-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Ceph Memtest RAM Fault
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-host-kernel-ram-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Host Kernel RAM Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-nuc-e1000e-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox NUC e1000e Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networking
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Networking
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/att-fiber-opnsense-outage-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AT&T Fiber OPNsense Outage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-lan-instability-storm-control-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN Instability Storm Control
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-lan-ip-dhcp-static-device-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN IP DHCP Static Device
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-opt2-lan-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense OPT2 LAN
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-web-gui-documentation-and-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense Web GUI Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/wireguard-ec2-proxmox-lxc-homelab-remote-access/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WireGuard EC2 Proxmox LXC Homelab Remote Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Security
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/homelab-ssh-ansible-nut-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab SSH Ansible NUT Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/proxmox-root-login-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Root Login Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_9" id="__nav_2_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Storage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Storage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/ceph-mainframe-osd-mon-mgr-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Mainframe OSD MON MGR Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/ceph-monitor-crash-loop-mainframe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Monitor Crash Loop Mainframe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/proxmox-ha-live-migration-ceph-vm-state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox HA Live Migration Ceph VM State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/truenas-vm-zfs-hba-planning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TrueNAS VM ZFS HBA Planning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/vm100-ceph-gluetun-troubleshooting-runbook-15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Ceph Gluetun Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/vm100-docker-nas-offen-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker NAS Offen Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Runbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runbooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_11" id="__nav_2_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting Incidents
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting Incidents
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting-incidents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloud
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cloud
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cloud/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portfolio
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Portfolio
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../portfolio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/documentation-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation Standards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/placement-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Placement Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/recurring-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recurring Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/command-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="vm-110-provisioning-alignment-guest-agent-check-ip-conflict-discussion-and-docker-appdata-permissions">VM 110 Provisioning Alignment, Guest Agent Check, IP Conflict Discussion, and Docker Appdata Permissions<a class="headerlink" href="#vm-110-provisioning-alignment-guest-agent-check-ip-conflict-discussion-and-docker-appdata-permissions" title="Permanent link">&para;</a></h1>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>This work session focused on reusing the configuration pattern from Proxmox VM 100 for a new VM 110, confirming the correct CPU model, reapplying the cloud-init custom snippet configuration, checking QEMU Guest Agent status, discussing the behavior of duplicate IP addresses on the same network, and standardizing ownership and permissions for Docker appdata under <code>/opt/docker-apps</code>. The session ended with a practical permissions plan for appdata used by Docker services such as Traefik and Dockge.</p>
+<h2 id="environment">Environment<a class="headerlink" href="#environment" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Hypervisor:</strong> Proxmox VE</li>
+<li><strong>VMs involved:</strong>  </li>
+<li>VM 100: existing Debian Docker VM used as reference  </li>
+<li>VM 110: new VM being aligned to the same pattern</li>
+<li><strong>Guest OS context:</strong> Debian-based Docker VM</li>
+<li><strong>Cloud-init snippet storage:</strong> <code>snips</code> (CephFS-backed snippet storage)</li>
+<li><strong>Docker appdata path:</strong> <code>/opt/docker-apps</code></li>
+<li><strong>Compose path context:</strong> <code>/opt/compose</code></li>
+<li><strong>Containers / app folders mentioned:</strong> Traefik, Dockge, Radarr, Sonarr, SABnzbd, qBittorrent, Plex, Prowlarr, Lidarr, Syncthing, Vaultwarden, TubeArchivist, Audiobookshelf, and many others under <code>/opt/docker-apps</code></li>
+<li><strong>Networking context:</strong> Proxmox VM networking on a shared LAN / bridge</li>
+<li><strong>Remote file management tool:</strong> WinSCP</li>
+<li><strong>Relevant Proxmox feature:</strong> QEMU Guest Agent</li>
+<li><strong>Relevant reverse proxy component:</strong> Traefik with <code>acme.json</code></li>
+</ul>
+<h2 id="problem">Problem<a class="headerlink" href="#problem" title="Permanent link">&para;</a></h2>
+<p>A new VM 110 needed to inherit the known-good VM 100 pattern, including CPU model and cloud-init snippet usage. During this process, the guest agent was reported as not running. Separately, there was uncertainty about whether the <code>debian</code> user should be able to delete files in Docker appdata from WinSCP, especially for Dockge and app config files such as Traefik JSON data.</p>
+<h2 id="symptoms">Symptoms<a class="headerlink" href="#symptoms" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Uncertainty about the exact CPU model used for VM 100.</li>
+<li>Need to restate the correct <code>cicustom</code> line for VM 110.</li>
+<li>Proxmox reported that the <strong>guest agent was not running</strong>.</li>
+<li>Concern about duplicate static IP usage between VMs.</li>
+<li>In WinSCP, the <code>debian</code> user could not reliably delete or manage files inside Docker appdata.</li>
+<li>Need to normalize permissions for appdata such as:</li>
+<li>Traefik files</li>
+<li>JSON-based app config</li>
+<li>Dockge data</li>
+<li>Other service directories under <code>/opt/docker-apps</code></li>
+</ul>
+<h2 id="actions-taken">Actions Taken<a class="headerlink" href="#actions-taken" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Recalled the VM 100 resource pattern and applied it conceptually to VM 110.</li>
+<li>
+<p>Corrected the CPU model from a generic assumption to the specific Proxmox CPU type:
+   <code>bash
+   qm set 110 --cores 8 --sockets 1 --memory 16384 --balloon 0 --cpu x86-64-v3</code>
+   Purpose: align VM 110 CPU and memory settings with the intended VM 100 profile.</p>
+</li>
+<li>
+<p>Restated the cloud-init custom snippet configuration for VM 110:
+   <code>bash
+   qm set 110 --cicustom "user=snips:snippets/docker-userdata.yml,network=snips:snippets/docker-net.yml"</code>
+   Purpose: attach the existing user-data and network-data snippets from <code>snips</code>.</p>
+</li>
+<li>
+<p>Restated the cloud-init drive attachment:
+   <code>bash
+   qm set 110 --ide2 snips:cloudinit</code>
+   Purpose: ensure VM 110 has a cloud-init drive.</p>
+</li>
+<li>
+<p>Addressed the “guest agent isn’t running” issue by identifying the normal enable/install flow:
+   <code>bash
+   qm set 110 --agent enabled=1</code>
+   Purpose: enable QEMU Guest Agent support on the Proxmox side.</p>
+</li>
+</ol>
+<p><code>bash
+   sudo apt update
+   sudo apt install -y qemu-guest-agent
+   sudo systemctl enable --now qemu-guest-agent</code>
+   Purpose: install and start the guest agent inside the guest OS.</p>
+<ol>
+<li>Discussed duplicate IP behavior if two VMs boot with the same IP on the same Layer 2 network.</li>
+<li>Clarified that duplicate IPs on the same subnet would cause ARP instability and intermittent reachability rather than a clean winner/loser scenario.</li>
+<li>Investigated the appdata permissions question, initially in the context of Dockge.</li>
+<li>Proposed standardizing Docker appdata ownership to the <code>debian</code> user.</li>
+<li>Requested and reviewed the folder list under <code>/opt/docker-apps</code>, which confirmed a broad shared appdata layout including Traefik and Dockge.</li>
+<li>
+<p>Recommended standardizing ownership and permissions across all appdata:
+   <code>bash
+   sudo chown -R debian:debian /opt/docker-apps
+   sudo chmod -R u=rwX,go-rX /opt/docker-apps</code>
+   Purpose: make <code>debian</code> the managing user for appdata and allow WinSCP operations.</p>
+</li>
+<li>
+<p>Identified Traefik <code>acme.json</code> as a special-case file requiring tighter permissions:
+   <code>bash
+   sudo chown debian:debian /opt/docker-apps/Traefik/acme.json
+   sudo chmod 600 /opt/docker-apps/Traefik/acme.json</code>
+   Purpose: preserve Traefik compatibility with sensitive certificate storage.</p>
+</li>
+</ol>
+<h2 id="key-findings">Key Findings<a class="headerlink" href="#key-findings" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The intended Proxmox CPU type was <strong><code>x86-64-v3</code></strong>, not a generic <code>host</code> or incorrectly spelled variant.</li>
+<li>VM 110 should reuse the same cloud-init snippet model as VM 100, using:</li>
+<li><code>docker-userdata.yml</code></li>
+<li><code>docker-net.yml</code>
+  stored on <strong><code>snips</code></strong>.</li>
+<li>If the QEMU Guest Agent is reported as not running, the issue can exist on either side:</li>
+<li>Agent not enabled in Proxmox</li>
+<li>Agent package not installed / started inside the guest</li>
+<li>Two VMs using the same IP on the same Layer 2 network will usually cause:</li>
+<li>ARP table instability</li>
+<li>intermittent connectivity</li>
+<li>sessions landing on the wrong host
+  rather than a predictable failure mode</li>
+<li>In Linux, deleting a file depends primarily on <strong>write and execute permissions on the parent directory</strong>, not only the file ownership itself.</li>
+<li>For this homelab pattern, making <code>debian</code> own <code>/opt/docker-apps</code> is operationally consistent with Docker workloads that are intended to be managed by that user.</li>
+<li>Traefik <code>acme.json</code> is a special permissions case and should remain restricted.</li>
+</ul>
+<h2 id="resolution">Resolution<a class="headerlink" href="#resolution" title="Permanent link">&para;</a></h2>
+<p>Current working guidance from this session:</p>
+<ul>
+<li>VM 110 should be configured with:</li>
+<li><code>8</code> cores</li>
+<li><code>1</code> socket</li>
+<li><code>16384</code> MB RAM</li>
+<li>ballooning disabled</li>
+<li>
+<p>CPU type <code>x86-64-v3</code></p>
+</li>
+<li>
+<p>VM 110 cloud-init should use:</p>
+</li>
+<li>user snippet: <code>snips:snippets/docker-userdata.yml</code></li>
+<li>network snippet: <code>snips:snippets/docker-net.yml</code></li>
+<li>
+<p>cloud-init drive on <code>snips:cloudinit</code></p>
+</li>
+<li>
+<p>If guest agent status is still needed, the next step is to ensure:</p>
+</li>
+<li>Proxmox agent support is enabled</li>
+<li>
+<p><code>qemu-guest-agent</code> is installed and running in the guest</p>
+</li>
+<li>
+<p>Docker appdata should be standardized to <code>debian:debian</code> ownership under <code>/opt/docker-apps</code>, with restrictive but usable permissions.</p>
+</li>
+<li>
+<p>Traefik <code>acme.json</code> should be explicitly set to mode <code>600</code>.</p>
+</li>
+</ul>
+<h2 id="validation">Validation<a class="headerlink" href="#validation" title="Permanent link">&para;</a></h2>
+<p>Validation methods identified in the session:</p>
+<ul>
+<li>Confirm VM CPU setting:
+  <code>bash
+  qm config 110 | grep -i cpu</code></li>
+<li>Confirm custom cloud-init snippet attachment:
+  <code>bash
+  qm config 110 | grep -i cicustom</code></li>
+<li>Confirm guest agent communication:
+  <code>bash
+  qm guest cmd 110 ping</code></li>
+<li>Confirm guest agent service state in the guest:
+  <code>bash
+  systemctl status qemu-guest-agent</code></li>
+<li>Confirm appdata ownership and permissions:
+  <code>bash
+  ls -ld /opt/docker-apps /opt/docker-apps/*</code></li>
+<li>Confirm Traefik special file permissions:
+  <code>bash
+  ls -l /opt/docker-apps/Traefik</code></li>
+</ul>
+<h2 id="follow-up-tasks">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Compare <code>qm config 100</code> and <code>qm config 110</code> directly to ensure no important VM options were missed.</li>
+<li>Confirm whether VM 110 should receive a unique static IP or DHCP reservation before boot if cloned from VM 100 patterns.</li>
+<li>Verify that VM 110 has the cloud-init drive attached before first boot.</li>
+<li>Confirm whether guest agent status matters operationally for this VM or can be deferred.</li>
+<li>Review whether some containers should explicitly run as <code>1000:1000</code> to prevent future root-owned file creation.</li>
+<li>Audit sensitive files under <code>/opt/docker-apps</code> beyond Traefik <code>acme.json</code>, such as:</li>
+<li><code>.env</code> files</li>
+<li>API key files</li>
+<li>backup credentials</li>
+<li>secret JSON / YAML files</li>
+</ul>
+<h2 id="lessons-learned">Lessons Learned<a class="headerlink" href="#lessons-learned" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Reusing a known-good VM pattern is efficient, but exact CPU type names matter in Proxmox.</li>
+<li>Cloud-init snippet location must match the actual snippet storage backend in use.</li>
+<li>QEMU Guest Agent problems often come from forgetting one half of the configuration: host-side enablement or guest-side service install.</li>
+<li>Duplicate IPs on the same LAN create confusing intermittent failures, not always obvious hard-down conditions.</li>
+<li>For Docker bind-mounted appdata, operational ownership should match the user expected to manage files over SSH / WinSCP.</li>
+<li>Sensitive files such as Traefik <code>acme.json</code> should be handled as exceptions even when standardizing broader directory permissions.</li>
+</ul>
+<hr />
+<h1 id="command-reference">Command Reference<a class="headerlink" href="#command-reference" title="Permanent link">&para;</a></h1>
+<h2 id="command">Command<a class="headerlink" href="#command" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm set 110 --cores 8 --sockets 1 --memory 16384 --balloon 0 --cpu x86-64-v3
+</code></pre>
+<p><strong>What it does</strong><br />
+Updates Proxmox VM 110 to use 8 CPU cores, 1 socket, 16 GiB RAM, ballooning disabled, and the <code>x86-64-v3</code> CPU model.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>110</code>: target VM ID
+- <code>--cores 8</code>: assigns 8 virtual CPU cores
+- <code>--sockets 1</code>: keeps those cores under 1 virtual socket
+- <code>--memory 16384</code>: allocates 16384 MB RAM
+- <code>--balloon 0</code>: disables ballooning
+- <code>--cpu x86-64-v3</code>: sets the emulated CPU model</p>
+<p><strong>Why it was used at that moment</strong><br />
+To make VM 110 match the known resource pattern intended from VM 100.</p>
+<p><strong>Expected result</strong><br />
+VM 110 configuration reflects the specified CPU and RAM settings.</p>
+<p><strong>What success or failure would indicate</strong>
+- Success: <code>qm config 110</code> shows the updated values.
+- Failure: typo in CPU model, invalid VM ID, or Proxmox rejecting the setting.</p>
+<p><strong>Risk level</strong><br />
+Low to moderate. CPU model changes can affect guest compatibility if changed on an already-running or already-tuned guest.</p>
+<p><strong>Safer alternative</strong><br />
+Inspect VM 100 directly first with <code>qm config 100</code> and mirror only the confirmed values.</p>
+<h2 id="command_1">Command<a class="headerlink" href="#command_1" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm config 110 | grep -i cpu
+</code></pre>
+<p><strong>What it does</strong><br />
+Shows the CPU-related configuration lines for VM 110.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>qm config 110</code>: prints the VM configuration
+- <code>grep -i cpu</code>: filters output case-insensitively for CPU-related lines</p>
+<p><strong>Why it was used at that moment</strong><br />
+To validate that the CPU model and CPU-related settings were applied correctly.</p>
+<p><strong>Expected result</strong><br />
+A line showing the configured CPU type and possibly related CPU settings.</p>
+<p><strong>What success or failure would indicate</strong>
+- Success: expected CPU config appears.
+- Failure: missing expected line means the prior change did not apply or was not stored.</p>
+<p><strong>Risk level</strong><br />
+Low.</p>
+<h2 id="command_2">Command<a class="headerlink" href="#command_2" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm set 110 --cicustom &quot;user=snips:snippets/docker-userdata.yml,network=snips:snippets/docker-net.yml&quot;
+</code></pre>
+<p><strong>What it does</strong><br />
+Tells Proxmox to use custom cloud-init user-data and network-data files for VM 110 from the <code>snips</code> storage.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>--cicustom</code>: overrides the default generated cloud-init config
+- <code>user=...</code>: points to the cloud-init user-data snippet
+- <code>network=...</code>: points to the cloud-init network-data snippet
+- <code>snips:snippets/...</code>: Proxmox storage and file path syntax for snippet storage</p>
+<p><strong>Why it was used at that moment</strong><br />
+To reuse the established Debian Docker VM cloud-init pattern for VM 110.</p>
+<p><strong>Expected result</strong><br />
+VM 110 references the custom user and network cloud-init snippet files.</p>
+<p><strong>What success or failure would indicate</strong>
+- Success: <code>qm config 110</code> shows the <code>cicustom</code> entry.
+- Failure: snippet path, storage name, or file location is wrong.</p>
+<p><strong>Risk level</strong><br />
+Moderate. A wrong snippet can misconfigure login, networking, package install, or storage mounts.</p>
+<p><strong>Safer alternative</strong><br />
+Run <code>qm cloudinit dump 110 user</code> and <code>qm cloudinit dump 110 network</code> before boot to inspect the effective rendered config if needed.</p>
+<h2 id="command_3">Command<a class="headerlink" href="#command_3" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm config 110 | grep -i cicustom
+</code></pre>
+<p><strong>What it does</strong><br />
+Checks whether a custom cloud-init configuration is attached to VM 110.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>qm config 110</code>: prints the config
+- <code>grep -i cicustom</code>: finds the <code>cicustom</code> line</p>
+<p><strong>Why it was used at that moment</strong><br />
+To confirm the snippet attachment was saved correctly.</p>
+<p><strong>Expected result</strong><br />
+A line containing the <code>user=</code> and <code>network=</code> snippet references.</p>
+<p><strong>What success or failure would indicate</strong>
+- Success: cloud-init override is present.
+- Failure: missing line means the setting was not applied.</p>
+<p><strong>Risk level</strong><br />
+Low.</p>
+<h2 id="command_4">Command<a class="headerlink" href="#command_4" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm set 110 --ide2 snips:cloudinit
+</code></pre>
+<p><strong>What it does</strong><br />
+Attaches a cloud-init drive to VM 110 on the <code>ide2</code> bus using the <code>snips</code> storage.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>--ide2</code>: sets the second IDE device slot
+- <code>snips:cloudinit</code>: creates or attaches a Proxmox-managed cloud-init disk on the <code>snips</code> storage</p>
+<p><strong>Why it was used at that moment</strong><br />
+Cloud-init needs a cloud-init drive attached to inject metadata into the VM.</p>
+<p><strong>Expected result</strong><br />
+VM 110 has a cloud-init drive available.</p>
+<p><strong>What success or failure would indicate</strong>
+- Success: <code>qm config 110</code> shows an <code>ide2</code> cloud-init disk.
+- Failure: storage or content type may not support the requested object.</p>
+<p><strong>Risk level</strong><br />
+Low.</p>
+<h2 id="command_5">Command<a class="headerlink" href="#command_5" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm set 110 --agent enabled=1
+</code></pre>
+<p><strong>What it does</strong><br />
+Enables QEMU Guest Agent support for VM 110 in Proxmox.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>--agent enabled=1</code>: turns on guest agent integration for the VM</p>
+<p><strong>Why it was used at that moment</strong><br />
+The guest agent was reported as not running, so host-side support needed to be confirmed.</p>
+<p><strong>Expected result</strong><br />
+Proxmox is ready to communicate with the guest agent once the guest-side service is running.</p>
+<p><strong>What success or failure would indicate</strong>
+- Success: VM options show guest agent enabled.
+- Failure: invalid VM ID or config application issue.</p>
+<p><strong>Risk level</strong><br />
+Low.</p>
+<h2 id="command_6">Command<a class="headerlink" href="#command_6" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo apt update
+</code></pre>
+<p><strong>What it does</strong><br />
+Refreshes the Debian package index.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>sudo</code>: runs with administrative privileges
+- <code>apt update</code>: fetches current package metadata</p>
+<p><strong>Why it was used at that moment</strong><br />
+Installing <code>qemu-guest-agent</code> requires a current package index.</p>
+<p><strong>Expected result</strong><br />
+Package lists refresh successfully from configured repositories.</p>
+<p><strong>What success or failure would indicate</strong>
+- Success: package index updated and package install can proceed.
+- Failure: DNS, network, repository, or mirror issues.</p>
+<p><strong>Risk level</strong><br />
+Low.</p>
+<h2 id="command_7">Command<a class="headerlink" href="#command_7" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo apt install -y qemu-guest-agent
+</code></pre>
+<p><strong>What it does</strong><br />
+Installs the QEMU Guest Agent package inside the Debian VM.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>install</code>: installs packages
+- <code>-y</code>: automatically answers yes to prompts
+- <code>qemu-guest-agent</code>: guest agent package name</p>
+<p><strong>Why it was used at that moment</strong><br />
+To provide the actual guest-side service required for Proxmox guest-agent integration.</p>
+<p><strong>Expected result</strong><br />
+Package is installed successfully.</p>
+<p><strong>What success or failure would indicate</strong>
+- Success: systemd service becomes available.
+- Failure: package repository, connectivity, or dpkg issues.</p>
+<p><strong>Risk level</strong><br />
+Low.</p>
+<h2 id="command_8">Command<a class="headerlink" href="#command_8" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo systemctl enable --now qemu-guest-agent
+</code></pre>
+<p><strong>What it does</strong><br />
+Enables the guest agent to start at boot and starts it immediately.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>enable</code>: persistently enables the service
+- <code>--now</code>: starts it immediately
+- <code>qemu-guest-agent</code>: service unit name</p>
+<p><strong>Why it was used at that moment</strong><br />
+To make the guest agent active right away and persistent across reboots.</p>
+<p><strong>Expected result</strong><br />
+The service enters the running state.</p>
+<p><strong>What success or failure would indicate</strong>
+- Success: <code>systemctl status</code> shows active.
+- Failure: service misconfiguration, missing package, or virtualization-side communication issue.</p>
+<p><strong>Risk level</strong><br />
+Low.</p>
+<h2 id="command_9">Command<a class="headerlink" href="#command_9" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">systemctl status qemu-guest-agent
+</code></pre>
+<p><strong>What it does</strong><br />
+Shows the status of the guest agent service.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>status</code>: displays runtime state, logs, and service metadata</p>
+<p><strong>Why it was used at that moment</strong><br />
+To confirm whether the service was actually running inside the guest.</p>
+<p><strong>Expected result</strong><br />
+<code>active (running)</code> or a useful failure message.</p>
+<p><strong>What success or failure would indicate</strong>
+- Success: service is active.
+- Failure: service crash, missing package, or other startup issue.</p>
+<p><strong>Risk level</strong><br />
+Low.</p>
+<h2 id="command_10">Command<a class="headerlink" href="#command_10" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">journalctl -u qemu-guest-agent -n 40
+</code></pre>
+<p><strong>What it does</strong><br />
+Shows the last 40 log lines for the QEMU Guest Agent service.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>-u qemu-guest-agent</code>: restricts logs to that unit
+- <code>-n 40</code>: prints the last 40 lines</p>
+<p><strong>Why it was used at that moment</strong><br />
+To diagnose why the service might not be running.</p>
+<p><strong>Expected result</strong><br />
+Service startup logs or error messages.</p>
+<p><strong>What success or failure would indicate</strong>
+- Success: logs explain current behavior.
+- Failure: absence of logs may indicate the unit never started or logging is unavailable.</p>
+<p><strong>Risk level</strong><br />
+Low.</p>
+<h2 id="command_11">Command<a class="headerlink" href="#command_11" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm guest cmd 110 ping
+</code></pre>
+<p><strong>What it does</strong><br />
+Sends a simple guest-agent command to VM 110 from the Proxmox host.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>guest cmd</code>: runs a QEMU Guest Agent command
+- <code>110</code>: target VM
+- <code>ping</code>: basic connectivity test against the agent</p>
+<p><strong>Why it was used at that moment</strong><br />
+To verify that the Proxmox host can talk to the guest agent.</p>
+<p><strong>Expected result</strong><br />
+A valid JSON response or a successful acknowledgment.</p>
+<p><strong>What success or failure would indicate</strong>
+- Success: guest agent is installed, running, and reachable.
+- Failure: agent is disabled, not installed, not running, or not connected.</p>
+<p><strong>Risk level</strong><br />
+Low.</p>
+<h2 id="command_12">Command<a class="headerlink" href="#command_12" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">id debian
+</code></pre>
+<p><strong>What it does</strong><br />
+Displays the numeric and named user/group identity for the <code>debian</code> account.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>debian</code>: the user being queried</p>
+<p><strong>Why it was used at that moment</strong><br />
+To confirm the expected UID and GID, likely <code>1000:1000</code>, before setting ownership.</p>
+<p><strong>Expected result</strong><br />
+Output showing <code>uid=1000(debian) gid=1000(debian)</code> or similar.</p>
+<p><strong>What success or failure would indicate</strong>
+- Success: confirms what ownership target to use.
+- Failure: if the user does not exist or has different IDs than assumed.</p>
+<p><strong>Risk level</strong><br />
+Low.</p>
+<h2 id="command_13">Command<a class="headerlink" href="#command_13" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo chown -R debian:debian /opt/docker-apps
+</code></pre>
+<p><strong>What it does</strong><br />
+Recursively changes ownership of everything under <code>/opt/docker-apps</code> to user <code>debian</code> and group <code>debian</code>.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>chown</code>: change ownership
+- <code>-R</code>: recurse into all files and directories
+- <code>debian:debian</code>: new owner and group
+- <code>/opt/docker-apps</code>: target directory tree</p>
+<p><strong>Why it was used at that moment</strong><br />
+To make Docker appdata manageable from WinSCP and consistent with the intended host-side managing user.</p>
+<p><strong>Expected result</strong><br />
+All appdata under <code>/opt/docker-apps</code> becomes owned by <code>debian</code>.</p>
+<p><strong>What success or failure would indicate</strong>
+- Success: <code>ls -l</code> shows <code>debian debian</code> ownership.
+- Failure: permissions, mount behavior, or immutable filesystem characteristics may block changes.</p>
+<p><strong>Risk level</strong><br />
+Moderate. Recursive ownership changes can affect container expectations if a service requires root-owned files.</p>
+<p><strong>Safer alternative</strong><br />
+Change only selected app folders first, such as <code>/opt/docker-apps/Dockge</code> or <code>/opt/docker-apps/Traefik</code>, and validate behavior.</p>
+<h2 id="command_14">Command<a class="headerlink" href="#command_14" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo chmod -R u=rwX,go-rX /opt/docker-apps
+</code></pre>
+<p><strong>What it does</strong><br />
+Recursively sets permissions so the owner has read/write and execute where appropriate, while group and others lose read and execute access.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>chmod</code>: change mode
+- <code>-R</code>: recurse
+- <code>u=rwX</code>: owner gets read/write and execute only where needed
+- <code>go-rX</code>: remove read and execute from group and others</p>
+<p><strong>Why it was used at that moment</strong><br />
+To standardize appdata permissions for security and usability.</p>
+<p><strong>Expected result</strong><br />
+Directories remain traversable by the owner, files become writable by the owner, and exposure to other users is minimized.</p>
+<p><strong>What success or failure would indicate</strong>
+- Success: WinSCP as <code>debian</code> can edit/delete files, and permissions look tighter.
+- Failure: some applications may expect broader access or a different owner.</p>
+<p><strong>Risk level</strong><br />
+Moderate. Recursive chmod can break apps if they need shared group access or executable bits on specific files.</p>
+<p><strong>Safer alternative</strong><br />
+Use separate <code>find</code> commands for directories and files to control permissions more precisely.</p>
+<h2 id="command_15">Command<a class="headerlink" href="#command_15" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo find /opt/docker-apps -type d -exec chmod 750 {} \;
+</code></pre>
+<p><strong>What it does</strong><br />
+Sets all directories under <code>/opt/docker-apps</code> to mode <code>750</code>.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>find</code>: traverses the tree
+- <code>-type d</code>: matches directories only
+- <code>-exec chmod 750 {} \;</code>: applies mode <code>750</code> to each directory</p>
+<p><strong>Why it was used at that moment</strong><br />
+To provide a more precise alternative to recursive chmod.</p>
+<p><strong>Expected result</strong><br />
+Directories are readable, writable, and traversable by owner; readable and traversable by group; inaccessible to others.</p>
+<p><strong>What success or failure would indicate</strong>
+- Success: directory traversal works as intended.
+- Failure: applications depending on wider access may fail.</p>
+<p><strong>Risk level</strong><br />
+Moderate.</p>
+<h2 id="command_16">Command<a class="headerlink" href="#command_16" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo find /opt/docker-apps -type f -exec chmod 640 {} \;
+</code></pre>
+<p><strong>What it does</strong><br />
+Sets all regular files under <code>/opt/docker-apps</code> to mode <code>640</code>.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>-type f</code>: matches files only
+- <code>chmod 640</code>: owner read/write, group read, others no access</p>
+<p><strong>Why it was used at that moment</strong><br />
+To provide tighter, file-specific permission control.</p>
+<p><strong>Expected result</strong><br />
+Files are owner-editable and group-readable.</p>
+<p><strong>What success or failure would indicate</strong>
+- Success: data files become consistently protected.
+- Failure: executable scripts may lose execute permission.</p>
+<p><strong>Risk level</strong><br />
+Moderate. Do not blindly use this if appdata includes scripts that need to remain executable.</p>
+<h2 id="command_17">Command<a class="headerlink" href="#command_17" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo chown debian:debian /opt/docker-apps/Traefik/acme.json
+</code></pre>
+<p><strong>What it does</strong><br />
+Sets ownership of Traefik’s certificate storage file to <code>debian</code>.</p>
+<p><strong>Important flags / arguments</strong>
+- target file: <code>/opt/docker-apps/Traefik/acme.json</code></p>
+<p><strong>Why it was used at that moment</strong><br />
+Traefik certificate storage needed to align with the standardized owner while remaining securely restricted.</p>
+<p><strong>Expected result</strong><br />
+The file is owned by <code>debian</code>.</p>
+<p><strong>What success or failure would indicate</strong>
+- Success: ownership changes cleanly.
+- Failure: missing file path or permission problem.</p>
+<p><strong>Risk level</strong><br />
+Low to moderate. Ownership changes are usually safe here, but confirm the container can still access the file.</p>
+<h2 id="command_18">Command<a class="headerlink" href="#command_18" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo chmod 600 /opt/docker-apps/Traefik/acme.json
+</code></pre>
+<p><strong>What it does</strong><br />
+Restricts <code>acme.json</code> so only the owner can read and write it.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>600</code>: owner read/write only</p>
+<p><strong>Why it was used at that moment</strong><br />
+Traefik commonly expects sensitive certificate storage to be tightly permissioned.</p>
+<p><strong>Expected result</strong><br />
+Traefik accepts the file permissions and continues operating normally.</p>
+<p><strong>What success or failure would indicate</strong>
+- Success: Traefik reads and writes certificate data without permission warnings.
+- Failure: wrong owner or wrong container runtime user may prevent access.</p>
+<p><strong>Risk level</strong><br />
+Low. This is usually the recommended mode for <code>acme.json</code>.</p>
+<h2 id="command_19">Command<a class="headerlink" href="#command_19" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ls -ld /opt/docker-apps /opt/docker-apps/*
+</code></pre>
+<p><strong>What it does</strong><br />
+Lists detailed permissions and ownership for the appdata root and all immediate child directories.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>-l</code>: long listing format
+- <code>-d</code>: list directory entries themselves, not their contents
+- <code>/opt/docker-apps/*</code>: expands to each app folder</p>
+<p><strong>Why it was used at that moment</strong><br />
+To audit ownership and mode problems across the appdata tree.</p>
+<p><strong>Expected result</strong><br />
+A list showing each folder’s owner, group, and permission mode.</p>
+<p><strong>What success or failure would indicate</strong>
+- Success: provides a quick view for spotting root-owned or mispermissioned directories.
+- Failure: shell glob or path issue if the directory does not exist.</p>
+<p><strong>Risk level</strong><br />
+Low.</p>
+<h2 id="command_20">Command<a class="headerlink" href="#command_20" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ls -l /opt/docker-apps/Traefik
+</code></pre>
+<p><strong>What it does</strong><br />
+Lists detailed contents of the Traefik appdata directory.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>-l</code>: long format listing</p>
+<p><strong>Why it was used at that moment</strong><br />
+To specifically verify the state of <code>acme.json</code> and other Traefik files.</p>
+<p><strong>Expected result</strong><br />
+Shows ownership, mode, and filenames inside the Traefik directory.</p>
+<p><strong>What success or failure would indicate</strong>
+- Success: can visually confirm <code>acme.json</code> ownership and mode.
+- Failure: path incorrect or directory absent.</p>
+<p><strong>Risk level</strong><br />
+Low.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

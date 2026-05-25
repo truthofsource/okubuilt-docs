@@ -1,0 +1,4228 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Infrastructure, cloud, automation, security, and operations documentation portfolio.">
+      
+      
+        <meta name="author" content="Kingsley Oku">
+      
+      
+      
+        <link rel="prev" href="../home-assistant-os-proxmox-ceph-vm-deployment/">
+      
+      
+        <link rel="next" href="../../containers-apps/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Rebuild Debian Docker VM 100 from Proxmox Template 9000 - OkuBuilt Infrastructure & Cloud Portfolio</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#rebuild-debian-docker-vm-100-from-proxmox-template-9000" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-header__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OkuBuilt Infrastructure & Cloud Portfolio
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Rebuild Debian Docker VM 100 from Proxmox Template 9000
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-nav__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OkuBuilt Infrastructure & Cloud Portfolio
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/proxmox-traefik-opnsense-ha-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox, Traefik, OPNsense HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Automation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cephfs-snips-cloudinit-vm100-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox CephFS Snips Cloud-Init VM100
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloud-init-docker-vm-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Docker VM Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-vm100-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker VM100 Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-cicustom-snippet-storage-ha/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init cicustom Snippet Storage HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/vm100-docker-startup-mountguard-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Startup Mount Guard Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compute
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../debian-docker-vm-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../home-assistant-os-proxmox-ceph-vm-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home Assistant OS Proxmox Ceph VM Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab VM100 Rebuild Restore
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab VM100 Rebuild Restore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Containers & Apps
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Containers & Apps
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/debian-docker-vm-rebuild-cloudinit-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM Rebuild Cloud-Init
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-apps-offen-restore-gluetun-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Apps Offen Restore Gluetun Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-compose-memos-image-tag-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Compose Memos Image Tag Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/gluetun-corrupted-servers-permissions-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gluetun Corrupted Servers Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/proxmox-traefik-console-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Traefik Console Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-docker29-upgrade-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Docker Upgrade Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-proxy-docker-network-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Proxy Docker Network
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm100-docker-data-disk-recovery-cloud-init-hardening/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Data Disk Recovery Cloud-Init Hardening
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm110-provisioning-guest-agent-docker-appdata-permissions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM110 Provisioning Guest Agent Docker AppData Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring & Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Monitoring & Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-ceph-memtest-ram-fault-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Ceph Memtest RAM Fault
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-host-kernel-ram-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Host Kernel RAM Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-nuc-e1000e-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox NUC e1000e Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networking
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Networking
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/att-fiber-opnsense-outage-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AT&T Fiber OPNsense Outage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-lan-instability-storm-control-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN Instability Storm Control
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-lan-ip-dhcp-static-device-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN IP DHCP Static Device
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-opt2-lan-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense OPT2 LAN
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-web-gui-documentation-and-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense Web GUI Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/wireguard-ec2-proxmox-lxc-homelab-remote-access/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WireGuard EC2 Proxmox LXC Homelab Remote Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Security
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/homelab-ssh-ansible-nut-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab SSH Ansible NUT Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/proxmox-root-login-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Root Login Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_9" id="__nav_2_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Storage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Storage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/ceph-mainframe-osd-mon-mgr-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Mainframe OSD MON MGR Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/ceph-monitor-crash-loop-mainframe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Monitor Crash Loop Mainframe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/proxmox-ha-live-migration-ceph-vm-state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox HA Live Migration Ceph VM State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/truenas-vm-zfs-hba-planning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TrueNAS VM ZFS HBA Planning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/vm100-ceph-gluetun-troubleshooting-runbook-15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Ceph Gluetun Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/vm100-docker-nas-offen-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker NAS Offen Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Runbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runbooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_11" id="__nav_2_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting Incidents
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting Incidents
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting-incidents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloud
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cloud
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cloud/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portfolio
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Portfolio
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../portfolio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/documentation-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation Standards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/placement-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Placement Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/recurring-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recurring Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/command-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="rebuild-debian-docker-vm-100-from-proxmox-template-9000">Rebuild Debian Docker VM 100 from Proxmox Template 9000<a class="headerlink" href="#rebuild-debian-docker-vm-100-from-proxmox-template-9000" title="Permanent link">&para;</a></h1>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>VM 100 (<code>debian-docker</code>) was destroyed and recreated from template 9000 as a full clone on Ceph RBD storage. The goal was to rebuild the main Docker VM cleanly, attach a dedicated Docker data disk, and reapply custom cloud-init from Proxmox snippets.</p>
+<h2 id="environment">Environment<a class="headerlink" href="#environment" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Proxmox VE host: <code>mainframe</code></li>
+<li>VM: <code>100</code> (<code>debian-docker</code>)</li>
+<li>Template VM: <code>9000</code></li>
+<li>Storage:</li>
+<li>VM disks: <code>cephpool</code> (Ceph RBD)</li>
+<li>Cloud-init snippets: <code>local</code> at <code>/var/lib/vz/snippets</code></li>
+<li>Cloud-init files:</li>
+<li><code>docker-userdata.yml</code></li>
+<li><code>docker-net.yml</code></li>
+<li>Guest OS: Debian cloud image / Debian 12 cloud-init guest</li>
+<li>Data disk target: <code>/var/lib/docker</code></li>
+<li>Bind mount targets:</li>
+<li><code>/opt/docker-apps</code></li>
+<li><code>/opt/compose</code></li>
+<li>Intended static IP: <code>192.168.16.3</code></li>
+</ul>
+<h2 id="problem">Problem<a class="headerlink" href="#problem" title="Permanent link">&para;</a></h2>
+<p>The VM needed a clean rebuild, but the recreation process hit storage syntax issues, cloud-init disk conflicts, and guest boot problems tied to the Docker data disk and cloud-init configuration.</p>
+<h2 id="symptoms">Symptoms<a class="headerlink" href="#symptoms" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Proxmox RBD disk syntax error:
+  <code>text
+  unable to parse rbd volume name '200G'</code></li>
+<li>Cloud-init disk creation conflict:
+  <code>text
+  rbd create 'vm-100-cloudinit' error: rbd: create error: (17) File exists</code></li>
+<li>The added Ceph disk was initially created with the wrong effective size (<code>0T</code>) despite a size argument being intended.</li>
+<li>Guest console behavior suggested emergency-mode style boot problems and inaccessible root shell.</li>
+<li>Cloud-init warnings appeared later during boot.</li>
+</ul>
+<h2 id="actions-taken">Actions Taken<a class="headerlink" href="#actions-taken" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Removed or prepared to remove the existing VM 100.</li>
+<li>Cloned template 9000 into VM 100 as a full clone on <code>cephpool</code>.</li>
+<li>Set the VM SCSI controller to <code>virtio-scsi-single</code>.</li>
+<li>Added a second virtual disk intended for Docker data as <code>scsi1</code>.</li>
+<li>Attached a cloud-init drive on <code>cephpool</code>.</li>
+<li>Applied Proxmox <code>cicustom</code> to use:</li>
+<li><code>local:snippets/docker-userdata.yml</code></li>
+<li><code>local:snippets/docker-net.yml</code></li>
+<li>Regenerated the cloud-init ISO with <code>qm cloudinit update 100</code>.</li>
+<li>Booted and inspected the VM from the Proxmox serial console.</li>
+</ol>
+<h2 id="key-findings">Key Findings<a class="headerlink" href="#key-findings" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Proxmox Ceph/RBD disk creation syntax was sensitive and early attempts did not create the intended 150–200 GiB secondary disk correctly.</li>
+<li>The cloud-init drive already existed after cloning, so trying to create it again failed.</li>
+<li>The VM could boot far enough for serial console troubleshooting, which made it possible to diagnose storage and cloud-init issues without relying on SSH.</li>
+<li>The root cause of the boot trouble was not basic cloning failure; it was the state of the second disk and the guest provisioning logic.</li>
+</ul>
+<h2 id="resolution">Resolution<a class="headerlink" href="#resolution" title="Permanent link">&para;</a></h2>
+<p>The rebuild proceeded with:
+- VM disks on <code>cephpool</code>
+- cloud-init snippets stored on <code>local</code>
+- custom cloud-init attached after creation
+- later fixes focused on correcting the second disk and guest-side mount behavior rather than rebuilding again immediately</p>
+<h2 id="validation">Validation<a class="headerlink" href="#validation" title="Permanent link">&para;</a></h2>
+<p>Success at this stage was partial:
+- VM 100 existed again on <code>cephpool</code>
+- custom cloud-init was attached
+- the VM booted far enough to provide serial console logs
+- further storage and mount fixes were still required</p>
+<h2 id="follow-up-tasks">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Correct the second disk size and filesystem handling</li>
+<li>validate cloud-init YAML before future rebuilds</li>
+<li>confirm that the guest network config and Docker storage mount both apply cleanly on first boot</li>
+<li>document a stable VM rebuild sequence for future use</li>
+</ul>
+<h2 id="lessons-learned">Lessons Learned<a class="headerlink" href="#lessons-learned" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Ceph-backed Proxmox disk creation syntax should be verified immediately after <code>qm set</code>.</li>
+<li>It is safer to create the VM first, then apply <code>--cicustom</code>, then regenerate cloud-init.</li>
+<li>Serial console access is essential during first-boot troubleshooting.</li>
+</ul>
+<hr />
+<h1 id="diagnose-boot-failure-and-missing-filesystem-on-devsdb">Diagnose Boot Failure and Missing Filesystem on /dev/sdb<a class="headerlink" href="#diagnose-boot-failure-and-missing-filesystem-on-devsdb" title="Permanent link">&para;</a></h1>
+<h2 id="summary_1">Summary<a class="headerlink" href="#summary_1" title="Permanent link">&para;</a></h2>
+<p>After the rebuild, VM 100 booted but failed to mount the dedicated Docker data disk. Troubleshooting focused on boot logs, cloud-init messages, and the state of <code>/dev/sdb</code>.</p>
+<h2 id="environment_1">Environment<a class="headerlink" href="#environment_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>VM: <code>100</code> (<code>debian-docker</code>)</li>
+<li>Guest disk layout:</li>
+<li><code>sda</code>: root disk</li>
+<li><code>sdb</code>: intended Docker data disk</li>
+<li><code>sr0</code>: cloud-init NoCloud seed</li>
+<li>Guest console: Proxmox serial console</li>
+<li>Cloud-init datasource: NoCloud from <code>/dev/sr0</code></li>
+</ul>
+<h2 id="problem_1">Problem<a class="headerlink" href="#problem_1" title="Permanent link">&para;</a></h2>
+<p>The guest expected <code>/dev/sdb</code> to host <code>/var/lib/docker</code>, but that disk did not have a usable ext4 filesystem when the guest first booted.</p>
+<h2 id="symptoms_1">Symptoms<a class="headerlink" href="#symptoms_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Boot log showed:
+  <code>text
+  EXT4-fs (sdb): VFS: Can't find ext4 filesystem</code></li>
+<li>Mount activation failure:
+  <code>text
+  Activate mounts: FAIL:mount -a</code></li>
+<li>Docker dependency failure tied to <code>/var/lib/docker</code></li>
+<li>CIFS mounts initially reported:
+  <code>text
+  CIFS: VFS: No username specified</code>
+  before <code>cifs-utils</code> and config were fully in place</li>
+<li>Cloud-init warning:
+  <code>text
+  Invalid cloud-config provided: Please run 'sudo cloud-init schema --system' to see the schema errors.</code></li>
+</ul>
+<h2 id="actions-taken_1">Actions Taken<a class="headerlink" href="#actions-taken_1" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Opened VM serial console.</li>
+<li>Reviewed boot output from kernel start through cloud-init final stage.</li>
+<li>Observed that <code>/dev/sdb</code> was detected as a 150 GiB disk.</li>
+<li>Confirmed the cloud-init datasource was present on <code>/dev/sr0</code>.</li>
+<li>Identified that <code>/var/lib/docker</code> was being mounted before <code>/dev/sdb</code> had a valid ext4 filesystem.</li>
+<li>Noted that Docker installation completed later in cloud-init, but Docker service still failed due to the missing filesystem.</li>
+</ol>
+<h2 id="key-findings_1">Key Findings<a class="headerlink" href="#key-findings_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>/dev/sdb</code> existed and was visible to the guest, so this was not a Proxmox device presentation issue.</li>
+<li>The failure was specifically that <code>/dev/sdb</code> lacked the expected ext4 filesystem.</li>
+<li>Cloud-init ran far enough to install packages, configure networking, and create the <code>debian</code> user, so the user-data was not fully ignored.</li>
+<li>The invalid cloud-config warning indicated that at least part of the YAML was malformed, which likely prevented some storage steps from behaving as intended.</li>
+</ul>
+<h2 id="resolution_1">Resolution<a class="headerlink" href="#resolution_1" title="Permanent link">&para;</a></h2>
+<p>The issue was narrowed down to guest-side filesystem initialization and mount sequencing. The next step was to manually create the ext4 filesystem on <code>/dev/sdb</code> and then refine the cloud-init YAML so first-boot provisioning would handle it correctly in future rebuilds.</p>
+<h2 id="validation_1">Validation<a class="headerlink" href="#validation_1" title="Permanent link">&para;</a></h2>
+<p>Validation came from the serial console:
+- <code>sdb</code> was present
+- root filesystem on <code>sda1</code> mounted successfully
+- cloud-init completed
+- the exact mount failure for <code>sdb</code> was visible in logs</p>
+<h2 id="follow-up-tasks_1">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>create ext4 on <code>/dev/sdb</code></li>
+<li>mount <code>/var/lib/docker</code></li>
+<li>update cloud-init to use valid schema and reliable disk setup</li>
+<li>retest boot after YAML changes</li>
+</ul>
+<h2 id="lessons-learned_1">Lessons Learned<a class="headerlink" href="#lessons-learned_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Presence of a disk in <code>lsblk</code> or kernel logs does not mean it is formatted or mountable.</li>
+<li>Cloud-init can complete partially while still leaving critical storage steps broken.</li>
+<li>Boot logs are often enough to separate disk presentation problems from filesystem problems.</li>
+</ul>
+<hr />
+<h1 id="manually-format-devsdb-mount-docker-data-and-start-docker">Manually Format /dev/sdb, Mount Docker Data, and Start Docker<a class="headerlink" href="#manually-format-devsdb-mount-docker-data-and-start-docker" title="Permanent link">&para;</a></h1>
+<h2 id="summary_2">Summary<a class="headerlink" href="#summary_2" title="Permanent link">&para;</a></h2>
+<p>Once the missing filesystem problem was identified, <code>/dev/sdb</code> was formatted manually, mounted at <code>/var/lib/docker</code>, and Docker was started successfully.</p>
+<h2 id="environment_2">Environment<a class="headerlink" href="#environment_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>VM: <code>100</code></li>
+<li>Docker root: <code>/var/lib/docker</code></li>
+<li>Data disk: <code>/dev/sdb</code></li>
+<li>Filesystem label used later in YAML: <code>docker-data</code></li>
+</ul>
+<h2 id="problem_2">Problem<a class="headerlink" href="#problem_2" title="Permanent link">&para;</a></h2>
+<p>Docker could not start because <code>/var/lib/docker</code> was not mounted on the dedicated data disk.</p>
+<h2 id="symptoms_2">Symptoms<a class="headerlink" href="#symptoms_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>/dev/sdb</code> had no filesystem in <code>lsblk -f</code></li>
+<li>Mount errors for <code>/var/lib/docker</code></li>
+<li>Docker service could not start correctly until the data disk was mounted</li>
+</ul>
+<h2 id="actions-taken_2">Actions Taken<a class="headerlink" href="#actions-taken_2" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Listed block devices and filesystems with <code>lsblk -f</code>.</li>
+<li>Created an ext4 filesystem on <code>/dev/sdb</code> and labeled it <code>docker-data</code>.</li>
+<li>Mounted <code>/var/lib/docker</code>.</li>
+<li>Started Docker and checked service health.</li>
+<li>Verified mounted storage with <code>df -h</code>.</li>
+</ol>
+<h2 id="key-findings_2">Key Findings<a class="headerlink" href="#key-findings_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>/dev/sdb</code> was empty before manual formatting.</li>
+<li>After formatting, <code>/var/lib/docker</code> mounted successfully on the dedicated disk.</li>
+<li>Docker started successfully once its data-root path existed on the mounted ext4 filesystem.</li>
+<li>This confirmed the disk, mountpoint, and Docker daemon behavior were otherwise sound.</li>
+</ul>
+<h2 id="resolution_2">Resolution<a class="headerlink" href="#resolution_2" title="Permanent link">&para;</a></h2>
+<p>Manual formatting of <code>/dev/sdb</code> restored the intended Docker storage design. <code>/var/lib/docker</code> was mounted from the dedicated data disk, and Docker was able to run.</p>
+<h2 id="validation_2">Validation<a class="headerlink" href="#validation_2" title="Permanent link">&para;</a></h2>
+<p>Success was confirmed by:
+- <code>lsblk -f</code> showing ext4 on <code>/dev/sdb</code>
+- <code>df -h /var/lib/docker</code> showing <code>/dev/sdb</code> as the backing filesystem
+- <code>systemctl status docker</code> showing Docker active and running</p>
+<h2 id="follow-up-tasks_2">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>bake this storage logic into cloud-init so manual formatting is no longer required</li>
+<li>ensure <code>/etc/fstab</code> is clean and uses a stable identifier</li>
+<li>verify Docker daemon configuration still points to <code>/var/lib/docker</code></li>
+</ul>
+<h2 id="lessons-learned_2">Lessons Learned<a class="headerlink" href="#lessons-learned_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Manually fixing the disk is a good recovery method, but provisioning should be fixed so it is not needed on rebuild.</li>
+<li>A dedicated Docker data disk should be validated before restoring application data.</li>
+</ul>
+<hr />
+<h1 id="restore-bind-mount-layout-for-optdocker-apps-and-optcompose">Restore Bind Mount Layout for /opt/docker-apps and /opt/compose<a class="headerlink" href="#restore-bind-mount-layout-for-optdocker-apps-and-optcompose" title="Permanent link">&para;</a></h1>
+<h2 id="summary_3">Summary<a class="headerlink" href="#summary_3" title="Permanent link">&para;</a></h2>
+<p>After Docker was running again, the guest still lacked the expected bind mount layout that mapped Docker app data and compose files into user-friendly paths under <code>/opt</code>.</p>
+<h2 id="environment_3">Environment<a class="headerlink" href="#environment_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Source paths:</li>
+<li><code>/var/lib/docker/appdata</code></li>
+<li><code>/var/lib/docker/compose</code></li>
+<li>Target paths:</li>
+<li><code>/opt/docker-apps</code></li>
+<li><code>/opt/compose</code></li>
+<li>Mount method: bind mounts via <code>/etc/fstab</code></li>
+</ul>
+<h2 id="problem_3">Problem<a class="headerlink" href="#problem_3" title="Permanent link">&para;</a></h2>
+<p>The bind mount targets existed conceptually in the design, but the source directories either did not exist yet or the bind mounts had been added multiple times, causing confusion and layered mounts.</p>
+<h2 id="symptoms_3">Symptoms<a class="headerlink" href="#symptoms_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Initial mount failures:
+  <code>text
+  mount: /opt/docker-apps: special device /var/lib/docker/appdata does not exist.
+  mount: /opt/compose: special device /var/lib/docker/compose does not exist.</code></li>
+<li><code>findmnt</code> later showed multiple stacked mount entries for the same targets, including references to both the old root disk and the new Docker data disk</li>
+</ul>
+<h2 id="actions-taken_3">Actions Taken<a class="headerlink" href="#actions-taken_3" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Created source directories under <code>/var/lib/docker</code>.</li>
+<li>Created target directories under <code>/opt</code>.</li>
+<li>Added <code>/etc/fstab</code> bind entries for:</li>
+<li><code>/var/lib/docker/appdata -&gt; /opt/docker-apps</code></li>
+<li><code>/var/lib/docker/compose -&gt; /opt/compose</code></li>
+<li>Mounted the bind targets.</li>
+<li>Verified mount results with <code>findmnt</code>.</li>
+<li>Identified duplicate or layered bind mounts caused by earlier attempts.</li>
+<li>Cleaned <code>/etc/fstab</code> and described a recovery sequence to unmount duplicates and remount once.</li>
+</ol>
+<h2 id="key-findings_3">Key Findings<a class="headerlink" href="#key-findings_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The bind mounts failed initially because the source directories did not yet exist.</li>
+<li>Repeated <code>mount</code> calls plus duplicate <code>fstab</code> lines produced confusing layered output.</li>
+<li>The correct design is simple once the source directories exist and <code>fstab</code> contains only one clean entry for each target.</li>
+</ul>
+<h2 id="resolution_3">Resolution<a class="headerlink" href="#resolution_3" title="Permanent link">&para;</a></h2>
+<p>The source directories and target directories were created, bind mounts were restored, and the configuration path layout under <code>/opt</code> became usable again.</p>
+<h2 id="validation_3">Validation<a class="headerlink" href="#validation_3" title="Permanent link">&para;</a></h2>
+<p>Validation came from:
+- <code>findmnt</code> showing <code>/opt/docker-apps</code> and <code>/opt/compose</code>
+- <code>/var/lib/docker</code> mounted from <code>/dev/sdb</code>
+- Docker running with its data directory on the dedicated disk</p>
+<h2 id="follow-up-tasks_3">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>embed clean bind mount handling in cloud-init</li>
+<li>avoid duplicate mount commands during troubleshooting</li>
+<li>keep <code>/etc/fstab</code> deduplicated</li>
+</ul>
+<h2 id="lessons-learned_3">Lessons Learned<a class="headerlink" href="#lessons-learned_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Bind mounts depend on source directories existing first.</li>
+<li>Repeated bind-mount attempts can produce misleading stacked output.</li>
+<li><code>findmnt</code> is the best quick check for mount correctness.</li>
+</ul>
+<hr />
+<h1 id="correct-cloud-init-yaml-for-the-rebuilt-docker-vm">Correct Cloud-Init YAML for the Rebuilt Docker VM<a class="headerlink" href="#correct-cloud-init-yaml-for-the-rebuilt-docker-vm" title="Permanent link">&para;</a></h1>
+<h2 id="summary_4">Summary<a class="headerlink" href="#summary_4" title="Permanent link">&para;</a></h2>
+<p>The cloud-init user-data for VM 100 was iteratively corrected to remove schema errors, properly handle <code>/dev/sdb</code>, and align with the new bind-mount layout under <code>/opt/docker-apps</code>.</p>
+<h2 id="environment_4">Environment<a class="headerlink" href="#environment_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Cloud-init snippet: <code>/var/lib/vz/snippets/docker-userdata.yml</code></li>
+<li>Network snippet: <code>/var/lib/vz/snippets/docker-net.yml</code></li>
+<li>Snippet storage in Proxmox: <code>local:snippets</code></li>
+<li>Intended app layout: <code>/opt/docker-apps/&lt;app&gt;/config</code></li>
+</ul>
+<h2 id="problem_4">Problem<a class="headerlink" href="#problem_4" title="Permanent link">&para;</a></h2>
+<p>The user-data YAML contained invalid or incomplete configuration for password handling, disk setup, and mount layout.</p>
+<h2 id="symptoms_4">Symptoms<a class="headerlink" href="#symptoms_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Cloud-init warning:
+  <code>text
+  Invalid cloud-config provided: Please run 'sudo cloud-init schema --system' to see the schema errors.</code></li>
+<li><code>fs_setup</code> did not produce the intended filesystem behavior during first boot</li>
+<li>Docker and bind mount steps had to be repaired manually after boot</li>
+</ul>
+<h2 id="actions-taken_4">Actions Taken<a class="headerlink" href="#actions-taken_4" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Compared the original user-data against the desired target design.</li>
+<li>Identified the <code>chpasswd</code> block as invalid in the way it was written.</li>
+<li>Removed the invalid <code>chpasswd</code> section from the proposed YAML.</li>
+<li>Switched the Docker data mount logic to rely on:</li>
+<li><code>fs_setup</code></li>
+<li>ext4 label <code>docker-data</code></li>
+<li>stable mount definitions</li>
+<li>Reworked bind mount handling to reflect the actual structure:</li>
+<li><code>/opt/docker-apps/&lt;app&gt;/config</code></li>
+<li><code>/opt/compose</code></li>
+<li>Discussed moving network-dependent Docker repo setup from <code>bootcmd</code> into <code>runcmd</code>.</li>
+<li>Built a cleaner version of the YAML that included:</li>
+<li>early directory creation</li>
+<li><code>fs_setup</code> on <code>/dev/sdb</code></li>
+<li>mount definitions</li>
+<li>Docker install steps</li>
+<li>Docker service ordering</li>
+</ol>
+<h2 id="key-findings_4">Key Findings<a class="headerlink" href="#key-findings_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The invalid <code>chpasswd</code> block was a likely cause of schema validation warnings.</li>
+<li>First-boot cloud-init storage behavior is sensitive to syntax and ordering; once it misses its opportunity, later YAML edits do not retroactively fix the guest without a clean reprovision or manual intervention.</li>
+<li>The YAML needed to match the actual restored directory layout, not the old <code>/DockerAppData</code> path.</li>
+</ul>
+<h2 id="resolution_4">Resolution<a class="headerlink" href="#resolution_4" title="Permanent link">&para;</a></h2>
+<p>A corrected cloud-init direction was established:
+- remove invalid schema elements
+- use <code>fs_setup</code> to initialize <code>/dev/sdb</code>
+- mount Docker data from a stable label
+- mount or bind <code>/opt/docker-apps</code> and <code>/opt/compose</code>
+- move network-dependent install actions to a later stage</p>
+<h2 id="validation_4">Validation<a class="headerlink" href="#validation_4" title="Permanent link">&para;</a></h2>
+<p>Validation was indirect but strong:
+- cloud-init completed enough to provision the guest
+- later manual fixes confirmed that the intended layout was valid
+- the revised YAML addressed the exact issues seen in boot logs and runtime behavior</p>
+<h2 id="follow-up-tasks_4">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li>validate the final YAML with cloud-init schema tools before the next rebuild</li>
+<li>keep a known-good cloud-init snippet under version control or archived in the homelab docs</li>
+<li>test a full destroy/recreate cycle once the final YAML is settled</li>
+</ul>
+<h2 id="lessons-learned_4">Lessons Learned<a class="headerlink" href="#lessons-learned_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Cloud-init YAML should be treated like code: validate it before production use.</li>
+<li>Disk setup logic and bind mount design should be explicit and reproducible.</li>
+<li>When rebuilding important infrastructure VMs, preserve a working snippet history.</li>
+</ul>
+<hr />
+<h1 id="restore-docker-application-data-from-offen-backup-to-optdocker-apps">Restore Docker Application Data from Offen Backup to /opt/docker-apps<a class="headerlink" href="#restore-docker-application-data-from-offen-backup-to-optdocker-apps" title="Permanent link">&para;</a></h1>
+<h2 id="summary_5">Summary<a class="headerlink" href="#summary_5" title="Permanent link">&para;</a></h2>
+<p>Application data previously backed up with Offen was prepared for restoration to the new host layout under <code>/opt/docker-apps</code>. The old archive structure still reflected the legacy backup source path, so the internal paths had to be inspected before extraction.</p>
+<h2 id="environment_5">Environment<a class="headerlink" href="#environment_5" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Backup tool: <code>offen/docker-volume-backup:v2</code></li>
+<li>Backup archive found:</li>
+<li><code>/srv/remotemount/NAS/Tools/Backups/Docker/offen/backup-[date removed].tar.gz</code></li>
+<li>NAS mount:</li>
+<li><code>/srv/remotemount/NAS</code></li>
+<li>New destination:</li>
+<li><code>/opt/docker-apps</code></li>
+</ul>
+<h2 id="problem_5">Problem<a class="headerlink" href="#problem_5" title="Permanent link">&para;</a></h2>
+<p>The restored environment no longer uses <code>/DockerAppData</code>, but the backup archive was built from the old path. The archive had to be restored into the new layout without preserving the old leading path components.</p>
+<h2 id="symptoms_5">Symptoms<a class="headerlink" href="#symptoms_5" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Initial archive lookup failed because the exact filename and extension were wrong.</li>
+<li>Once found, the archive structure showed:
+  <code>text
+  /backup/my-app-backup/&lt;AppName&gt;/config/...</code></li>
+<li>This meant a naive extract would recreate the wrapper path, not restore directly into <code>/opt/docker-apps/&lt;AppName&gt;</code>.</li>
+</ul>
+<h2 id="actions-taken_5">Actions Taken<a class="headerlink" href="#actions-taken_5" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Confirmed the NAS CIFS mount was active.</li>
+<li>Located the correct archive file with <code>find</code>.</li>
+<li>Inspected the archive with <code>tar -tzf</code>.</li>
+<li>Determined that the leading components to remove were:</li>
+<li><code>backup</code></li>
+<li><code>my-app-backup</code></li>
+<li>Planned extraction into <code>/opt/docker-apps</code> using <code>--strip-components=2</code>.</li>
+<li>Planned to stop compose stacks before extraction.</li>
+<li>Planned permission normalization after restore.</li>
+</ol>
+<h2 id="key-findings_5">Key Findings<a class="headerlink" href="#key-findings_5" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The correct Offen archive was gzipped (<code>.tar.gz</code>), not plain <code>.tar</code>.</li>
+<li>The archive layout required exactly two components to be stripped to land correctly under <code>/opt/docker-apps</code>.</li>
+<li>The backup was usable without reintroducing <code>/DockerAppData</code>, provided extraction was handled carefully.</li>
+</ul>
+<h2 id="resolution_5">Resolution<a class="headerlink" href="#resolution_5" title="Permanent link">&para;</a></h2>
+<p>The restore plan was established: stop containers, extract the archive into <code>/opt/docker-apps</code> with <code>--strip-components=2</code>, reapply ownership and permission policy, then bring the stacks back up.</p>
+<h2 id="validation_5">Validation<a class="headerlink" href="#validation_5" title="Permanent link">&para;</a></h2>
+<p>Validation was achieved by:
+- confirming the NAS mount
+- locating the archive on disk
+- reading the top archive entries
+- matching those entries to the intended destination layout</p>
+<h2 id="follow-up-tasks_5">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_5" title="Permanent link">&para;</a></h2>
+<ul>
+<li>perform the actual extract if not already done</li>
+<li>reapply ownership and secret file permissions after extraction</li>
+<li>restart and validate application stacks</li>
+<li>update backup definitions so future archives are sourced from <code>/opt/docker-apps</code></li>
+</ul>
+<h2 id="lessons-learned_5">Lessons Learned<a class="headerlink" href="#lessons-learned_5" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Always inspect backup archive structure before restoring into a live environment.</li>
+<li>Backup path migrations should be handled deliberately when host layout changes.</li>
+<li>CIFS mount validation is a necessary first step before restore operations.</li>
+</ul>
+<hr />
+<h1 id="update-backup-and-restore-strategy-from-dockerappdata-to-optdocker-apps">Update Backup and Restore Strategy from /DockerAppData to /opt/docker-apps<a class="headerlink" href="#update-backup-and-restore-strategy-from-dockerappdata-to-optdocker-apps" title="Permanent link">&para;</a></h1>
+<h2 id="summary_6">Summary<a class="headerlink" href="#summary_6" title="Permanent link">&para;</a></h2>
+<p>The backup configuration for Offen and Restic still pointed at <code>/DockerAppData</code>, but the rebuilt host now uses <code>/opt/docker-apps</code>. Backup and restore strategy had to be updated to reflect the new canonical path.</p>
+<h2 id="environment_6">Environment<a class="headerlink" href="#environment_6" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Offen config:</li>
+<li>archive path: <code>/srv/remotemount/NAS/Tools/Backups/Docker/offen</code></li>
+<li>old source mapping: <code>/DockerAppData:/backup/my-app-backup:ro</code></li>
+<li>Restic config:</li>
+<li>repository: <code>/srv/remotemount/NAS/Tools/Backups/Docker/restic</code></li>
+<li>old source: <code>/DockerAppData</code></li>
+<li>New live source:</li>
+<li><code>/opt/docker-apps</code></li>
+</ul>
+<h2 id="problem_6">Problem<a class="headerlink" href="#problem_6" title="Permanent link">&para;</a></h2>
+<p>Future backups would be inconsistent or incomplete if the old <code>/DockerAppData</code> path remained in the compose definitions after migration.</p>
+<h2 id="symptoms_6">Symptoms<a class="headerlink" href="#symptoms_6" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Existing backup configs still referenced <code>/DockerAppData</code></li>
+<li>The rebuilt host used <code>/opt/docker-apps</code> instead</li>
+<li>Starting containers before updating these references could accidentally recreate stale path usage</li>
+</ul>
+<h2 id="actions-taken_6">Actions Taken<a class="headerlink" href="#actions-taken_6" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Reviewed the old Offen and Restic service configuration.</li>
+<li>Identified all bind mounts and environment values still referencing <code>/DockerAppData</code>.</li>
+<li>Recommended changing those references to <code>/opt/docker-apps</code> before restarting the backup containers.</li>
+<li>Recommended updating compose files and scripts before bringing any stack back online.</li>
+</ol>
+<h2 id="key-findings_6">Key Findings<a class="headerlink" href="#key-findings_6" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Offen backed up the live bind-mounted path mounted into <code>/backup/my-app-backup</code>.</li>
+<li>Restic backed up <code>/DockerAppData</code> directly.</li>
+<li>Both backup services needed explicit path migration to match the rebuilt host.</li>
+</ul>
+<h2 id="resolution_6">Resolution<a class="headerlink" href="#resolution_6" title="Permanent link">&para;</a></h2>
+<p>The required path migration was identified:
+- Offen source volume should change from <code>/DockerAppData</code> to <code>/opt/docker-apps</code>
+- Restic <code>RESTIC_BACKUP_SOURCES</code> and bind mount should change from <code>/DockerAppData</code> to <code>/opt/docker-apps</code></p>
+<h2 id="validation_6">Validation<a class="headerlink" href="#validation_6" title="Permanent link">&para;</a></h2>
+<p>Validation at this stage was design-level:
+- old configs were reviewed
+- replacement path strategy was established
+- risk of stale path recreation was identified before bringing services online</p>
+<h2 id="follow-up-tasks_6">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_6" title="Permanent link">&para;</a></h2>
+<ul>
+<li>edit backup stack compose files</li>
+<li>validate backup jobs after restart</li>
+<li>document one known-good backup and restore workflow based on <code>/opt/docker-apps</code></li>
+</ul>
+<h2 id="lessons-learned_6">Lessons Learned<a class="headerlink" href="#lessons-learned_6" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Rebuilds and path migrations must include backup jobs, not just application stacks.</li>
+<li>Backup containers are easy to overlook during storage layout changes.</li>
+</ul>
+<hr />
+<h1 id="use-resumable-rsync-for-application-data-migration-and-recovery">Use Resumable Rsync for Application Data Migration and Recovery<a class="headerlink" href="#use-resumable-rsync-for-application-data-migration-and-recovery" title="Permanent link">&para;</a></h1>
+<h2 id="summary_7">Summary<a class="headerlink" href="#summary_7" title="Permanent link">&para;</a></h2>
+<p>A resumable rsync-based migration was prepared to copy Docker app data from the old host to the new Docker VM with bandwidth limiting and automatic resume behavior.</p>
+<h2 id="environment_7">Environment<a class="headerlink" href="#environment_7" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Source host: <code>192.168.16.100</code></li>
+<li>Destination host: <code>192.168.16.3</code></li>
+<li>Source path: <code>/DockerAppData(old)/</code></li>
+<li>Destination path: <code>/opt/docker-apps</code></li>
+</ul>
+<h2 id="problem_7">Problem<a class="headerlink" href="#problem_7" title="Permanent link">&para;</a></h2>
+<p>A large data copy needed to survive connection drops and resume without restarting from scratch.</p>
+<h2 id="symptoms_7">Symptoms<a class="headerlink" href="#symptoms_7" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Concern about connection drops interrupting long file copies</li>
+<li>Earlier shell formatting issues caused an rsync loop to misbehave</li>
+<li>At one point the operator realized the sync had been run on the wrong host</li>
+</ul>
+<h2 id="actions-taken_7">Actions Taken<a class="headerlink" href="#actions-taken_7" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Built an rsync command with:</li>
+<li>bandwidth limiting</li>
+<li>SSH keepalive settings</li>
+<li><code>--partial</code></li>
+<li><code>--append-verify</code></li>
+<li>Wrapped it in a retry loop.</li>
+<li>Added a completion banner after the loop.</li>
+<li>Discussed how to cancel the loop cleanly.</li>
+<li>Used a no-change rsync dry run to confirm final completion.</li>
+</ol>
+<h2 id="key-findings_7">Key Findings<a class="headerlink" href="#key-findings_7" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The resumable rsync strategy was suitable for unstable or long-running transfers.</li>
+<li>A clean completion was indicated by:</li>
+<li>zero regular files transferred</li>
+<li>zero transferred file size</li>
+<li>return to shell prompt and completion banner</li>
+<li>The approach worked, but host context must be verified before running it.</li>
+</ul>
+<h2 id="resolution_7">Resolution<a class="headerlink" href="#resolution_7" title="Permanent link">&para;</a></h2>
+<p>The rsync process and verification pattern were established as a reusable migration workflow.</p>
+<h2 id="validation_7">Validation<a class="headerlink" href="#validation_7" title="Permanent link">&para;</a></h2>
+<p>Validation was provided by the successful dry-run output showing no files needed transfer and a completion timestamp.</p>
+<h2 id="follow-up-tasks_7">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_7" title="Permanent link">&para;</a></h2>
+<ul>
+<li>clean any accidental sync artifacts from the wrong host</li>
+<li>keep the resumable rsync snippet in the homelab runbook</li>
+<li>use <code>hostname</code> or IP checks before future migrations</li>
+</ul>
+<h2 id="lessons-learned_7">Lessons Learned<a class="headerlink" href="#lessons-learned_7" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>--partial --append-verify</code> is a strong default for resumable LAN copies.</li>
+<li>Explicit completion output improves operator confidence.</li>
+<li>Always verify the current host before starting a long-running migration.</li>
+</ul>
+<hr />
+<h1 id="fix-compose-file-discovery-path-assumptions-and-dockge-startup">Fix Compose File Discovery, Path Assumptions, and Dockge Startup<a class="headerlink" href="#fix-compose-file-discovery-path-assumptions-and-dockge-startup" title="Permanent link">&para;</a></h1>
+<h2 id="summary_8">Summary<a class="headerlink" href="#summary_8" title="Permanent link">&para;</a></h2>
+<p>Compose stack management was briefly blocked by incorrect assumptions about file locations. Compose files were stored under per-stack subdirectories within <code>/opt/compose</code>, not directly under <code>/opt/compose</code>.</p>
+<h2 id="environment_8">Environment<a class="headerlink" href="#environment_8" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Compose root: <code>/opt/compose</code></li>
+<li>Example compose paths:</li>
+<li><code>/opt/compose/dockge/compose.yml</code></li>
+<li><code>/opt/compose/traefik/compose.yaml</code></li>
+<li><code>/opt/compose/arr_stack/compose.yaml</code></li>
+<li>others under stack subdirectories</li>
+</ul>
+<h2 id="problem_8">Problem<a class="headerlink" href="#problem_8" title="Permanent link">&para;</a></h2>
+<p>Service commands failed because they referenced non-existent flat paths like <code>/opt/compose/dockge.yml</code>.</p>
+<h2 id="symptoms_8">Symptoms<a class="headerlink" href="#symptoms_8" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Docker Compose reported:
+  <code>text
+  open /opt/compose/dockge.yml: no such file or directory</code></li>
+<li><code>find</code> with <code>-maxdepth 1</code> returned no compose files, which initially obscured the real directory structure.</li>
+</ul>
+<h2 id="actions-taken_8">Actions Taken<a class="headerlink" href="#actions-taken_8" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Listed compose files recursively under <code>/opt/compose</code>.</li>
+<li>Identified the real Dockge compose file path:
+   <code>text
+   /opt/compose/dockge/compose.yml</code></li>
+<li>Corrected the startup command to use the real path.</li>
+<li>Confirmed that <code>docker compose -f &lt;path&gt;</code> can be run without changing into the directory.</li>
+</ol>
+<h2 id="key-findings_8">Key Findings<a class="headerlink" href="#key-findings_8" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Compose files were organized by stack subdirectory, not flat naming.</li>
+<li>Recursive discovery is required for bulk maintenance tasks.</li>
+<li>The issue was path discovery, not a Docker or Dockge runtime failure.</li>
+</ul>
+<h2 id="resolution_8">Resolution<a class="headerlink" href="#resolution_8" title="Permanent link">&para;</a></h2>
+<p>Compose operations were updated to target the actual file paths under <code>/opt/compose/&lt;stack&gt;/compose.yml|yaml</code>.</p>
+<h2 id="validation_8">Validation<a class="headerlink" href="#validation_8" title="Permanent link">&para;</a></h2>
+<p>Validation came from recursive file discovery and the corrected startup command format.</p>
+<h2 id="follow-up-tasks_8">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_8" title="Permanent link">&para;</a></h2>
+<ul>
+<li>standardize compose file naming if desired</li>
+<li>maintain a reusable compose discovery command</li>
+<li>validate all compose paths before mass automation</li>
+</ul>
+<h2 id="lessons-learned_8">Lessons Learned<a class="headerlink" href="#lessons-learned_8" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Never assume a flat compose directory in a multi-stack homelab.</li>
+<li>File discovery should be recursive before bulk edits or startup automation.</li>
+</ul>
+<hr />
+<h1 id="bulk-remove-deprecated-compose-version-lines">Bulk Remove Deprecated Compose version Lines<a class="headerlink" href="#bulk-remove-deprecated-compose-version-lines" title="Permanent link">&para;</a></h1>
+<h2 id="summary_9">Summary<a class="headerlink" href="#summary_9" title="Permanent link">&para;</a></h2>
+<p>A reusable regex-based bulk edit was developed to remove obsolete <code>version: "3.x"</code> lines from compose files stored under <code>/opt/compose</code>.</p>
+<h2 id="environment_9">Environment<a class="headerlink" href="#environment_9" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Compose root: <code>/opt/compose</code></li>
+<li>File types:</li>
+<li><code>compose.yml</code></li>
+<li><code>compose.yaml</code></li>
+<li>other YAML compose files</li>
+</ul>
+<h2 id="problem_9">Problem<a class="headerlink" href="#problem_9" title="Permanent link">&para;</a></h2>
+<p>Compose files still included deprecated <code>version:</code> declarations that were no longer required.</p>
+<h2 id="symptoms_9">Symptoms<a class="headerlink" href="#symptoms_9" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Initial bulk edit attempt returned:
+  <code>text
+  sed: no input files</code>
+  because the command assumed flat files at <code>/opt/compose</code> depth 1.</li>
+<li>Real compose files were nested in stack subdirectories.</li>
+</ul>
+<h2 id="actions-taken_9">Actions Taken<a class="headerlink" href="#actions-taken_9" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Searched recursively under <code>/opt/compose</code> to locate all compose files.</li>
+<li>Reworked the bulk edit command to run against the discovered files.</li>
+<li>Included <code>.bak</code> backup creation.</li>
+<li>Added verification via <code>grep</code>.</li>
+</ol>
+<h2 id="key-findings_9">Key Findings<a class="headerlink" href="#key-findings_9" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The first failure was due to incorrect depth assumptions, not bad regex logic.</li>
+<li>Recursive compose file discovery solved the input problem.</li>
+<li>A regex removing only <code>version: "3.x"</code> style lines was sufficient and safe once the right files were targeted.</li>
+</ul>
+<h2 id="resolution_9">Resolution<a class="headerlink" href="#resolution_9" title="Permanent link">&para;</a></h2>
+<p>A recursive regex-based cleanup approach was established for all compose files under <code>/opt/compose</code>.</p>
+<h2 id="validation_9">Validation<a class="headerlink" href="#validation_9" title="Permanent link">&para;</a></h2>
+<p>Validation consisted of:
+- successful recursive compose file discovery
+- no remaining <code>version:</code> lines after the cleanup
+- <code>.bak</code> files available for rollback</p>
+<h2 id="follow-up-tasks_9">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_9" title="Permanent link">&para;</a></h2>
+<ul>
+<li>clean up <code>.bak</code> files when satisfied</li>
+<li>run <code>docker compose config</code> on edited stacks as a final sanity check</li>
+</ul>
+<h2 id="lessons-learned_9">Lessons Learned<a class="headerlink" href="#lessons-learned_9" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Regex maintenance tasks are only as good as the file discovery feeding them.</li>
+<li>Always create backups for bulk in-place YAML edits.</li>
+</ul>
+<hr />
+<h1 id="create-traefik-bridge-network-and-restore-traefik-acme-permissions">Create Traefik Bridge Network and Restore Traefik ACME Permissions<a class="headerlink" href="#create-traefik-bridge-network-and-restore-traefik-acme-permissions" title="Permanent link">&para;</a></h1>
+<h2 id="summary_10">Summary<a class="headerlink" href="#summary_10" title="Permanent link">&para;</a></h2>
+<p>Traefik-specific recovery work included creating the <code>traefik-proxy</code> Docker bridge network and troubleshooting write access to the Traefik ACME directory and <code>acme.json</code> file.</p>
+<h2 id="environment_10">Environment<a class="headerlink" href="#environment_10" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Docker network: <code>traefik-proxy</code></li>
+<li>Intended network settings:</li>
+<li>driver: <code>bridge</code></li>
+<li>subnet: <code>172.35.0.0/16</code></li>
+<li>gateway: <code>172.35.0.1</code></li>
+<li>Traefik config layout:</li>
+<li><code>/opt/docker-apps/Traefik/config</code></li>
+<li>expected ACME storage under <code>.../letsencrypt/acme.json</code></li>
+</ul>
+<h2 id="problem_10">Problem<a class="headerlink" href="#problem_10" title="Permanent link">&para;</a></h2>
+<p>Traefik required both a known bridge network and correct file permissions for its ACME storage, but directory layout assumptions and permissions caused confusion.</p>
+<h2 id="symptoms_10">Symptoms<a class="headerlink" href="#symptoms_10" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Network needed to be recreated manually.</li>
+<li><code>acme.json</code> creation attempts initially failed because the path assumption was wrong.</li>
+<li>WinSCP reported permission denied when writing to the Traefik <code>letsencrypt</code> directory.</li>
+<li>The <code>letsencrypt</code> directory was found to have been given file-like permissions (<code>0600</code>), which is invalid for a usable directory.</li>
+</ul>
+<h2 id="actions-taken_10">Actions Taken<a class="headerlink" href="#actions-taken_10" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Created the <code>traefik-proxy</code> Docker bridge network with the intended subnet/gateway.</li>
+<li>Corrected the Traefik path assumption to use:</li>
+<li><code>/opt/docker-apps/Traefik/config/letsencrypt</code></li>
+<li>Diagnosed permission issues with <code>namei</code>, ownership checks, and user/group reasoning.</li>
+<li>Corrected the guidance:</li>
+<li>directories need execute bits</li>
+<li><code>letsencrypt</code> should be a directory</li>
+<li><code>acme.json</code> should be a file with tight permissions</li>
+<li>Established two valid permission models:</li>
+<li><code>1000:1000</code> with <code>700</code> directory and <code>600</code> file</li>
+<li>or <code>debian:docker</code> with group-shared permissions if operationally needed</li>
+</ol>
+<h2 id="key-findings_10">Key Findings<a class="headerlink" href="#key-findings_10" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The directory path was wrong at first because the real per-app layout is <code>/opt/docker-apps/&lt;app&gt;/config</code>.</li>
+<li>A directory set to <code>0600</code> cannot be traversed or written into normally because it lacks execute permission.</li>
+<li><code>acme.json</code> should be the file restricted to <code>600</code>, not the directory.</li>
+<li>Host-side group membership for the Docker socket is a separate concern from Traefik app data ownership.</li>
+</ul>
+<h2 id="resolution_10">Resolution<a class="headerlink" href="#resolution_10" title="Permanent link">&para;</a></h2>
+<p>The correct Traefik ACME storage layout and permission model were re-established:
+- use <code>/opt/docker-apps/Traefik/config/letsencrypt</code>
+- ensure the directory has executable permission
+- ensure <code>acme.json</code> is tightly permissioned</p>
+<h2 id="validation_10">Validation<a class="headerlink" href="#validation_10" title="Permanent link">&para;</a></h2>
+<p>Validation included:
+- checking path existence
+- checking directory and file ownership/perms
+- confirming the intended bridge network definition
+- reasoning through SFTP/WinSCP write behavior</p>
+<h2 id="follow-up-tasks_10">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_10" title="Permanent link">&para;</a></h2>
+<ul>
+<li>confirm Traefik compose volume mounts align with the corrected ACME path</li>
+<li>recreate or restore <code>acme.json</code> if needed</li>
+<li>restart Traefik and confirm certificate storage works</li>
+</ul>
+<h2 id="lessons-learned_10">Lessons Learned<a class="headerlink" href="#lessons-learned_10" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Secret files and secret directories require different permission models.</li>
+<li>A directory without execute permission behaves like an inaccessible path even if ownership is otherwise correct.</li>
+<li>Reverse proxy recovery work should validate both network and storage assumptions.</li>
+</ul>
+<hr />
+<h1 id="standardize-app-permissions-under-optdocker-appsconfig">Standardize App Permissions Under /opt/docker-apps/<App>/config<a class="headerlink" href="#standardize-app-permissions-under-optdocker-appsconfig" title="Permanent link">&para;</a></h1>
+<h2 id="summary_11">Summary<a class="headerlink" href="#summary_11" title="Permanent link">&para;</a></h2>
+<p>The restored environment required a consistent permissions policy for application directories stored under <code>/opt/docker-apps/&lt;App&gt;/config</code>. Special handling was discussed for Traefik, Authelia, Gluetun, DB-backed apps, TubeArchivist, Plex, and related services.</p>
+<h2 id="environment_11">Environment<a class="headerlink" href="#environment_11" title="Permanent link">&para;</a></h2>
+<ul>
+<li>App root: <code>/opt/docker-apps</code></li>
+<li>Per-app layout: <code>/opt/docker-apps/&lt;App&gt;/config</code></li>
+<li>Runtime UID/GID standard: <code>1000:1000</code></li>
+</ul>
+<h2 id="problem_11">Problem<a class="headerlink" href="#problem_11" title="Permanent link">&para;</a></h2>
+<p>Restored files from migration or backup could preserve old ownership or overly open/overly restrictive modes. Some apps require special handling for secrets, DBs, or media/transcode/log access.</p>
+<h2 id="symptoms_11">Symptoms<a class="headerlink" href="#symptoms_11" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Permission denied errors in Traefik-related paths</li>
+<li>Need to decide whether <code>1000:1000</code> or <code>debian:docker</code> was appropriate</li>
+<li>Concern about app-specific special cases</li>
+</ul>
+<h2 id="actions-taken_11">Actions Taken<a class="headerlink" href="#actions-taken_11" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Established a baseline permissions policy:</li>
+<li>ownership <code>1000:1000</code></li>
+<li>directories <code>2775</code></li>
+<li>files <code>0664</code></li>
+<li>Identified categories requiring tighter permissions:</li>
+<li><code>.env</code></li>
+<li><code>acme.json</code></li>
+<li>keys</li>
+<li>VPN credentials</li>
+<li>Authelia config</li>
+<li>Identified DB file patterns that should be <code>0660</code>.</li>
+<li>Documented app-specific exceptions for Traefik, Authelia, Gluetun, TubeArchivist, Plex, Tautulli, Arr stack, Syncthing, and selected web apps.</li>
+</ol>
+<h2 id="key-findings_11">Key Findings<a class="headerlink" href="#key-findings_11" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Most apps can use one sane baseline.</li>
+<li>Secret files should be <code>0600</code>.</li>
+<li>DB files should usually be <code>0660</code>.</li>
+<li>Traefik <code>acme.json</code> is a must-tighten file.</li>
+<li>OpenSearch data for TubeArchivist should not be world-readable.</li>
+<li>Plex transcode benefits from a sticky temp-style directory.</li>
+</ul>
+<h2 id="resolution_11">Resolution<a class="headerlink" href="#resolution_11" title="Permanent link">&para;</a></h2>
+<p>A reusable permissions checklist and shell snippets were developed for the <code>/opt/docker-apps/&lt;App&gt;/config</code> layout.</p>
+<h2 id="validation_11">Validation<a class="headerlink" href="#validation_11" title="Permanent link">&para;</a></h2>
+<p>Validation was intended through:
+- <code>ls -l</code>
+- <code>namei -l</code>
+- secret file checks
+- app startup behavior after permission normalization</p>
+<h2 id="follow-up-tasks_11">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_11" title="Permanent link">&para;</a></h2>
+<ul>
+<li>apply the baseline and special-case permissions to restored apps</li>
+<li>audit secret file permissions after full restore</li>
+<li>verify the host Docker socket access model for Traefik separately</li>
+</ul>
+<h2 id="lessons-learned_11">Lessons Learned<a class="headerlink" href="#lessons-learned_11" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Baseline-plus-exceptions is more maintainable than one-off manual permissions.</li>
+<li>Numeric UID/GID alignment with container PUID/PGID is usually the cleanest host-side model.</li>
+<li>Secret directories and secret files must be treated differently.</li>
+</ul>
+<hr />
+<h1 id="increase-vm-100-resources-and-discuss-ha-across-dissimilar-nodes">Increase VM 100 Resources and Discuss HA Across Dissimilar Nodes<a class="headerlink" href="#increase-vm-100-resources-and-discuss-ha-across-dissimilar-nodes" title="Permanent link">&para;</a></h1>
+<h2 id="summary_12">Summary<a class="headerlink" href="#summary_12" title="Permanent link">&para;</a></h2>
+<p>VM 100 started with 2 GiB of RAM and later required an increase. CPU sizing and the implications of running HA across a more powerful tower PC and a weaker Intel NUC were also discussed.</p>
+<h2 id="environment_12">Environment<a class="headerlink" href="#environment_12" title="Permanent link">&para;</a></h2>
+<ul>
+<li>VM: <code>100</code></li>
+<li>Proxmox HA context:</li>
+<li>stronger tower PC</li>
+<li>weaker Intel NUC</li>
+<li>Resource targets discussed:</li>
+<li>RAM increase to 4 GiB</li>
+<li>possible CPU increase</li>
+</ul>
+<h2 id="problem_12">Problem<a class="headerlink" href="#problem_12" title="Permanent link">&para;</a></h2>
+<p>The rebuilt Docker VM needed more memory, and there was a broader design question about how to handle CPU sizing in a cluster with mixed host performance.</p>
+<h2 id="symptoms_12">Symptoms<a class="headerlink" href="#symptoms_12" title="Permanent link">&para;</a></h2>
+<ul>
+<li>VM memory was only 2 GiB</li>
+<li>Desire to increase to 4 GiB and possibly raise CPU allocation</li>
+<li>Concern that a VM sized for a tower might not fit or perform similarly on a weaker HA target</li>
+</ul>
+<h2 id="actions-taken_12">Actions Taken<a class="headerlink" href="#actions-taken_12" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Proposed changing VM memory to 4 GiB.</li>
+<li>Discussed increasing CPU with Proxmox <code>qm set</code>.</li>
+<li>Explained that one VM has one config, even in HA.</li>
+<li>Discussed using a portable CPU model instead of <code>host</code> if live migration or HA portability across dissimilar nodes matters.</li>
+<li>Discussed using maximum topology plus boot-time online vCPU adjustment via hookscript as a more advanced option.</li>
+</ol>
+<h2 id="key-findings_12">Key Findings<a class="headerlink" href="#key-findings_12" title="Permanent link">&para;</a></h2>
+<ul>
+<li>RAM increase is straightforward.</li>
+<li>CPU sizing is more nuanced in mixed-node HA:</li>
+<li>one VM config applies across nodes</li>
+<li><code>cpu: host</code> is best performance but worse portability</li>
+<li>portable CPU models help with migration across different hardware</li>
+<li>The final resource decision depends on whether migration portability or performance is more important.</li>
+</ul>
+<h2 id="resolution_12">Resolution<a class="headerlink" href="#resolution_12" title="Permanent link">&para;</a></h2>
+<p>The intended direction was to increase VM memory to 4 GiB and consider a moderate CPU increase, with awareness that HA across dissimilar nodes requires deliberate CPU model choices.</p>
+<h2 id="validation_12">Validation<a class="headerlink" href="#validation_12" title="Permanent link">&para;</a></h2>
+<p>No final resource reconfiguration was confirmed in-guest in this session, but the correct Proxmox resource-setting approach was established.</p>
+<h2 id="follow-up-tasks_12">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_12" title="Permanent link">&para;</a></h2>
+<ul>
+<li>set final RAM and CPU values on VM 100</li>
+<li>decide whether to prioritize <code>cpu: host</code> performance or a portable CPU model</li>
+<li>document HA behavior expectations across tower and NUC nodes</li>
+</ul>
+<h2 id="lessons-learned_12">Lessons Learned<a class="headerlink" href="#lessons-learned_12" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Resource changes are easy; mixed-node portability is the hard part.</li>
+<li>HA design should account for the weakest node that may need to start the VM.</li>
+</ul>
+<hr />
+<h1 id="command-reference">Command Reference<a class="headerlink" href="#command-reference" title="Permanent link">&para;</a></h1>
+<h2 id="command">Command<a class="headerlink" href="#command" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm clone 9000 100 --name debian-docker --storage cephpool --full 1
+</code></pre>
+<p><strong>What it does</strong><br />
+Creates VM 100 from template 9000 as a full clone on the Ceph RBD-backed storage pool <code>cephpool</code>.</p>
+<p><strong>Important flags</strong>
+- <code>9000</code>: source template VM ID
+- <code>100</code>: destination VM ID
+- <code>--name debian-docker</code>: sets the VM name
+- <code>--storage cephpool</code>: places clone storage on the Ceph pool
+- <code>--full 1</code>: creates an independent full clone instead of a linked clone</p>
+<p><strong>Why it was used</strong><br />
+To rebuild the main Docker VM cleanly.</p>
+<p><strong>Expected result</strong><br />
+A new VM 100 exists on <code>cephpool</code> and can be configured with cloud-init and an extra data disk.</p>
+<p><strong>What failure indicates</strong><br />
+Template, storage, or Proxmox clone errors.</p>
+<p><strong>Risk</strong><br />
+Low to moderate. It creates a new VM but does not by itself destroy the old one.</p>
+<hr />
+<h2 id="command_1">Command<a class="headerlink" href="#command_1" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm set 100 --scsihw virtio-scsi-single
+</code></pre>
+<p><strong>What it does</strong><br />
+Sets the guest’s SCSI controller to <code>virtio-scsi-single</code>.</p>
+<p><strong>Why it was used</strong><br />
+To provide a modern, stable controller for multiple attached disks.</p>
+<p><strong>Expected result</strong><br />
+The VM configuration shows the selected SCSI controller.</p>
+<p><strong>What failure indicates</strong><br />
+VM config or Proxmox-side issue.</p>
+<p><strong>Proxmox relevance</strong><br />
+Controller choice affects how additional disks are presented to the guest.</p>
+<hr />
+<h2 id="command_2">Command<a class="headerlink" href="#command_2" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm set 100 --scsi1 cephpool:0,size=150G,ssd=1,discard=on,cache=writeback
+</code></pre>
+<p><strong>What it does</strong><br />
+Attempts to create a new Ceph-backed disk and attach it as <code>scsi1</code>.</p>
+<p><strong>Important flags</strong>
+- <code>cephpool:0</code>: create a new disk on <code>cephpool</code>
+- <code>size=150G</code>: intended disk size
+- <code>ssd=1</code>: mark as SSD-like
+- <code>discard=on</code>: allow discard/TRIM semantics
+- <code>cache=writeback</code>: use writeback caching</p>
+<p><strong>Why it was used</strong><br />
+To create the dedicated Docker data disk that would later mount at <code>/var/lib/docker</code>.</p>
+<p><strong>Expected result</strong><br />
+A new Ceph RBD image appears and the VM config shows <code>scsi1</code>.</p>
+<p><strong>What failure indicates</strong><br />
+Incorrect Proxmox/Ceph disk syntax or storage-layer handling issues.</p>
+<p><strong>Risk</strong><br />
+Moderate. Mis-specified storage arguments can create an unusable disk.</p>
+<p><strong>Safer alternative</strong><br />
+Verify the resulting disk immediately with <code>qm config 100</code> and storage inspection before proceeding.</p>
+<hr />
+<h2 id="command_3">Command<a class="headerlink" href="#command_3" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm set 100 --ide2 cephpool:cloudinit
+</code></pre>
+<p><strong>What it does</strong><br />
+Attaches a cloud-init disk to VM 100 on <code>cephpool</code>.</p>
+<p><strong>Why it was used</strong><br />
+To provide NoCloud seed data built from Proxmox cloud-init settings.</p>
+<p><strong>Expected result</strong><br />
+The VM has an <code>ide2</code> cloud-init drive attached.</p>
+<p><strong>What failure indicates</strong><br />
+If it reports <code>File exists</code>, the cloud-init volume is already present and should not be recreated.</p>
+<p><strong>Risk</strong><br />
+Low.</p>
+<hr />
+<h2 id="command_4">Command<a class="headerlink" href="#command_4" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm set 100 --cicustom &quot;user=local:snippets/docker-userdata.yml,network=local:snippets/docker-net.yml&quot;
+</code></pre>
+<p><strong>What it does</strong><br />
+Tells Proxmox to use custom cloud-init snippet files for user-data and network-config.</p>
+<p><strong>Important arguments</strong>
+- <code>user=local:snippets/docker-userdata.yml</code>
+- <code>network=local:snippets/docker-net.yml</code></p>
+<p><strong>Why it was used</strong><br />
+The default cloud-init template behavior was not sufficient for the Docker VM’s custom provisioning.</p>
+<p><strong>Expected result</strong><br />
+<code>qm config 100</code> reflects the custom cloud-init snippet references.</p>
+<p><strong>What failure indicates</strong><br />
+Snippet path or storage content-type issues.</p>
+<p><strong>Proxmox relevance</strong><br />
+This is how Proxmox consumes user-managed cloud-init YAML from snippet-capable storage.</p>
+<hr />
+<h2 id="command_5">Command<a class="headerlink" href="#command_5" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm cloudinit update 100
+</code></pre>
+<p><strong>What it does</strong><br />
+Regenerates the cloud-init ISO for VM 100 after snippet or config changes.</p>
+<p><strong>Why it was used</strong><br />
+To ensure updated user-data and network-config were baked into the next boot.</p>
+<p><strong>Expected result</strong><br />
+A fresh cloud-init seed image is generated.</p>
+<p><strong>What failure indicates</strong><br />
+Cloud-init disk problems or malformed VM config.</p>
+<hr />
+<h2 id="command_6">Command<a class="headerlink" href="#command_6" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm terminal 100
+</code></pre>
+<p><strong>What it does</strong><br />
+Opens the serial console for VM 100 from the Proxmox host.</p>
+<p><strong>Why it was used</strong><br />
+To inspect boot logs, cloud-init output, and early mount failures when SSH was not yet reliable.</p>
+<p><strong>Expected result</strong><br />
+Live serial console output from the guest.</p>
+<p><strong>What failure indicates</strong><br />
+Console misconfiguration or a VM state issue.</p>
+<p><strong>Proxmox relevance</strong><br />
+Serial console access is often the fastest path to diagnose cloud-image first-boot issues.</p>
+<hr />
+<h2 id="command_7">Command<a class="headerlink" href="#command_7" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">lsblk -f
+</code></pre>
+<p><strong>What it does</strong><br />
+Lists block devices, filesystems, labels, and mountpoints.</p>
+<p><strong>Why it was used</strong><br />
+To confirm whether <code>/dev/sdb</code> existed and whether it had a filesystem.</p>
+<p><strong>Expected result</strong><br />
+<code>sdb</code> appears with filesystem and label once formatted.</p>
+<p><strong>What failure indicates</strong><br />
+If <code>sdb</code> lacks a filesystem, the Docker data disk has not been initialized.</p>
+<hr />
+<h2 id="command_8">Command<a class="headerlink" href="#command_8" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo mkfs.ext4 -F -L docker-data /dev/sdb
+</code></pre>
+<p><strong>What it does</strong><br />
+Creates an ext4 filesystem on <code>/dev/sdb</code> with label <code>docker-data</code>.</p>
+<p><strong>Important flags</strong>
+- <code>-F</code>: force filesystem creation
+- <code>-L docker-data</code>: assign a filesystem label</p>
+<p><strong>Why it was used</strong><br />
+To recover from the first-boot failure where <code>/dev/sdb</code> existed but had no ext4 filesystem.</p>
+<p><strong>Expected result</strong><br />
+<code>lsblk -f</code> and <code>blkid</code> show ext4 and label <code>docker-data</code>.</p>
+<p><strong>What failure indicates</strong><br />
+Disk problems, permissions problems, or use of the wrong device.</p>
+<p><strong>Risk</strong><br />
+High. This destroys existing contents on <code>/dev/sdb</code>.</p>
+<p><strong>Safer alternative</strong><br />
+Double-check the target device with <code>lsblk -f</code> before running it.</p>
+<hr />
+<h2 id="command_9">Command<a class="headerlink" href="#command_9" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo mount -a
+</code></pre>
+<p><strong>What it does</strong><br />
+Attempts to mount all entries from <code>/etc/fstab</code>.</p>
+<p><strong>Why it was used</strong><br />
+To activate newly added filesystem and bind mount definitions.</p>
+<p><strong>Expected result</strong><br />
+All valid <code>fstab</code> entries mount without error.</p>
+<p><strong>What failure indicates</strong><br />
+Bad paths, missing source directories, missing filesystems, or invalid <code>fstab</code> syntax.</p>
+<p><strong>Risk</strong><br />
+Moderate. A bad <code>fstab</code> can break later boots if not corrected.</p>
+<hr />
+<h2 id="command_10">Command<a class="headerlink" href="#command_10" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo systemctl start docker
+</code></pre>
+<p><strong>What it does</strong><br />
+Starts the Docker daemon.</p>
+<p><strong>Why it was used</strong><br />
+Docker could only start after <code>/var/lib/docker</code> was successfully mounted from <code>/dev/sdb</code>.</p>
+<p><strong>Expected result</strong><br />
+Docker service becomes active.</p>
+<p><strong>What failure indicates</strong><br />
+Dependency or storage-root problems.</p>
+<p><strong>Docker relevance</strong><br />
+Docker will fail or behave incorrectly if its data-root is unavailable or mounted on the wrong filesystem.</p>
+<hr />
+<h2 id="command_11">Command<a class="headerlink" href="#command_11" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo systemctl status docker --no-pager
+</code></pre>
+<p><strong>What it does</strong><br />
+Shows Docker service status without invoking a pager.</p>
+<p><strong>Why it was used</strong><br />
+To verify whether Docker was running after storage fixes.</p>
+<p><strong>Expected result</strong><br />
+<code>active (running)</code>.</p>
+<p><strong>What failure indicates</strong><br />
+Mount dependency failure, daemon config issue, or container runtime issue.</p>
+<hr />
+<h2 id="command_12">Command<a class="headerlink" href="#command_12" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">findmnt /var/lib/docker /opt/docker-apps /opt/compose
+</code></pre>
+<p><strong>What it does</strong><br />
+Shows live mount sources and types for the requested targets.</p>
+<p><strong>Why it was used</strong><br />
+To verify the Docker data mount and bind mounts, and to detect layered or duplicate mounts.</p>
+<p><strong>Expected result</strong><br />
+<code>/var/lib/docker</code> points to <code>/dev/sdb</code> or the ext4 label; <code>/opt/docker-apps</code> and <code>/opt/compose</code> point to bind sources under <code>/var/lib/docker</code>.</p>
+<p><strong>What failure indicates</strong><br />
+Incorrect bind mounts, stale mounts, or mount source problems.</p>
+<hr />
+<h2 id="command_13">Command<a class="headerlink" href="#command_13" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">cloud-init status --long
+</code></pre>
+<p><strong>What it does</strong><br />
+Reports detailed cloud-init state in the guest.</p>
+<p><strong>Why it was used</strong><br />
+To determine whether provisioning had completed or failed.</p>
+<p><strong>Expected result</strong><br />
+Cloud-init modules complete without fatal errors.</p>
+<p><strong>What failure indicates</strong><br />
+Provisioning or datasource issues.</p>
+<p><strong>Cloud-init relevance</strong><br />
+Useful for separating provisioning failure from ordinary system boot behavior.</p>
+<hr />
+<h2 id="command_14">Command<a class="headerlink" href="#command_14" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">Likely command used:
+cloud-init devel schema --config-file /var/lib/vz/snippets/docker-userdata.yml
+</code></pre>
+<p><strong>What it does</strong><br />
+Validates the cloud-init YAML file against the expected schema.</p>
+<p><strong>Why it was used</strong><br />
+To diagnose the invalid cloud-config warning and catch malformed YAML before reuse.</p>
+<p><strong>Expected result</strong><br />
+Validation passes without schema errors.</p>
+<p><strong>What failure indicates</strong><br />
+The YAML contains unsupported or malformed keys.</p>
+<p><strong>Safer alternative</strong><br />
+Validate before attaching the snippet to a production VM.</p>
+<hr />
+<h2 id="command_15">Command<a class="headerlink" href="#command_15" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">find /srv/remotemount/NAS -maxdepth 5 -iname 'backup-[date removed].tar*' -printf '%p\n'
+</code></pre>
+<p><strong>What it does</strong><br />
+Searches the NAS-mounted backup tree for the expected Offen backup archive.</p>
+<p><strong>Why it was used</strong><br />
+The original archive path assumption was wrong and needed to be corrected.</p>
+<p><strong>Expected result</strong><br />
+Prints the full path to the matching archive.</p>
+<p><strong>What failure indicates</strong><br />
+Wrong path assumption, missing NAS mount, or missing backup file.</p>
+<hr />
+<h2 id="command_16">Command<a class="headerlink" href="#command_16" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">tar -tzf &quot;/srv/remotemount/NAS/Tools/Backups/Docker/offen/backup-[date removed].tar.gz&quot; | head -n 20
+</code></pre>
+<p><strong>What it does</strong><br />
+Lists the first 20 entries in the gzipped tar archive without extracting it.</p>
+<p><strong>Why it was used</strong><br />
+To determine the internal path structure and the correct strip count for restoration.</p>
+<p><strong>Expected result</strong><br />
+Archive entries showing the leading directories, such as <code>/backup/my-app-backup/...</code>.</p>
+<p><strong>What failure indicates</strong><br />
+Bad path, archive corruption, or wrong compression assumption.</p>
+<hr />
+<h2 id="command_17">Command<a class="headerlink" href="#command_17" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo tar --numeric-owner --same-owner --acls --xattrs -xpf &quot;$ARCH&quot; -C /opt/docker-apps --strip-components=2 -z
+</code></pre>
+<p><strong>What it does</strong><br />
+Extracts the Offen archive into <code>/opt/docker-apps</code>, removing the first two path components.</p>
+<p><strong>Important flags</strong>
+- <code>--numeric-owner</code>: preserve numeric UID/GID
+- <code>--same-owner</code>: restore ownership if possible
+- <code>--acls --xattrs</code>: preserve ACLs and extended attributes
+- <code>-xpf</code>: extract from file and preserve permissions
+- <code>-C /opt/docker-apps</code>: destination directory
+- <code>--strip-components=2</code>: remove <code>backup/my-app-backup</code>
+- <code>-z</code>: treat input as gzip-compressed</p>
+<p><strong>Why it was used</strong><br />
+The archive layout was <code>/backup/my-app-backup/&lt;AppName&gt;/...</code>, while the live destination should be <code>/opt/docker-apps/&lt;AppName&gt;/...</code>.</p>
+<p><strong>Expected result</strong><br />
+App directories appear directly under <code>/opt/docker-apps</code>.</p>
+<p><strong>What failure indicates</strong><br />
+Wrong strip count, path problems, or archive issues.</p>
+<p><strong>Risk</strong><br />
+Moderate to high. This can overwrite existing restored data.</p>
+<p><strong>Safer alternative</strong><br />
+Extract into a staging directory first, then <code>rsync</code> into place.</p>
+<hr />
+<h2 id="command_18">Command<a class="headerlink" href="#command_18" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo rsync -aHAX --numeric-ids --partial --append-verify --info=progress2 --stats --bwlimit=12M -e &quot;ssh -o ServerAliveInterval=30 -o ServerAliveCountMax=6&quot; root@192.168.16.100:&quot;/DockerAppData(old)/&quot; /opt/docker-apps
+</code></pre>
+<p><strong>What it does</strong><br />
+Pulls app data from the old host into <code>/opt/docker-apps</code> with metadata preservation, throttling, and resumable transfer behavior.</p>
+<p><strong>Important flags</strong>
+- <code>-aHAX</code>: archive, hardlinks, ACLs, xattrs
+- <code>--numeric-ids</code>: preserve UID/GID numerically
+- <code>--partial</code>: keep partial files
+- <code>--append-verify</code>: resume and verify appended files
+- <code>--info=progress2 --stats</code>: detailed progress and summary
+- <code>--bwlimit=12M</code>: rate limit
+- SSH keepalive options: prevent idle disconnects</p>
+<p><strong>Why it was used</strong><br />
+To move a large Docker application tree safely over the LAN even if connections dropped.</p>
+<p><strong>Expected result</strong><br />
+Data copies into <code>/opt/docker-apps</code> and can be resumed if interrupted.</p>
+<p><strong>What failure indicates</strong><br />
+SSH, path, permission, or network interruption issues.</p>
+<p><strong>Risk</strong><br />
+Moderate. Running on the wrong host or wrong destination can sync into the wrong place.</p>
+<p><strong>Safer alternative</strong><br />
+Echo <code>hostname</code> and IP before starting long transfers.</p>
+<hr />
+<h2 id="command_19">Command<a class="headerlink" href="#command_19" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo rsync -aHAXn --delete --info=stats2,flist0,del0 -e &quot;ssh -o ServerAliveInterval=30 -o ServerAliveCountMax=6&quot; root@192.168.16.100:&quot;/DockerAppData(old)/&quot; /opt/docker-apps
+</code></pre>
+<p><strong>What it does</strong><br />
+Runs a dry-run rsync comparison without changing files.</p>
+<p><strong>Why it was used</strong><br />
+To confirm that the migration had completed and source and destination matched.</p>
+<p><strong>Expected result</strong><br />
+Zero files transferred when the trees are fully in sync.</p>
+<p><strong>What failure indicates</strong><br />
+Remaining drift between source and destination.</p>
+<hr />
+<h2 id="command_20">Command<a class="headerlink" href="#command_20" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">find /opt/compose -type f \( -iname 'docker-compose.yml' -o -iname 'compose.yml' -o -iname '*.yml' -o -iname '*.yaml' \)
+</code></pre>
+<p><strong>What it does</strong><br />
+Recursively finds compose files under <code>/opt/compose</code>.</p>
+<p><strong>Why it was used</strong><br />
+Compose files were not stored flat under <code>/opt/compose</code>; they lived in stack subdirectories.</p>
+<p><strong>Expected result</strong><br />
+A list of actual compose file paths.</p>
+<p><strong>What failure indicates</strong><br />
+Wrong root path or missing compose files.</p>
+<hr />
+<h2 id="command_21">Command<a class="headerlink" href="#command_21" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">docker compose -f /opt/compose/dockge/compose.yml up -d
+</code></pre>
+<p><strong>What it does</strong><br />
+Starts the Dockge stack using the correct nested compose file path.</p>
+<p><strong>Why it was used</strong><br />
+The earlier command assumed a nonexistent path <code>/opt/compose/dockge.yml</code>.</p>
+<p><strong>Expected result</strong><br />
+Dockge containers start in detached mode.</p>
+<p><strong>What failure indicates</strong><br />
+Wrong path, compose syntax problem, or runtime issue.</p>
+<p><strong>Docker relevance</strong><br />
+<code>docker compose -f</code> allows stack management without changing into the compose directory.</p>
+<hr />
+<h2 id="command_22">Command<a class="headerlink" href="#command_22" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">find /opt/compose -type f \( -name '*.yml' -o -name '*.yaml' \) -exec sed -ri.bak -e 's/\r$//' -e &quot;/^[[:space:]]*version:[[:space:]]*['\&quot;]?3(\.[0-9]+)?['\&quot;]?[[:space:]]*(#.*)?$/d&quot; {} +
+</code></pre>
+<p><strong>What it does</strong><br />
+Recursively edits compose files in place, removes Windows CRLF if present, and deletes deprecated <code>version: "3.x"</code> lines.</p>
+<p><strong>Why it was used</strong><br />
+To clean up legacy Compose syntax across many stack files.</p>
+<p><strong>Expected result</strong><br />
+No remaining top-level <code>version:</code> declarations matching 3.x, with <code>.bak</code> rollback files preserved.</p>
+<p><strong>What failure indicates</strong><br />
+Wrong file targeting or shell quoting issues.</p>
+<p><strong>Risk</strong><br />
+Moderate. Bulk in-place edits affect many files.</p>
+<p><strong>Safer alternative</strong><br />
+Run a dry-run <code>grep</code> first and keep backups until validation is complete.</p>
+<hr />
+<h2 id="command_23">Command<a class="headerlink" href="#command_23" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">docker network create --driver bridge --subnet 172.35.0.0/16 --gateway 172.35.0.1 traefik-proxy
+</code></pre>
+<p><strong>What it does</strong><br />
+Creates the <code>traefik-proxy</code> Docker bridge network with the specified subnet and gateway.</p>
+<p><strong>Why it was used</strong><br />
+Traefik and proxied services needed a known shared bridge network.</p>
+<p><strong>Expected result</strong><br />
+<code>traefik-proxy</code> exists with the requested IPAM settings.</p>
+<p><strong>What failure indicates</strong><br />
+Name conflict or subnet overlap.</p>
+<p><strong>Docker relevance</strong><br />
+A shared bridge network is the standard pattern for Traefik-to-service communication on a single Docker host.</p>
+<hr />
+<h2 id="command_24">Command<a class="headerlink" href="#command_24" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">namei -l /opt/docker-apps/Traefik/config/letsencrypt/acme.json
+</code></pre>
+<p><strong>What it does</strong><br />
+Displays permissions and ownership for every path component from <code>/</code> to the target file.</p>
+<p><strong>Why it was used</strong><br />
+To diagnose WinSCP and shell permission errors in the Traefik <code>letsencrypt</code> path.</p>
+<p><strong>Expected result</strong><br />
+Each directory in the chain is traversable and the file exists with the intended ownership and mode.</p>
+<p><strong>What failure indicates</strong><br />
+Missing directories or insufficient execute/read/write permission somewhere in the path.</p>
+<hr />
+<h2 id="command_25">Command<a class="headerlink" href="#command_25" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo install -m 600 -o 1000 -g 1000 /dev/null /opt/docker-apps/Traefik/config/letsencrypt/acme.json
+</code></pre>
+<p><strong>What it does</strong><br />
+Creates <code>acme.json</code> if missing, with strict permissions and explicit ownership.</p>
+<p><strong>Important flags</strong>
+- <code>-m 600</code>: set file mode to 600
+- <code>-o 1000 -g 1000</code>: set owner/group
+- <code>/dev/null</code>: source for creating an empty file</p>
+<p><strong>Why it was used</strong><br />
+Traefik requires <code>acme.json</code> to exist with strict permissions.</p>
+<p><strong>Expected result</strong><br />
+An empty but correctly permissioned <code>acme.json</code> at the target path.</p>
+<p><strong>What failure indicates</strong><br />
+Missing parent directory or permission problem.</p>
+<p><strong>Risk</strong><br />
+Moderate. If the file already exists, this can replace it depending on usage context.</p>
+<p><strong>Safer alternative</strong><br />
+Use <code>touch</code> and then <code>chmod</code>/<code>chown</code> if preserving existing contents is critical.</p>
+<hr />
+<h2 id="command_26">Command<a class="headerlink" href="#command_26" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm set 100 --memory 4096
+</code></pre>
+<p><strong>What it does</strong><br />
+Sets VM 100 memory allocation to 4096 MiB (4 GiB).</p>
+<p><strong>Why it was used</strong><br />
+The rebuilt Docker VM initially had only 2 GiB and needed more RAM.</p>
+<p><strong>Expected result</strong><br />
+VM config reflects 4 GiB of memory.</p>
+<p><strong>What failure indicates</strong><br />
+VM config or Proxmox-side issue.</p>
+<p><strong>Proxmox relevance</strong><br />
+RAM sizing directly affects guest workload stability and HA fit on target nodes.</p>
+<hr />
+<h2 id="command_27">Command<a class="headerlink" href="#command_27" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">Likely command used:
+qm set 100 --cpu host --sockets 1 --cores 2
+</code></pre>
+<p><strong>What it does</strong><br />
+Sets CPU model and topology for the VM.</p>
+<p><strong>Why it was discussed</strong><br />
+The VM may need more CPU, but HA portability across mismatched nodes complicates the choice.</p>
+<p><strong>Expected result</strong><br />
+VM config reflects the new CPU topology.</p>
+<p><strong>What failure indicates</strong><br />
+Proxmox config issue or an architectural mismatch with migration requirements.</p>
+<p><strong>Risk</strong><br />
+Low for the config change itself; higher operationally if <code>cpu: host</code> is used across mismatched HA nodes.</p>
+<p><strong>Safer alternative</strong><br />
+Use a portable baseline CPU model when cross-node migration compatibility matters more than peak performance.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

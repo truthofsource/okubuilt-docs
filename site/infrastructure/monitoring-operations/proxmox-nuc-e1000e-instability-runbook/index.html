@@ -1,0 +1,4321 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Infrastructure, cloud, automation, security, and operations documentation portfolio.">
+      
+      
+        <meta name="author" content="Kingsley Oku">
+      
+      
+      
+        <link rel="prev" href="../proxmox-host-kernel-ram-instability-runbook/">
+      
+      
+        <link rel="next" href="../../networking/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Initial Investigation of Proxmox Host and VM Instability Under Container Load - OkuBuilt Infrastructure & Cloud Portfolio</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#initial-investigation-of-proxmox-host-and-vm-instability-under-container-load" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-header__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OkuBuilt Infrastructure & Cloud Portfolio
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Initial Investigation of Proxmox Host and VM Instability Under Container Load
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-nav__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OkuBuilt Infrastructure & Cloud Portfolio
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/proxmox-traefik-opnsense-ha-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox, Traefik, OPNsense HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Automation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cephfs-snips-cloudinit-vm100-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox CephFS Snips Cloud-Init VM100
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloud-init-docker-vm-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Docker VM Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-vm100-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker VM100 Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-cicustom-snippet-storage-ha/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init cicustom Snippet Storage HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/vm100-docker-startup-mountguard-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Startup Mount Guard Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compute
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/debian-docker-vm-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/home-assistant-os-proxmox-ceph-vm-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home Assistant OS Proxmox Ceph VM Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/homelab-vm100-rebuild-restore-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab VM100 Rebuild Restore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Containers & Apps
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Containers & Apps
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/debian-docker-vm-rebuild-cloudinit-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM Rebuild Cloud-Init
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-apps-offen-restore-gluetun-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Apps Offen Restore Gluetun Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-compose-memos-image-tag-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Compose Memos Image Tag Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/gluetun-corrupted-servers-permissions-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gluetun Corrupted Servers Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/proxmox-traefik-console-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Traefik Console Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-docker29-upgrade-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Docker Upgrade Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-proxy-docker-network-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Proxy Docker Network
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm100-docker-data-disk-recovery-cloud-init-hardening/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Data Disk Recovery Cloud-Init Hardening
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm110-provisioning-guest-agent-docker-appdata-permissions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM110 Provisioning Guest Agent Docker AppData Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring & Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Monitoring & Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../proxmox-ceph-memtest-ram-fault-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Ceph Memtest RAM Fault
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../proxmox-host-kernel-ram-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Host Kernel RAM Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox NUC e1000e Instability
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox NUC e1000e Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networking
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Networking
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/att-fiber-opnsense-outage-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AT&T Fiber OPNsense Outage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-lan-instability-storm-control-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN Instability Storm Control
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-lan-ip-dhcp-static-device-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN IP DHCP Static Device
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-opt2-lan-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense OPT2 LAN
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-web-gui-documentation-and-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense Web GUI Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/wireguard-ec2-proxmox-lxc-homelab-remote-access/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WireGuard EC2 Proxmox LXC Homelab Remote Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Security
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/homelab-ssh-ansible-nut-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab SSH Ansible NUT Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/proxmox-root-login-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Root Login Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_9" id="__nav_2_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Storage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Storage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/ceph-mainframe-osd-mon-mgr-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Mainframe OSD MON MGR Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/ceph-monitor-crash-loop-mainframe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Monitor Crash Loop Mainframe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/proxmox-ha-live-migration-ceph-vm-state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox HA Live Migration Ceph VM State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/truenas-vm-zfs-hba-planning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TrueNAS VM ZFS HBA Planning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/vm100-ceph-gluetun-troubleshooting-runbook-15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Ceph Gluetun Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/vm100-docker-nas-offen-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker NAS Offen Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Runbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runbooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_11" id="__nav_2_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting Incidents
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting Incidents
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting-incidents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloud
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cloud
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cloud/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portfolio
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Portfolio
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../portfolio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/documentation-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation Standards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/placement-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Placement Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/recurring-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recurring Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/command-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="initial-investigation-of-proxmox-host-and-vm-instability-under-container-load">Initial Investigation of Proxmox Host and VM Instability Under Container Load<a class="headerlink" href="#initial-investigation-of-proxmox-host-and-vm-instability-under-container-load" title="Permanent link">&para;</a></h1>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>Troubleshooting began for a Proxmox node that became unresponsive while running a Debian Docker VM with many containers active. The first goal was to determine whether the issue was caused by kernel faults, guest instability, host overcommit, memory pressure, or storage/network dependencies.</p>
+<h2 id="environment">Environment<a class="headerlink" href="#environment" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Proxmox VE host: <code>pve1</code></li>
+<li>Kernel observed in logs: <code>6.8.12-13-pve</code></li>
+<li>VM: <code>debian-docker</code></li>
+<li>Guest OS: Debian</li>
+<li>Workload: Docker / Docker Compose containers</li>
+<li>Host network:</li>
+<li>physical NIC: <code>eno1</code></li>
+<li>bridge: <code>vmbr0</code></li>
+<li>Ceph present in the environment</li>
+<li>Hardware platform later identified as Intel NUC8i7BEH</li>
+<li>CPU later identified as Intel Core i7-8559U</li>
+</ul>
+<h2 id="problem">Problem<a class="headerlink" href="#problem" title="Permanent link">&para;</a></h2>
+<p>The Proxmox host and the Docker VM became unresponsive after some runtime with most or all containers active.</p>
+<h2 id="symptoms">Symptoms<a class="headerlink" href="#symptoms" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Host and VM both became unresponsive.</li>
+<li>Previous boots ended uncleanly.</li>
+<li>No immediate panic, MCE, or OOM signature was obvious at the start of troubleshooting.</li>
+<li>The issue did not match prior bare-metal behavior, where the same or similar container workload had been stable.</li>
+</ul>
+<h2 id="actions-taken">Actions Taken<a class="headerlink" href="#actions-taken" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Listed previous boots and inspected the prior boot’s kernel logs.</li>
+<li>Filtered logs for warnings, errors, panic signatures, watchdog events, and hardware fault indicators.</li>
+<li>Checked host memory, swap, CPU, and IO at a healthy moment.</li>
+<li>Checked live kernel logs inside the Debian Docker VM.</li>
+<li>Compared the VM-based deployment to the previously stable bare-metal Docker deployment.</li>
+</ol>
+<p>Important commands used:</p>
+<pre><code class="language-bash">journalctl --list-boots
+</code></pre>
+<p>Purpose: identify which prior boot should be inspected.</p>
+<pre><code class="language-bash">journalctl -k -b -1
+</code></pre>
+<p>Purpose: inspect kernel messages from the previous boot.</p>
+<pre><code class="language-bash">journalctl -k -b -1 -p warning..alert
+</code></pre>
+<p>Purpose: reduce noise and focus on prior-boot kernel warnings and errors.</p>
+<pre><code class="language-bash">journalctl -k -b -1 | egrep -i 'panic|BUG:|Oops|Call Trace|hardware error|MCE|watchdog|soft lockup|hard lockup|NMI|reset|blocked for more than'
+</code></pre>
+<p>Purpose: search for classic crash and hardware-fault signatures.</p>
+<pre><code class="language-bash">free -h
+swapon --show
+vmstat 1 5
+</code></pre>
+<p>Purpose: check host RAM pressure, swap, and basic CPU/IO health.</p>
+<pre><code class="language-bash">sudo journalctl -kf
+</code></pre>
+<p>Purpose: watch live kernel messages inside the Docker VM.</p>
+<h2 id="key-findings">Key Findings<a class="headerlink" href="#key-findings" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Prior-boot warnings initially appeared mostly non-fatal:</li>
+<li>SGX disabled in BIOS</li>
+<li>CPU vulnerability warnings</li>
+<li>ACPI thermal firmware warning</li>
+<li>ZFS taint messages</li>
+<li>journald corruption / unclean shutdown notice</li>
+<li>No early evidence of:</li>
+<li>kernel panic</li>
+<li>MCE / ECC-style hardware fault</li>
+<li>watchdog soft lockup</li>
+<li>guest OOM killer</li>
+<li>Live VM logs showed normal Docker bridge and veth lifecycle messages rather than guest kernel crashes.</li>
+<li>At this stage, the issue appeared more likely to be host-side or dependency-related than a Docker guest kernel fault.</li>
+</ul>
+<h2 id="resolution">Resolution<a class="headerlink" href="#resolution" title="Permanent link">&para;</a></h2>
+<p>No final resolution was reached in this phase. Troubleshooting continued into memory, thermals, and hardware-specific causes.</p>
+<h2 id="validation">Validation<a class="headerlink" href="#validation" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Prior boot logs were successfully collected and reviewed.</li>
+<li>VM live logs did not show guest kernel panic behavior.</li>
+<li>Early host checks did not reveal a simple OOM or swap-driven failure.</li>
+</ul>
+<h2 id="follow-up-tasks">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Capture host telemetry closer to the actual failure window.</li>
+<li>Investigate thermal conditions under sustained load.</li>
+<li>Inspect previous-boot logs near the end of failed runtime.</li>
+<li>Continue checking for hardware- or driver-specific faults.</li>
+</ul>
+<h2 id="lessons-learned">Lessons Learned<a class="headerlink" href="#lessons-learned" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Unclean shutdown messages alone do not identify root cause.</li>
+<li>Docker bridge and veth events inside the guest are normal and should not be mistaken for guest kernel failure.</li>
+<li>Early triage should clearly separate:</li>
+<li>guest failure</li>
+<li>host failure</li>
+<li>storage/network dependency failure</li>
+</ul>
+<h1 id="host-resource-review-and-thermal-testing-on-pve1">Host Resource Review and Thermal Testing on pve1<a class="headerlink" href="#host-resource-review-and-thermal-testing-on-pve1" title="Permanent link">&para;</a></h1>
+<h2 id="summary_1">Summary<a class="headerlink" href="#summary_1" title="Permanent link">&para;</a></h2>
+<p>The next work session focused on determining whether the node was simply overcommitted or memory-starved. Host telemetry showed healthy RAM and swap usage, which shifted attention away from basic overcommit and toward thermals or platform-specific faults.</p>
+<h2 id="environment_1">Environment<a class="headerlink" href="#environment_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Proxmox host: <code>pve1</code></li>
+<li>Hardware: Intel NUC8i7BEH</li>
+<li>CPU: Intel Core i7-8559U</li>
+<li>Host RAM: approximately 32 GiB</li>
+<li>Swap: 8 GiB configured</li>
+<li>VM: <code>debian-docker</code></li>
+<li>VM sizing discussed:</li>
+<li>12 GiB RAM</li>
+<li>4 vCPUs</li>
+<li>CPU type <code>x86-64-v3</code></li>
+<li>ballooning disabled</li>
+</ul>
+<h2 id="problem_1">Problem<a class="headerlink" href="#problem_1" title="Permanent link">&para;</a></h2>
+<p>The node still became unresponsive after running for a while, even though the container workload was not believed to be especially resource-intensive.</p>
+<h2 id="symptoms_1">Symptoms<a class="headerlink" href="#symptoms_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Host and VM became unresponsive after some runtime.</li>
+<li>Behavior was intermittent rather than a constant “load too high immediately” pattern.</li>
+<li>Prior theory that the node was simply RAM-starved became doubtful.</li>
+</ul>
+<h2 id="actions-taken_1">Actions Taken<a class="headerlink" href="#actions-taken_1" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Checked host memory and swap usage while the node was healthy.</li>
+<li>Reviewed <code>vmstat</code> output for swap activity and IO wait.</li>
+<li>Installed <code>lm-sensors</code>.</li>
+<li>Ran <code>sensors-detect</code>.</li>
+<li>Checked baseline temperatures.</li>
+<li>Monitored temperatures during heavier sustained load.</li>
+</ol>
+<p>Important commands used:</p>
+<pre><code class="language-bash">free -h
+swapon --show
+vmstat 1 5
+</code></pre>
+<p>Purpose: verify whether the host was exhausting RAM or swapping.</p>
+<pre><code class="language-bash">apt-get install -y lm-sensors
+</code></pre>
+<p>Purpose: install host sensor tooling.</p>
+<pre><code class="language-bash">sensors-detect
+</code></pre>
+<p>Purpose: identify supported sensor drivers.</p>
+<pre><code class="language-bash">sensors
+</code></pre>
+<p>Purpose: read CPU, chipset, and NVMe temperatures.</p>
+<pre><code class="language-bash">watch -n2 sensors
+</code></pre>
+<p>Purpose: monitor temperatures continuously during load.</p>
+<h2 id="key-findings_1">Key Findings<a class="headerlink" href="#key-findings_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Host memory state was healthy when sampled:</li>
+<li>about 31 GiB total</li>
+<li>about 11 GiB used</li>
+<li>about 19 GiB free</li>
+<li>swap unused</li>
+<li><code>vmstat</code> showed:</li>
+<li>no swap-in / swap-out</li>
+<li>low IO wait</li>
+<li>plenty of idle CPU at the sampled moment</li>
+<li>This ruled out simple host RAM exhaustion as the immediate cause.</li>
+<li><code>lm-sensors</code> found the <code>coretemp</code> driver and provided usable CPU telemetry.</li>
+<li>Initial temperatures were normal.</li>
+<li>Under sustained load, temperatures later spiked dramatically:</li>
+<li>CPU package reached 99°C</li>
+<li>at least one core also reached 99°C</li>
+<li>This confirmed that thermal stress was a real issue at least part of the time.</li>
+</ul>
+<h2 id="resolution_1">Resolution<a class="headerlink" href="#resolution_1" title="Permanent link">&para;</a></h2>
+<p>A real thermal problem was identified, but it was not yet proven to be the only root cause.</p>
+<h2 id="validation_1">Validation<a class="headerlink" href="#validation_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Host RAM and swap telemetry disproved the simple “memory starvation” theory.</li>
+<li>Sensor telemetry captured thermal throttle territory under load.</li>
+</ul>
+<h2 id="follow-up-tasks_1">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Clean the NUC cooling path.</li>
+<li>Check fan profile and BIOS cooling settings.</li>
+<li>Consider re-pasting if necessary.</li>
+<li>Continue collecting post-crash logs because thermals did not fully explain all failures.</li>
+</ul>
+<h2 id="lessons-learned_1">Lessons Learned<a class="headerlink" href="#lessons-learned_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Verify resource-pressure assumptions with actual telemetry before changing VM sizing.</li>
+<li>Thermal issues can be real without explaining every outage.</li>
+<li>Sample both healthy state and sustained-load state before narrowing the failure domain.</li>
+</ul>
+<h1 id="thermal-instability-confirmed-then-ruled-out-as-the-only-failure-mode">Thermal Instability Confirmed, Then Ruled Out as the Only Failure Mode<a class="headerlink" href="#thermal-instability-confirmed-then-ruled-out-as-the-only-failure-mode" title="Permanent link">&para;</a></h1>
+<h2 id="summary_2">Summary<a class="headerlink" href="#summary_2" title="Permanent link">&para;</a></h2>
+<p>Thermal testing confirmed the NUC could reach near-critical CPU temperatures under load. However, a later outage occurred while temperatures were normal, which proved a second failure mechanism existed.</p>
+<h2 id="environment_2">Environment<a class="headerlink" href="#environment_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Proxmox host: <code>pve1</code></li>
+<li>Hardware: Intel NUC8i7BEH</li>
+<li>CPU: Intel Core i7-8559U</li>
+<li>Sensor source: <code>lm-sensors</code></li>
+</ul>
+<h2 id="problem_2">Problem<a class="headerlink" href="#problem_2" title="Permanent link">&para;</a></h2>
+<p>Even after confirming the node could overheat, the node still later went down when temperatures were only in the mid-60°C range.</p>
+<h2 id="symptoms_2">Symptoms<a class="headerlink" href="#symptoms_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Under one sustained-load test:</li>
+<li>package temperature hit 99°C</li>
+<li>one core hit 99°C</li>
+<li>In a later failure:</li>
+<li>package temperature was around 66°C</li>
+<li>cores were around 62–68°C</li>
+<li>The node still went down.</li>
+</ul>
+<h2 id="actions-taken_2">Actions Taken<a class="headerlink" href="#actions-taken_2" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Observed temperatures continuously during runtime.</li>
+<li>Compared a high-thermal event to a later outage with normal temperatures.</li>
+<li>Concluded that thermals were contributing but not the only issue.</li>
+</ol>
+<p>Important command used:</p>
+<pre><code class="language-bash">watch -n2 sensors
+</code></pre>
+<p>Purpose: compare thermal behavior across different failure windows.</p>
+<h2 id="key-findings_2">Key Findings<a class="headerlink" href="#key-findings_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The node definitely reached throttle territory in one run.</li>
+<li>Another outage occurred at safe temperatures, so overheating was not the only explanation.</li>
+<li>Troubleshooting needed to pivot back to log-based fault analysis.</li>
+</ul>
+<h2 id="resolution_2">Resolution<a class="headerlink" href="#resolution_2" title="Permanent link">&para;</a></h2>
+<p>Thermals were kept as a real but partial issue. Post-crash log analysis became the next priority.</p>
+<h2 id="validation_2">Validation<a class="headerlink" href="#validation_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Two separate sensor observations showed:</li>
+<li>one clearly thermal event</li>
+<li>one non-thermal outage</li>
+<li>That split prevented a false conclusion that “temperature alone” was the whole problem.</li>
+</ul>
+<h2 id="follow-up-tasks_2">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Keep thermal monitoring in place.</li>
+<li>Continue reviewing previous-boot logs after each crash.</li>
+<li>Improve cooling anyway, even if a second issue also exists.</li>
+</ul>
+<h2 id="lessons-learned_2">Lessons Learned<a class="headerlink" href="#lessons-learned_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Multiple independent fault domains can coexist on the same node.</li>
+<li>Do not stop at the first confirmed problem if later evidence contradicts a single-cause explanation.</li>
+</ul>
+<h1 id="previous-boot-log-analysis-identified-intel-e1000e-nic-hardware-hangs">Previous-Boot Log Analysis Identified Intel e1000e NIC Hardware Hangs<a class="headerlink" href="#previous-boot-log-analysis-identified-intel-e1000e-nic-hardware-hangs" title="Permanent link">&para;</a></h1>
+<h2 id="summary_3">Summary<a class="headerlink" href="#summary_3" title="Permanent link">&para;</a></h2>
+<p>Targeted inspection of the previous boot’s final log lines revealed repeated Intel <code>e1000e</code> hardware hangs on <code>eno1</code>, followed immediately by Ceph socket closures. This established a strong link between node “death” and host network failure.</p>
+<h2 id="environment_3">Environment<a class="headerlink" href="#environment_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Proxmox host: <code>pve1</code></li>
+<li>Hardware: Intel NUC8i7BEH</li>
+<li>NIC:</li>
+<li>interface: <code>eno1</code></li>
+<li>driver: <code>e1000e</code></li>
+<li>Bridge: <code>vmbr0</code></li>
+<li>Ceph environment present:</li>
+<li>monitor connectivity affected</li>
+<li>MDS connectivity affected</li>
+<li>VM: <code>debian-docker</code></li>
+<li>VM and cluster behavior dependent on host network stability</li>
+</ul>
+<h2 id="problem_3">Problem<a class="headerlink" href="#problem_3" title="Permanent link">&para;</a></h2>
+<p>The node still failed when temperatures were normal. The goal became distinguishing between:
+- power loss
+- kernel panic
+- reboot/reset
+- NIC failure
+- Ceph/storage dependency failure</p>
+<h2 id="symptoms_3">Symptoms<a class="headerlink" href="#symptoms_3" title="Permanent link">&para;</a></h2>
+<p>Previous-boot logs ended with repeated messages such as:
+- <code>e1000e 0000:00:1f.6 eno1: Detected Hardware Unit Hang</code>
+- <code>libceph: mon3 ... socket closed</code>
+- <code>libceph: mds0 ... socket closed</code></p>
+<p>The node appeared offline externally and required reboot.</p>
+<h2 id="actions-taken_3">Actions Taken<a class="headerlink" href="#actions-taken_3" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Pulled the final lines from the previous boot’s kernel log.</li>
+<li>Pulled previous-boot error and alert messages.</li>
+<li>Searched the previous boot for panic, watchdog, MCE, reset, and reboot indicators.</li>
+<li>Checked <code>last -x</code> to confirm reboot timing and uptime windows.</li>
+<li>Interpreted the end-of-boot sequence.</li>
+</ol>
+<p>Important commands used:</p>
+<pre><code class="language-bash">journalctl -k -b -1 | tail -n 120
+</code></pre>
+<p>Purpose: inspect final kernel messages before reboot.</p>
+<pre><code class="language-bash">journalctl -b -1 -p err..alert | tail -n 120
+</code></pre>
+<p>Purpose: inspect severe prior-boot errors.</p>
+<pre><code class="language-bash">journalctl -b -1 | egrep -i 'panic|BUG:|Call Trace|watchdog|soft lockup|hard lockup|mce|hardware error|fatal|reset|reboot' | tail -n 80
+</code></pre>
+<p>Purpose: check for classic crash signatures.</p>
+<pre><code class="language-bash">last -x | head
+</code></pre>
+<p>Purpose: confirm reboot sequence and uptime windows.</p>
+<h2 id="key-findings_3">Key Findings<a class="headerlink" href="#key-findings_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The previous boot ended with repeated <code>e1000e</code> NIC hangs on <code>eno1</code>.</li>
+<li>Ceph monitor and MDS socket closures followed immediately.</li>
+<li>No matching panic, MCE, or watchdog signature was found in the same time window.</li>
+<li>This strongly indicated:</li>
+<li>host networking failed first</li>
+<li>Ceph connectivity failed as a downstream effect</li>
+<li>the node appeared “dead” because network access and Ceph-backed or Ceph-dependent services collapsed</li>
+</ul>
+<h2 id="resolution_3">Resolution<a class="headerlink" href="#resolution_3" title="Permanent link">&para;</a></h2>
+<p>The primary failure mode captured in logs was identified as Intel <code>e1000e</code> NIC hangs on the onboard NUC NIC.</p>
+<h2 id="validation_3">Validation<a class="headerlink" href="#validation_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Previous-boot logs clearly captured repeated <code>Detected Hardware Unit Hang</code> messages.</li>
+<li>Ceph socket closures immediately followed.</li>
+<li>The absence of panic/MCE signatures made the NIC/driver path the strongest explanation.</li>
+</ul>
+<h2 id="follow-up-tasks_3">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Apply an offload workaround on the affected node.</li>
+<li>Standardize the workaround on similar NUC8i7BEH nodes.</li>
+<li>Continue checking for recurrence of <code>e1000e</code> hang messages.</li>
+<li>Consider BIOS updates and alternate NIC options if needed.</li>
+</ul>
+<h2 id="lessons-learned_3">Lessons Learned<a class="headerlink" href="#lessons-learned_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>On clustered Proxmox/Ceph nodes, a NIC failure can look like total host death.</li>
+<li>Ceph errors can be downstream effects of NIC instability rather than the root cause.</li>
+<li>Previous-boot tail inspection is often more useful than broad log sweeps once the likely failure window is known.</li>
+</ul>
+<h1 id="applied-e1000e-offload-workaround-on-pve1">Applied e1000e Offload Workaround on pve1<a class="headerlink" href="#applied-e1000e-offload-workaround-on-pve1" title="Permanent link">&para;</a></h1>
+<h2 id="summary_4">Summary<a class="headerlink" href="#summary_4" title="Permanent link">&para;</a></h2>
+<p>A mitigation was applied to disable problematic offload features on the Intel NUC onboard NIC and on the Linux bridge. The change was tested live and then persisted in the network interfaces configuration.</p>
+<h2 id="environment_4">Environment<a class="headerlink" href="#environment_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Proxmox host: <code>pve1</code></li>
+<li>Hardware: Intel NUC8i7BEH</li>
+<li>Physical NIC: <code>eno1</code></li>
+<li>Linux bridge: <code>vmbr0</code></li>
+<li>Driver: <code>e1000e</code></li>
+<li>Network config file: <code>/etc/network/interfaces</code></li>
+</ul>
+<h2 id="problem_4">Problem<a class="headerlink" href="#problem_4" title="Permanent link">&para;</a></h2>
+<p>The Intel onboard NIC on <code>pve1</code> was hanging under load and causing host network loss and downstream Ceph disconnects.</p>
+<h2 id="symptoms_4">Symptoms<a class="headerlink" href="#symptoms_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Repeated:</li>
+<li><code>e1000e ... Detected Hardware Unit Hang</code></li>
+<li>Followed by:</li>
+<li><code>libceph ... socket closed</code></li>
+<li>Host and VM appeared down or frozen from the network.</li>
+</ul>
+<h2 id="actions-taken_4">Actions Taken<a class="headerlink" href="#actions-taken_4" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Installed <code>ethtool</code>.</li>
+<li>Disabled TSO/GSO/GRO offloads live on <code>eno1</code>.</li>
+<li>Disabled TSO/GSO/GRO offloads live on <code>vmbr0</code>.</li>
+<li>Verified offload state using <code>ethtool -k</code>.</li>
+<li>Edited <code>/etc/network/interfaces</code> to add persistent <code>post-up</code> commands.</li>
+<li>Reloaded networking with <code>ifreload -a</code>.</li>
+<li>Re-verified offload settings after reload.</li>
+</ol>
+<p>Important commands used:</p>
+<pre><code class="language-bash">apt-get install -y ethtool
+</code></pre>
+<p>Purpose: install NIC feature tuning tool.</p>
+<pre><code class="language-bash">ethtool -K eno1 tso off gso off gro off
+</code></pre>
+<p>Purpose: disable problematic offloads on the physical NIC.</p>
+<pre><code class="language-bash">ethtool -K vmbr0 tso off gso off gro off
+</code></pre>
+<p>Purpose: apply the same mitigation at the bridge layer where supported.</p>
+<pre><code class="language-bash">ethtool -k eno1 | egrep 'tso|gso|gro'
+</code></pre>
+<p>Purpose: verify the physical NIC’s offload state.</p>
+<pre><code class="language-bash">ethtool -k vmbr0 | egrep 'tso|gso|gro'
+</code></pre>
+<p>Purpose: inspect bridge feature state after the change.</p>
+<pre><code class="language-bash">nano /etc/network/interfaces
+</code></pre>
+<p>Purpose: persist the workaround across reboot.</p>
+<pre><code class="language-bash">ifreload -a
+</code></pre>
+<p>Purpose: apply the network config without a full reboot.</p>
+<p>Persisted configuration:</p>
+<pre><code class="language-text">auto lo
+iface lo inet loopback
+
+auto eno1
+iface eno1 inet manual
+    post-up /sbin/ethtool -K eno1 tso off gso off gro off
+
+auto vmbr0
+iface vmbr0 inet static
+        address 192.168.16.12/24
+        gateway 192.168.16.1
+        bridge-ports eno1
+        bridge-stp off
+        bridge-fd 0
+        post-up /sbin/ethtool -K vmbr0 tso off gso off gro off
+
+iface wlp0s20f3 inet manual
+
+source /etc/network/interfaces.d/*
+</code></pre>
+<h2 id="key-findings_4">Key Findings<a class="headerlink" href="#key-findings_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>eno1</code> successfully showed the relevant offload features disabled.</li>
+<li><code>vmbr0</code> showed mixed bridge-specific behavior, which is normal; the key mitigation is on the physical NIC.</li>
+<li>The mitigation fits a known Intel NUC / <code>e1000e</code> problem pattern under Linux and bursty network load.</li>
+</ul>
+<h2 id="resolution_4">Resolution<a class="headerlink" href="#resolution_4" title="Permanent link">&para;</a></h2>
+<p>The <code>e1000e</code> offload workaround was applied successfully on <code>pve1</code> and made persistent.</p>
+<h2 id="validation_4">Validation<a class="headerlink" href="#validation_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Live <code>ethtool</code> changes succeeded.</li>
+<li>Verification output showed the relevant offload features disabled on <code>eno1</code>.</li>
+<li>After about a day, the node appeared stable with most containers running.</li>
+</ul>
+<h2 id="follow-up-tasks_4">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Apply the same workaround to other Intel NUC8i7BEH nodes using the same NIC/driver path.</li>
+<li>Keep checking for:</li>
+<li><code>e1000e</code> hardware hangs</li>
+<li>Ceph socket closures</li>
+<li>Continue monitoring temperatures because thermal spikes were also confirmed earlier.</li>
+<li>Consider BIOS updates and cooling cleanup on all NUC nodes.</li>
+</ul>
+<h2 id="lessons-learned_4">Lessons Learned<a class="headerlink" href="#lessons-learned_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Intel NUC onboard <code>e1000e</code> NIC instability can destabilize an entire Proxmox/Ceph node.</li>
+<li>Disabling TSO/GSO/GRO is a practical and low-risk mitigation.</li>
+<li>Persisting the fix in <code>/etc/network/interfaces</code> is better than relying on manual reapplication after reboot.</li>
+</ul>
+<h1 id="follow-up-operational-notes-after-stability-improved">Follow-Up Operational Notes After Stability Improved<a class="headerlink" href="#follow-up-operational-notes-after-stability-improved" title="Permanent link">&para;</a></h1>
+<h2 id="summary_5">Summary<a class="headerlink" href="#summary_5" title="Permanent link">&para;</a></h2>
+<p>After roughly a day of runtime, the node appeared stable with most containers running. The conversation then shifted into follow-up operational guidance for other NUC nodes, VM disk option tuning, backup option clarification, and Proxmox update workflow.</p>
+<h2 id="environment_5">Environment<a class="headerlink" href="#environment_5" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Proxmox host: <code>pve1</code></li>
+<li>Other nodes: Intel NUC8i7BEH</li>
+<li>VM: <code>debian-docker</code></li>
+<li>Proxmox storage and VM disk options discussed:</li>
+<li>IOThreads</li>
+<li>discard</li>
+<li>cloud-init disk</li>
+<li>per-disk backup checkbox</li>
+</ul>
+<h2 id="problem_5">Problem<a class="headerlink" href="#problem_5" title="Permanent link">&para;</a></h2>
+<p>With immediate instability reduced, the next goal was to standardize the workaround and document safe operational behavior.</p>
+<h2 id="symptoms_5">Symptoms<a class="headerlink" href="#symptoms_5" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Node appeared stable after the NIC workaround.</li>
+<li>A Proxmox warning occurred when enabling IOThread:</li>
+<li><code>WARN: iothread is only valid with virtio disk or virtio-scsi-single controller, ignoring</code></li>
+<li>Clarification was needed on:</li>
+<li>whether to apply the NIC fix to other NUCs</li>
+<li>whether IOThreads/discard were appropriate</li>
+<li>where backup storage is actually consumed</li>
+<li>how to update Proxmox cleanly</li>
+</ul>
+<h2 id="actions-taken_5">Actions Taken<a class="headerlink" href="#actions-taken_5" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Determined that the NIC workaround should likely be repeated on other NUC8i7BEH nodes using the same onboard NIC and driver.</li>
+<li>Reviewed whether <code>iothread</code> and <code>discard</code> were appropriate for the VM disk.</li>
+<li>Explained that the per-disk Proxmox “Backup” checkbox only controls inclusion in backups and does not allocate separate disk storage on its own.</li>
+<li>Interpreted the IOThread warning as a controller/disk compatibility issue.</li>
+<li>Documented concise Proxmox update commands and Proxmox wrapper behavior.</li>
+</ol>
+<p>Important commands used or discussed:</p>
+<pre><code class="language-bash">pveversion
+</code></pre>
+<p>Purpose: check current Proxmox version before updating.</p>
+<pre><code class="language-bash">apt update
+apt full-upgrade -y
+reboot
+</code></pre>
+<p>Purpose: standard Proxmox update flow.</p>
+<pre><code class="language-bash">pveupdate
+pveupgrade
+reboot
+</code></pre>
+<p>Purpose: wrapper-based Proxmox update flow.</p>
+<h2 id="key-findings_5">Key Findings<a class="headerlink" href="#key-findings_5" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The Intel NUC8i7BEH platform likely shares the same <code>e1000e</code> risk on other nodes, so the workaround should be standardized there as well.</li>
+<li><code>iothread</code> is only valid for:</li>
+<li>virtio disks</li>
+<li>disks on a <code>virtio-scsi-single</code> controller</li>
+<li>Enabling <code>iothread</code> on unsupported disks such as cloud-init or unsupported controller types produces a warning and is ignored.</li>
+<li><code>discard=on</code> is generally reasonable for thin-provisioned or Ceph-backed virtual disks when trim/unmap is supported.</li>
+<li>The Proxmox disk “Backup” option only controls whether a disk is included in a VM backup job.</li>
+<li><code>pveupdate</code> and <code>pveupgrade</code> are Proxmox convenience wrappers around the normal <code>apt</code> flow.</li>
+</ul>
+<h2 id="resolution_5">Resolution<a class="headerlink" href="#resolution_5" title="Permanent link">&para;</a></h2>
+<p>Current status:
+- <code>pve1</code> appeared stable after the NIC offload workaround.
+- Guidance was captured for:
+  - repeating the NIC fix on similar NUC nodes
+  - using IOThread only on supported disk/controller combinations
+  - enabling discard where appropriate
+  - understanding disk-backup inclusion behavior
+  - updating Proxmox using either standard <code>apt</code> or Proxmox wrappers</p>
+<h2 id="validation_5">Validation<a class="headerlink" href="#validation_5" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Roughly one day of improved stability was observed with most containers running.</li>
+<li>No new failure evidence was presented during this follow-up checkpoint.</li>
+</ul>
+<h2 id="follow-up-tasks_5">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_5" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Apply the NIC workaround across other NUC8i7BEH nodes.</li>
+<li>Review BIOS versions and cooling health on all NUC nodes.</li>
+<li>Verify VM controller types before enabling IOThreads.</li>
+<li>Continue observing <code>pve1</code> before fully closing the incident.</li>
+</ul>
+<h2 id="lessons-learned_5">Lessons Learned<a class="headerlink" href="#lessons-learned_5" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Once a platform-specific fault pattern is confirmed, standardizing the workaround across identical nodes is usually worthwhile.</li>
+<li>Not all Proxmox disk options apply to all controller types.</li>
+<li>Concise operational notes are useful once an incident moves from active troubleshooting to maintenance.</li>
+</ul>
+<hr />
+<h1 id="command-reference">Command Reference<a class="headerlink" href="#command-reference" title="Permanent link">&para;</a></h1>
+<h2 id="command">Command<a class="headerlink" href="#command" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">journalctl --list-boots
+</code></pre>
+<h3 id="what-it-does">What it does<a class="headerlink" href="#what-it-does" title="Permanent link">&para;</a></h3>
+<p>Lists known boot sessions from the systemd journal, each with a relative boot index such as <code>0</code>, <code>-1</code>, or <code>-2</code>.</p>
+<h3 id="important-flags-or-arguments">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments" title="Permanent link">&para;</a></h3>
+<ul>
+<li>none in this invocation</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment" title="Permanent link">&para;</a></h3>
+<p>To identify which earlier boot corresponded to a failure window before inspecting previous-boot logs.</p>
+<h3 id="expected-result">Expected result<a class="headerlink" href="#expected-result" title="Permanent link">&para;</a></h3>
+<p>A list of boots with IDs and time ranges.</p>
+<h3 id="what-success-or-failure-would-indicate">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: prior boots are available for review.</li>
+<li>Failure: journald may not be persistent or older logs may be unavailable.</li>
+</ul>
+<h3 id="risk">Risk<a class="headerlink" href="#risk" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h3 id="safer-alternative">Safer alternative<a class="headerlink" href="#safer-alternative" title="Permanent link">&para;</a></h3>
+<p>None needed.</p>
+<hr />
+<h2 id="command_1">Command<a class="headerlink" href="#command_1" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">journalctl -k -b -1
+</code></pre>
+<h3 id="what-it-does_1">What it does<a class="headerlink" href="#what-it-does_1" title="Permanent link">&para;</a></h3>
+<p>Shows kernel messages from the previous boot.</p>
+<h3 id="important-flags-or-arguments_1">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>-k</code>: kernel messages only</li>
+<li><code>-b -1</code>: previous boot</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_1">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_1" title="Permanent link">&para;</a></h3>
+<p>To inspect host-side kernel and driver behavior leading up to the last crash or reboot.</p>
+<h3 id="expected-result_1">Expected result<a class="headerlink" href="#expected-result_1" title="Permanent link">&para;</a></h3>
+<p>The previous boot’s kernel log.</p>
+<h3 id="what-success-or-failure-would-indicate_1">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: prior-boot kernel history is available.</li>
+<li>Failure: logs from the prior boot are missing.</li>
+</ul>
+<h3 id="risk_1">Risk<a class="headerlink" href="#risk_1" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h3 id="safer-alternative_1">Safer alternative<a class="headerlink" href="#safer-alternative_1" title="Permanent link">&para;</a></h3>
+<p>None needed.</p>
+<hr />
+<h2 id="command_2">Command<a class="headerlink" href="#command_2" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">journalctl -k -b -1 -p warning..alert
+</code></pre>
+<h3 id="what-it-does_2">What it does<a class="headerlink" href="#what-it-does_2" title="Permanent link">&para;</a></h3>
+<p>Filters the previous boot’s kernel log to warnings and more severe messages.</p>
+<h3 id="important-flags-or-arguments_2">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>-p warning..alert</code>: severity range from warning through alert</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_2">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_2" title="Permanent link">&para;</a></h3>
+<p>To reduce noise and focus only on significant prior-boot kernel warnings and errors.</p>
+<h3 id="expected-result_2">Expected result<a class="headerlink" href="#expected-result_2" title="Permanent link">&para;</a></h3>
+<p>A smaller, higher-signal set of kernel messages.</p>
+<h3 id="what-success-or-failure-would-indicate_2">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: serious kernel messages are easier to inspect.</li>
+<li>No output: there may have been no warning-level kernel events captured.</li>
+</ul>
+<h3 id="risk_2">Risk<a class="headerlink" href="#risk_2" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h3 id="safer-alternative_2">Safer alternative<a class="headerlink" href="#safer-alternative_2" title="Permanent link">&para;</a></h3>
+<p>None needed.</p>
+<hr />
+<h2 id="command_3">Command<a class="headerlink" href="#command_3" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">journalctl -k -b -1 | egrep -i 'panic|BUG:|Oops|Call Trace|hardware error|MCE|watchdog|soft lockup|hard lockup|NMI|reset|blocked for more than'
+</code></pre>
+<h3 id="what-it-does_3">What it does<a class="headerlink" href="#what-it-does_3" title="Permanent link">&para;</a></h3>
+<p>Searches the previous boot’s kernel log for common panic, fault, and hardware-error signatures.</p>
+<h3 id="important-flags-or-arguments_3">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>egrep -i</code>: extended regex, case-insensitive</li>
+<li>Search terms include common kernel crash indicators</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_3">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_3" title="Permanent link">&para;</a></h3>
+<p>To quickly identify whether the failure resembled a classic panic, watchdog event, or MCE-style hardware fault.</p>
+<h3 id="expected-result_3">Expected result<a class="headerlink" href="#expected-result_3" title="Permanent link">&para;</a></h3>
+<p>Any matching fault signatures.</p>
+<h3 id="what-success-or-failure-would-indicate_3">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Matches found: there may be direct crash or hardware clues.</li>
+<li>No matches: the failure may be outside classic kernel panic patterns.</li>
+</ul>
+<h3 id="risk_3">Risk<a class="headerlink" href="#risk_3" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h3 id="safer-alternative_3">Safer alternative<a class="headerlink" href="#safer-alternative_3" title="Permanent link">&para;</a></h3>
+<p>None needed.</p>
+<hr />
+<h2 id="command_4">Command<a class="headerlink" href="#command_4" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">free -h
+</code></pre>
+<h3 id="what-it-does_4">What it does<a class="headerlink" href="#what-it-does_4" title="Permanent link">&para;</a></h3>
+<p>Displays memory usage in human-readable units.</p>
+<h3 id="important-flags-or-arguments_4">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>-h</code>: human-readable output</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_4">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_4" title="Permanent link">&para;</a></h3>
+<p>To check whether host RAM exhaustion was contributing to instability.</p>
+<h3 id="expected-result_4">Expected result<a class="headerlink" href="#expected-result_4" title="Permanent link">&para;</a></h3>
+<p>A summary showing total, used, free, shared, cache, and available memory.</p>
+<h3 id="what-success-or-failure-would-indicate_4">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li>High available memory: RAM starvation is less likely.</li>
+<li>Very low available memory plus swap activity: memory pressure is more likely.</li>
+</ul>
+<h3 id="risk_4">Risk<a class="headerlink" href="#risk_4" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h3 id="safer-alternative_4">Safer alternative<a class="headerlink" href="#safer-alternative_4" title="Permanent link">&para;</a></h3>
+<p>None needed.</p>
+<hr />
+<h2 id="command_5">Command<a class="headerlink" href="#command_5" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">swapon --show
+</code></pre>
+<h3 id="what-it-does_5">What it does<a class="headerlink" href="#what-it-does_5" title="Permanent link">&para;</a></h3>
+<p>Lists configured swap devices and current swap usage.</p>
+<h3 id="important-flags-or-arguments_5">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>--show</code>: tabular display of active swap devices</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_5">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_5" title="Permanent link">&para;</a></h3>
+<p>To verify whether the host had started swapping.</p>
+<h3 id="expected-result_5">Expected result<a class="headerlink" href="#expected-result_5" title="Permanent link">&para;</a></h3>
+<p>A list of swap devices and used size.</p>
+<h3 id="what-success-or-failure-would-indicate_5">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>0B</code> used: no current swap pressure.</li>
+<li>Nonzero usage: swap pressure exists or existed.</li>
+</ul>
+<h3 id="risk_5">Risk<a class="headerlink" href="#risk_5" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h3 id="safer-alternative_5">Safer alternative<a class="headerlink" href="#safer-alternative_5" title="Permanent link">&para;</a></h3>
+<p>None needed.</p>
+<hr />
+<h2 id="command_6">Command<a class="headerlink" href="#command_6" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">vmstat 1 5
+</code></pre>
+<h3 id="what-it-does_6">What it does<a class="headerlink" href="#what-it-does_6" title="Permanent link">&para;</a></h3>
+<p>Prints virtual memory, process, IO, swap, and CPU statistics every second for five samples.</p>
+<h3 id="important-flags-or-arguments_6">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_6" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>1</code>: sample interval in seconds</li>
+<li><code>5</code>: number of samples</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_6">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_6" title="Permanent link">&para;</a></h3>
+<p>To check whether the host was swapping, blocked on IO, or under visible CPU pressure.</p>
+<h3 id="expected-result_6">Expected result<a class="headerlink" href="#expected-result_6" title="Permanent link">&para;</a></h3>
+<p>Five rows of live system telemetry.</p>
+<h3 id="what-success-or-failure-would-indicate_6">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_6" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>si</code>/<code>so</code> above zero: active swap activity.</li>
+<li>High <code>wa</code>: IO wait / storage bottleneck.</li>
+<li>High run queue or low idle: CPU pressure.</li>
+</ul>
+<h3 id="risk_6">Risk<a class="headerlink" href="#risk_6" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h3 id="safer-alternative_6">Safer alternative<a class="headerlink" href="#safer-alternative_6" title="Permanent link">&para;</a></h3>
+<p>None needed.</p>
+<hr />
+<h2 id="command_7">Command<a class="headerlink" href="#command_7" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo journalctl -kf
+</code></pre>
+<h3 id="what-it-does_7">What it does<a class="headerlink" href="#what-it-does_7" title="Permanent link">&para;</a></h3>
+<p>Follows live kernel messages continuously.</p>
+<h3 id="important-flags-or-arguments_7">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_7" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>-k</code>: kernel messages only</li>
+<li><code>-f</code>: follow new entries as they arrive</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_7">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_7" title="Permanent link">&para;</a></h3>
+<p>To observe live guest or host kernel behavior during runtime and while reproducing the issue.</p>
+<h3 id="expected-result_7">Expected result<a class="headerlink" href="#expected-result_7" title="Permanent link">&para;</a></h3>
+<p>New kernel messages appear as they are logged.</p>
+<h3 id="what-success-or-failure-would-indicate_7">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_7" title="Permanent link">&para;</a></h3>
+<ul>
+<li>New fault messages during a problem window can reveal the root cause.</li>
+<li>Quiet output may simply mean the kernel is not logging anything unusual.</li>
+</ul>
+<h3 id="risk_7">Risk<a class="headerlink" href="#risk_7" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h3 id="safer-alternative_7">Safer alternative<a class="headerlink" href="#safer-alternative_7" title="Permanent link">&para;</a></h3>
+<p>None needed.</p>
+<hr />
+<h2 id="command_8">Command<a class="headerlink" href="#command_8" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">apt-get install -y lm-sensors
+</code></pre>
+<h3 id="what-it-does_8">What it does<a class="headerlink" href="#what-it-does_8" title="Permanent link">&para;</a></h3>
+<p>Installs Linux hardware sensor utilities and dependencies.</p>
+<h3 id="important-flags-or-arguments_8">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_8" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>-y</code>: automatically answer yes to prompts</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_8">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_8" title="Permanent link">&para;</a></h3>
+<p>To gather thermal telemetry from the NUC host.</p>
+<h3 id="expected-result_8">Expected result<a class="headerlink" href="#expected-result_8" title="Permanent link">&para;</a></h3>
+<p>The <code>lm-sensors</code> package and dependencies install successfully.</p>
+<h3 id="what-success-or-failure-would-indicate_8">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_8" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: thermal readings can be collected.</li>
+<li>Failure: package or repository issue must be resolved first.</li>
+</ul>
+<h3 id="risk_8">Risk<a class="headerlink" href="#risk_8" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h3 id="safer-alternative_8">Safer alternative<a class="headerlink" href="#safer-alternative_8" title="Permanent link">&para;</a></h3>
+<p>None needed.</p>
+<hr />
+<h2 id="command_9">Command<a class="headerlink" href="#command_9" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sensors-detect
+</code></pre>
+<h3 id="what-it-does_9">What it does<a class="headerlink" href="#what-it-does_9" title="Permanent link">&para;</a></h3>
+<p>Probes the system for supported hardware monitoring chips and recommended drivers.</p>
+<h3 id="important-flags-or-arguments_9">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_9" title="Permanent link">&para;</a></h3>
+<ul>
+<li>interactive prompts during hardware probing</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_9">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_9" title="Permanent link">&para;</a></h3>
+<p>To identify which driver modules were needed for temperature reporting.</p>
+<h3 id="expected-result_9">Expected result<a class="headerlink" href="#expected-result_9" title="Permanent link">&para;</a></h3>
+<p>A detection summary showing supported sensors and recommended modules.</p>
+<h3 id="what-success-or-failure-would-indicate_9">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_9" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: usable drivers are identified.</li>
+<li>Failure: the platform may expose only limited monitoring.</li>
+</ul>
+<h3 id="risk_9">Risk<a class="headerlink" href="#risk_9" title="Permanent link">&para;</a></h3>
+<p>Low to moderate. Some bus probing is more intrusive than simply reading existing sensors.</p>
+<h3 id="safer-alternative_9">Safer alternative<a class="headerlink" href="#safer-alternative_9" title="Permanent link">&para;</a></h3>
+<p>Run only <code>sensors</code> first if sensor modules are already loaded, but <code>sensors-detect</code> is standard when telemetry is missing.</p>
+<hr />
+<h2 id="command_10">Command<a class="headerlink" href="#command_10" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sensors
+</code></pre>
+<h3 id="what-it-does_10">What it does<a class="headerlink" href="#what-it-does_10" title="Permanent link">&para;</a></h3>
+<p>Displays current temperature and sensor readings.</p>
+<h3 id="important-flags-or-arguments_10">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_10" title="Permanent link">&para;</a></h3>
+<ul>
+<li>none in this invocation</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_10">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_10" title="Permanent link">&para;</a></h3>
+<p>To inspect CPU, chipset, and NVMe temperatures while evaluating thermal behavior.</p>
+<h3 id="expected-result_10">Expected result<a class="headerlink" href="#expected-result_10" title="Permanent link">&para;</a></h3>
+<p>Temperature readings per detected device.</p>
+<h3 id="what-success-or-failure-would-indicate_10">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_10" title="Permanent link">&para;</a></h3>
+<ul>
+<li>High temperatures near critical thresholds indicate thermal stress.</li>
+<li>Normal temperatures during failure windows suggest another fault domain exists.</li>
+</ul>
+<h3 id="risk_10">Risk<a class="headerlink" href="#risk_10" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h3 id="safer-alternative_10">Safer alternative<a class="headerlink" href="#safer-alternative_10" title="Permanent link">&para;</a></h3>
+<p>None needed.</p>
+<hr />
+<h2 id="command_11">Command<a class="headerlink" href="#command_11" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">watch -n2 sensors
+</code></pre>
+<h3 id="what-it-does_11">What it does<a class="headerlink" href="#what-it-does_11" title="Permanent link">&para;</a></h3>
+<p>Repeats the <code>sensors</code> command every two seconds.</p>
+<h3 id="important-flags-or-arguments_11">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_11" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>-n2</code>: update every two seconds</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_11">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_11" title="Permanent link">&para;</a></h3>
+<p>To catch peak temperatures under sustained load rather than relying on a single snapshot.</p>
+<h3 id="expected-result_11">Expected result<a class="headerlink" href="#expected-result_11" title="Permanent link">&para;</a></h3>
+<p>A continuously refreshed thermal display.</p>
+<h3 id="what-success-or-failure-would-indicate_11">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_11" title="Permanent link">&para;</a></h3>
+<ul>
+<li>CPU temperatures near 99–100°C indicate thermal throttle territory on this NUC.</li>
+<li>Later normal readings during a crash showed thermal issues were not the only problem.</li>
+</ul>
+<h3 id="risk_11">Risk<a class="headerlink" href="#risk_11" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h3 id="safer-alternative_11">Safer alternative<a class="headerlink" href="#safer-alternative_11" title="Permanent link">&para;</a></h3>
+<p>None needed.</p>
+<hr />
+<h2 id="command_12">Command<a class="headerlink" href="#command_12" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">journalctl -k -b -1 | tail -n 120
+</code></pre>
+<h3 id="what-it-does_12">What it does<a class="headerlink" href="#what-it-does_12" title="Permanent link">&para;</a></h3>
+<p>Shows the last 120 lines of the previous boot’s kernel log.</p>
+<h3 id="important-flags-or-arguments_12">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_12" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>tail -n 120</code>: limit to the end of the log where the failure likely occurred</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_12">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_12" title="Permanent link">&para;</a></h3>
+<p>To inspect the final kernel events before the reboot.</p>
+<h3 id="expected-result_12">Expected result<a class="headerlink" href="#expected-result_12" title="Permanent link">&para;</a></h3>
+<p>The previous boot’s last kernel messages.</p>
+<h3 id="what-success-or-failure-would-indicate_12">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_12" title="Permanent link">&para;</a></h3>
+<ul>
+<li>This command exposed the repeated <code>e1000e</code> NIC hang messages.</li>
+<li>If the log ends abruptly with no clue, hard power loss or deeper lockup remains possible.</li>
+</ul>
+<h3 id="risk_12">Risk<a class="headerlink" href="#risk_12" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h3 id="safer-alternative_12">Safer alternative<a class="headerlink" href="#safer-alternative_12" title="Permanent link">&para;</a></h3>
+<p>None needed.</p>
+<hr />
+<h2 id="command_13">Command<a class="headerlink" href="#command_13" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">journalctl -b -1 -p err..alert | tail -n 120
+</code></pre>
+<h3 id="what-it-does_13">What it does<a class="headerlink" href="#what-it-does_13" title="Permanent link">&para;</a></h3>
+<p>Shows the last 120 error-level and higher messages from the previous boot.</p>
+<h3 id="important-flags-or-arguments_13">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_13" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>-b -1</code>: previous boot</li>
+<li><code>-p err..alert</code>: error through alert severity</li>
+<li><code>tail -n 120</code>: limit output to the end of the failure window</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_13">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_13" title="Permanent link">&para;</a></h3>
+<p>To isolate high-severity service and kernel errors from the failing boot.</p>
+<h3 id="expected-result_13">Expected result<a class="headerlink" href="#expected-result_13" title="Permanent link">&para;</a></h3>
+<p>A compact list of severe prior-boot messages.</p>
+<h3 id="what-success-or-failure-would-indicate_13">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_13" title="Permanent link">&para;</a></h3>
+<ul>
+<li>This helped confirm the NIC hang as the main severe event before reboot.</li>
+</ul>
+<h3 id="risk_13">Risk<a class="headerlink" href="#risk_13" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h3 id="safer-alternative_13">Safer alternative<a class="headerlink" href="#safer-alternative_13" title="Permanent link">&para;</a></h3>
+<p>None needed.</p>
+<hr />
+<h2 id="command_14">Command<a class="headerlink" href="#command_14" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">journalctl -b -1 | egrep -i 'panic|BUG:|Call Trace|watchdog|soft lockup|hard lockup|mce|hardware error|fatal|reset|reboot' | tail -n 80
+</code></pre>
+<h3 id="what-it-does_14">What it does<a class="headerlink" href="#what-it-does_14" title="Permanent link">&para;</a></h3>
+<p>Searches the previous boot’s full journal for panic, watchdog, and hardware-fault signatures.</p>
+<h3 id="important-flags-or-arguments_14">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_14" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>egrep -i</code>: case-insensitive regex search</li>
+<li><code>tail -n 80</code>: focus on the end of the result set</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_14">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_14" title="Permanent link">&para;</a></h3>
+<p>To distinguish a NIC or network failure from a classic kernel panic or hardware fault.</p>
+<h3 id="expected-result_14">Expected result<a class="headerlink" href="#expected-result_14" title="Permanent link">&para;</a></h3>
+<p>Any matching critical fault lines.</p>
+<h3 id="what-success-or-failure-would-indicate_14">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_14" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Few or no relevant matches support a non-panic failure path.</li>
+<li>Strong matches would shift attention back to kernel or hardware-fault analysis.</li>
+</ul>
+<h3 id="risk_14">Risk<a class="headerlink" href="#risk_14" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h3 id="safer-alternative_14">Safer alternative<a class="headerlink" href="#safer-alternative_14" title="Permanent link">&para;</a></h3>
+<p>None needed.</p>
+<hr />
+<h2 id="command_15">Command<a class="headerlink" href="#command_15" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">last -x | head
+</code></pre>
+<h3 id="what-it-does_15">What it does<a class="headerlink" href="#what-it-does_15" title="Permanent link">&para;</a></h3>
+<p>Shows recent login, reboot, shutdown, and runlevel events.</p>
+<h3 id="important-flags-or-arguments_15">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_15" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>-x</code>: include system events such as reboot and runlevel changes</li>
+<li><code>head</code>: limit to the most recent entries</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_15">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_15" title="Permanent link">&para;</a></h3>
+<p>To confirm reboot timing and how long the failed boot lasted.</p>
+<h3 id="expected-result_15">Expected result<a class="headerlink" href="#expected-result_15" title="Permanent link">&para;</a></h3>
+<p>Recent reboot and runlevel history.</p>
+<h3 id="what-success-or-failure-would-indicate_15">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_15" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Frequent reboot entries confirm repeated outages.</li>
+<li>Helps align journal timestamps with observed downtime.</li>
+</ul>
+<h3 id="risk_15">Risk<a class="headerlink" href="#risk_15" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h3 id="safer-alternative_15">Safer alternative<a class="headerlink" href="#safer-alternative_15" title="Permanent link">&para;</a></h3>
+<p>None needed.</p>
+<hr />
+<h2 id="command_16">Command<a class="headerlink" href="#command_16" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">apt-get install -y ethtool
+</code></pre>
+<h3 id="what-it-does_16">What it does<a class="headerlink" href="#what-it-does_16" title="Permanent link">&para;</a></h3>
+<p>Installs the NIC inspection and tuning utility.</p>
+<h3 id="important-flags-or-arguments_16">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_16" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>-y</code>: automatically answer yes</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_16">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_16" title="Permanent link">&para;</a></h3>
+<p>To disable problematic offload features on the Intel onboard NIC.</p>
+<h3 id="expected-result_16">Expected result<a class="headerlink" href="#expected-result_16" title="Permanent link">&para;</a></h3>
+<p><code>ethtool</code> installs successfully.</p>
+<h3 id="what-success-or-failure-would-indicate_16">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_16" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: NIC features can be queried and changed.</li>
+<li>Failure: NIC mitigation steps cannot be applied yet.</li>
+</ul>
+<h3 id="risk_16">Risk<a class="headerlink" href="#risk_16" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h3 id="safer-alternative_16">Safer alternative<a class="headerlink" href="#safer-alternative_16" title="Permanent link">&para;</a></h3>
+<p>None needed.</p>
+<hr />
+<h2 id="command_17">Command<a class="headerlink" href="#command_17" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ethtool -K eno1 tso off gso off gro off
+</code></pre>
+<h3 id="what-it-does_17">What it does<a class="headerlink" href="#what-it-does_17" title="Permanent link">&para;</a></h3>
+<p>Disables transmit segmentation offload, generic segmentation offload, and generic receive offload on the physical NIC.</p>
+<h3 id="important-flags-or-arguments_17">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_17" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>-K</code>: change offload settings</li>
+<li><code>tso off</code>: disable TCP segmentation offload</li>
+<li><code>gso off</code>: disable generic segmentation offload</li>
+<li><code>gro off</code>: disable generic receive offload</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_17">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_17" title="Permanent link">&para;</a></h3>
+<p>To avoid the offload paths associated with the observed <code>e1000e</code> hardware hangs on the Intel NUC NIC.</p>
+<h3 id="expected-result_17">Expected result<a class="headerlink" href="#expected-result_17" title="Permanent link">&para;</a></h3>
+<p>The command succeeds and the requested offloads are disabled.</p>
+<h3 id="what-success-or-failure-would-indicate_17">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_17" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: the NIC is less likely to hit the buggy offload path.</li>
+<li>Failure: the feature is unsupported or the change was rejected.</li>
+</ul>
+<h3 id="risk_17">Risk<a class="headerlink" href="#risk_17" title="Permanent link">&para;</a></h3>
+<p>Low. Performance may decrease slightly because packet processing shifts more into software.</p>
+<h3 id="safer-alternative_17">Safer alternative<a class="headerlink" href="#safer-alternative_17" title="Permanent link">&para;</a></h3>
+<p>Disabling only one feature at a time is sometimes used for narrower testing, but disabling all three was the chosen mitigation here.</p>
+<hr />
+<h2 id="command_18">Command<a class="headerlink" href="#command_18" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ethtool -K vmbr0 tso off gso off gro off
+</code></pre>
+<h3 id="what-it-does_18">What it does<a class="headerlink" href="#what-it-does_18" title="Permanent link">&para;</a></h3>
+<p>Requests the same offload-related changes on the Linux bridge device.</p>
+<h3 id="important-flags-or-arguments_18">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_18" title="Permanent link">&para;</a></h3>
+<ul>
+<li>same offload flags as above</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_18">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_18" title="Permanent link">&para;</a></h3>
+<p>To align bridge-layer behavior with the NIC workaround where supported.</p>
+<h3 id="expected-result_18">Expected result<a class="headerlink" href="#expected-result_18" title="Permanent link">&para;</a></h3>
+<p>Some bridge features may change; others may remain fixed or partially supported.</p>
+<h3 id="what-success-or-failure-would-indicate_18">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_18" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Mixed bridge output is normal.</li>
+<li>The critical mitigation remains the change on the physical NIC.</li>
+</ul>
+<h3 id="risk_18">Risk<a class="headerlink" href="#risk_18" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h3 id="safer-alternative_18">Safer alternative<a class="headerlink" href="#safer-alternative_18" title="Permanent link">&para;</a></h3>
+<p>The physical NIC change alone is the essential step.</p>
+<hr />
+<h2 id="command_19">Command<a class="headerlink" href="#command_19" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ethtool -k eno1 | egrep 'tso|gso|gro'
+</code></pre>
+<h3 id="what-it-does_19">What it does<a class="headerlink" href="#what-it-does_19" title="Permanent link">&para;</a></h3>
+<p>Displays the relevant offload settings for the physical NIC.</p>
+<h3 id="important-flags-or-arguments_19">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_19" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>-k</code>: show NIC feature state</li>
+<li><code>egrep 'tso|gso|gro'</code>: filter only relevant offload entries</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_19">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_19" title="Permanent link">&para;</a></h3>
+<p>To verify that the workaround was actually in effect on <code>eno1</code>.</p>
+<h3 id="expected-result_19">Expected result<a class="headerlink" href="#expected-result_19" title="Permanent link">&para;</a></h3>
+<p>Relevant offloads show <code>off</code> or <code>off [fixed]</code>.</p>
+<h3 id="what-success-or-failure-would-indicate_19">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_19" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Correct output confirms the physical NIC mitigation is active.</li>
+</ul>
+<h3 id="risk_19">Risk<a class="headerlink" href="#risk_19" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h3 id="safer-alternative_19">Safer alternative<a class="headerlink" href="#safer-alternative_19" title="Permanent link">&para;</a></h3>
+<p>None needed.</p>
+<hr />
+<h2 id="command_20">Command<a class="headerlink" href="#command_20" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ethtool -k vmbr0 | egrep 'tso|gso|gro'
+</code></pre>
+<h3 id="what-it-does_20">What it does<a class="headerlink" href="#what-it-does_20" title="Permanent link">&para;</a></h3>
+<p>Displays the relevant offload-related settings for the bridge.</p>
+<h3 id="important-flags-or-arguments_20">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_20" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>-k</code>: show feature state</li>
+<li><code>egrep 'tso|gso|gro'</code>: filter relevant entries</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_20">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_20" title="Permanent link">&para;</a></h3>
+<p>To inspect bridge-level behavior after applying the workaround.</p>
+<h3 id="expected-result_20">Expected result<a class="headerlink" href="#expected-result_20" title="Permanent link">&para;</a></h3>
+<p>A mix of bridge-specific feature states.</p>
+<h3 id="what-success-or-failure-would-indicate_20">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_20" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Use this as supplemental verification only; <code>eno1</code> is the important interface.</li>
+</ul>
+<h3 id="risk_20">Risk<a class="headerlink" href="#risk_20" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h3 id="safer-alternative_20">Safer alternative<a class="headerlink" href="#safer-alternative_20" title="Permanent link">&para;</a></h3>
+<p>None needed.</p>
+<hr />
+<h2 id="command_21">Command<a class="headerlink" href="#command_21" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">nano /etc/network/interfaces
+</code></pre>
+<h3 id="what-it-does_21">What it does<a class="headerlink" href="#what-it-does_21" title="Permanent link">&para;</a></h3>
+<p>Opens the Proxmox host network configuration file for editing.</p>
+<h3 id="important-flags-or-arguments_21">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_21" title="Permanent link">&para;</a></h3>
+<ul>
+<li>none</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_21">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_21" title="Permanent link">&para;</a></h3>
+<p>To persist the <code>ethtool</code> workaround with <code>post-up</code> lines.</p>
+<h3 id="expected-result_21">Expected result<a class="headerlink" href="#expected-result_21" title="Permanent link">&para;</a></h3>
+<p>The network configuration file opens in the editor.</p>
+<h3 id="what-success-or-failure-would-indicate_21">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_21" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: the workaround can survive reboot.</li>
+<li>Failure: another editor or permission check is needed.</li>
+</ul>
+<h3 id="risk_21">Risk<a class="headerlink" href="#risk_21" title="Permanent link">&para;</a></h3>
+<p>Moderate. Incorrect edits can break management networking on the host.</p>
+<h3 id="safer-alternative_21">Safer alternative<a class="headerlink" href="#safer-alternative_21" title="Permanent link">&para;</a></h3>
+<p>The Proxmox GUI is safer for common network changes, but direct file edits are often necessary for custom <code>post-up</code> directives.</p>
+<hr />
+<h2 id="command_22">Command<a class="headerlink" href="#command_22" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ifreload -a
+</code></pre>
+<h3 id="what-it-does_22">What it does<a class="headerlink" href="#what-it-does_22" title="Permanent link">&para;</a></h3>
+<p>Reloads all interface definitions using ifupdown2.</p>
+<h3 id="important-flags-or-arguments_22">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_22" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>-a</code>: reload all interfaces</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_22">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_22" title="Permanent link">&para;</a></h3>
+<p>To apply the persistent NIC workaround without rebooting the node.</p>
+<h3 id="expected-result_22">Expected result<a class="headerlink" href="#expected-result_22" title="Permanent link">&para;</a></h3>
+<p>Interfaces reload successfully and <code>post-up</code> hooks run.</p>
+<h3 id="what-success-or-failure-would-indicate_22">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_22" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: the persistent change is live immediately.</li>
+<li>Failure: there may be a syntax issue in <code>/etc/network/interfaces</code>.</li>
+</ul>
+<h3 id="risk_22">Risk<a class="headerlink" href="#risk_22" title="Permanent link">&para;</a></h3>
+<p>Moderate. Reloading networking on a remote Proxmox host can interrupt management access if the config is wrong.</p>
+<h3 id="safer-alternative_22">Safer alternative<a class="headerlink" href="#safer-alternative_22" title="Permanent link">&para;</a></h3>
+<p>Reboot during a maintenance window instead of live reloading.</p>
+<hr />
+<h2 id="command_23">Command<a class="headerlink" href="#command_23" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">pveversion
+</code></pre>
+<h3 id="what-it-does_23">What it does<a class="headerlink" href="#what-it-does_23" title="Permanent link">&para;</a></h3>
+<p>Shows installed Proxmox VE version information.</p>
+<h3 id="important-flags-or-arguments_23">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_23" title="Permanent link">&para;</a></h3>
+<ul>
+<li>none</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_23">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_23" title="Permanent link">&para;</a></h3>
+<p>To check the current update baseline before upgrading the node.</p>
+<h3 id="expected-result_23">Expected result<a class="headerlink" href="#expected-result_23" title="Permanent link">&para;</a></h3>
+<p>Proxmox version output.</p>
+<h3 id="what-success-or-failure-would-indicate_23">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_23" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: confirms current installed version state.</li>
+</ul>
+<h3 id="risk_23">Risk<a class="headerlink" href="#risk_23" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h3 id="safer-alternative_23">Safer alternative<a class="headerlink" href="#safer-alternative_23" title="Permanent link">&para;</a></h3>
+<p>None needed.</p>
+<hr />
+<h2 id="command_24">Command<a class="headerlink" href="#command_24" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">apt update
+</code></pre>
+<h3 id="what-it-does_24">What it does<a class="headerlink" href="#what-it-does_24" title="Permanent link">&para;</a></h3>
+<p>Refreshes package metadata from configured Debian and Proxmox repositories.</p>
+<h3 id="important-flags-or-arguments_24">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_24" title="Permanent link">&para;</a></h3>
+<ul>
+<li>none</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_24">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_24" title="Permanent link">&para;</a></h3>
+<p>As part of the standard Proxmox node update workflow.</p>
+<h3 id="expected-result_24">Expected result<a class="headerlink" href="#expected-result_24" title="Permanent link">&para;</a></h3>
+<p>Updated package lists.</p>
+<h3 id="what-success-or-failure-would-indicate_24">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_24" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: host is ready for package upgrade.</li>
+<li>Failure: repository, network, or configuration problem exists.</li>
+</ul>
+<h3 id="risk_24">Risk<a class="headerlink" href="#risk_24" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h3 id="safer-alternative_24">Safer alternative<a class="headerlink" href="#safer-alternative_24" title="Permanent link">&para;</a></h3>
+<p><code>pveupdate</code> is the Proxmox wrapper for a similar step.</p>
+<hr />
+<h2 id="command_25">Command<a class="headerlink" href="#command_25" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">apt full-upgrade -y
+</code></pre>
+<h3 id="what-it-does_25">What it does<a class="headerlink" href="#what-it-does_25" title="Permanent link">&para;</a></h3>
+<p>Performs a full package upgrade, allowing dependency changes and replacements.</p>
+<h3 id="important-flags-or-arguments_25">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_25" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>full-upgrade</code>: upgrade with dependency changes</li>
+<li><code>-y</code>: automatically confirm prompts</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_25">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_25" title="Permanent link">&para;</a></h3>
+<p>To fully update the Proxmox node, including kernel and core packages.</p>
+<h3 id="expected-result_25">Expected result<a class="headerlink" href="#expected-result_25" title="Permanent link">&para;</a></h3>
+<p>The node upgrades all eligible packages.</p>
+<h3 id="what-success-or-failure-would-indicate_25">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_25" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: node is updated and ready for reboot.</li>
+<li>Failure: package dependency or repository issues must be addressed.</li>
+</ul>
+<h3 id="risk_25">Risk<a class="headerlink" href="#risk_25" title="Permanent link">&para;</a></h3>
+<p>Moderate. This can update critical Proxmox, kernel, and storage components.</p>
+<h3 id="safer-alternative_25">Safer alternative<a class="headerlink" href="#safer-alternative_25" title="Permanent link">&para;</a></h3>
+<p>Run on one node at a time during a maintenance window.</p>
+<hr />
+<h2 id="command_26">Command<a class="headerlink" href="#command_26" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">reboot
+</code></pre>
+<h3 id="what-it-does_26">What it does<a class="headerlink" href="#what-it-does_26" title="Permanent link">&para;</a></h3>
+<p>Restarts the node.</p>
+<h3 id="important-flags-or-arguments_26">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_26" title="Permanent link">&para;</a></h3>
+<ul>
+<li>none</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_26">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_26" title="Permanent link">&para;</a></h3>
+<p>To load updated kernels or apply changes that require reboot.</p>
+<h3 id="expected-result_26">Expected result<a class="headerlink" href="#expected-result_26" title="Permanent link">&para;</a></h3>
+<p>The node restarts and returns to service.</p>
+<h3 id="what-success-or-failure-would-indicate_26">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_26" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: host comes back online with the updated runtime.</li>
+<li>Failure: console investigation may be required.</li>
+</ul>
+<h3 id="risk_26">Risk<a class="headerlink" href="#risk_26" title="Permanent link">&para;</a></h3>
+<p>High in a clustered environment if workloads are not planned around the reboot.</p>
+<h3 id="safer-alternative_26">Safer alternative<a class="headerlink" href="#safer-alternative_26" title="Permanent link">&para;</a></h3>
+<p>Migrate or stop critical workloads first.</p>
+<hr />
+<h2 id="command_27">Command<a class="headerlink" href="#command_27" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">pveupdate
+</code></pre>
+<h3 id="what-it-does_27">What it does<a class="headerlink" href="#what-it-does_27" title="Permanent link">&para;</a></h3>
+<p>Runs the Proxmox convenience wrapper for refreshing package lists.</p>
+<h3 id="important-flags-or-arguments_27">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_27" title="Permanent link">&para;</a></h3>
+<ul>
+<li>none</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_27">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_27" title="Permanent link">&para;</a></h3>
+<p>To describe the concise Proxmox-native update flow.</p>
+<h3 id="expected-result_27">Expected result<a class="headerlink" href="#expected-result_27" title="Permanent link">&para;</a></h3>
+<p>Repository metadata refreshes.</p>
+<h3 id="what-success-or-failure-would-indicate_27">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_27" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: package lists are current.</li>
+<li>Failure: same classes of issues as <code>apt update</code>.</li>
+</ul>
+<h3 id="risk_27">Risk<a class="headerlink" href="#risk_27" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h3 id="safer-alternative_27">Safer alternative<a class="headerlink" href="#safer-alternative_27" title="Permanent link">&para;</a></h3>
+<p><code>apt update</code> is the standard Debian equivalent.</p>
+<hr />
+<h2 id="command_28">Command<a class="headerlink" href="#command_28" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">pveupgrade
+</code></pre>
+<h3 id="what-it-does_28">What it does<a class="headerlink" href="#what-it-does_28" title="Permanent link">&para;</a></h3>
+<p>Runs the Proxmox convenience wrapper for a full node upgrade.</p>
+<h3 id="important-flags-or-arguments_28">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_28" title="Permanent link">&para;</a></h3>
+<ul>
+<li>none in this invocation</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_28">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_28" title="Permanent link">&para;</a></h3>
+<p>To describe the concise Proxmox-native update flow.</p>
+<h3 id="expected-result_28">Expected result<a class="headerlink" href="#expected-result_28" title="Permanent link">&para;</a></h3>
+<p>Available Proxmox and Debian package upgrades are applied.</p>
+<h3 id="what-success-or-failure-would-indicate_28">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_28" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: host is updated.</li>
+<li>Failure: dependency or repository issues need review.</li>
+</ul>
+<h3 id="risk_28">Risk<a class="headerlink" href="#risk_28" title="Permanent link">&para;</a></h3>
+<p>Moderate. This can affect critical virtualization and storage components.</p>
+<h3 id="safer-alternative_28">Safer alternative<a class="headerlink" href="#safer-alternative_28" title="Permanent link">&para;</a></h3>
+<p><code>apt full-upgrade</code> is the standard Debian equivalent.</p>
+<hr />
+<h2 id="command_29">Command<a class="headerlink" href="#command_29" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">Likely command used: top
+</code></pre>
+<h3 id="what-it-does_29">What it does<a class="headerlink" href="#what-it-does_29" title="Permanent link">&para;</a></h3>
+<p>Displays live process, CPU, memory, and load information.</p>
+<h3 id="important-flags-or-arguments_29">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_29" title="Permanent link">&para;</a></h3>
+<ul>
+<li>interactive usage</li>
+<li>in a VM, pressing <code>1</code> shows per-vCPU detail</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_29">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_29" title="Permanent link">&para;</a></h3>
+<p>To inspect runtime CPU pressure, IO wait, and possible VM steal time.</p>
+<h3 id="expected-result_29">Expected result<a class="headerlink" href="#expected-result_29" title="Permanent link">&para;</a></h3>
+<p>An interactive process and CPU summary.</p>
+<h3 id="what-success-or-failure-would-indicate_29">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_29" title="Permanent link">&para;</a></h3>
+<ul>
+<li>High <code>wa</code>: storage bottleneck.</li>
+<li>High <code>st</code> inside a VM: host scheduling contention.</li>
+<li>High load with poor responsiveness: potential lockup or backend dependency issue.</li>
+</ul>
+<h3 id="risk_29">Risk<a class="headerlink" href="#risk_29" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h3 id="safer-alternative_29">Safer alternative<a class="headerlink" href="#safer-alternative_29" title="Permanent link">&para;</a></h3>
+<p><code>htop</code> if installed, but <code>top</code> is standard and usually available.</p>
+<hr />
+<h2 id="command_30">Command<a class="headerlink" href="#command_30" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">Likely command used: iostat -x 1
+</code></pre>
+<h3 id="what-it-does_30">What it does<a class="headerlink" href="#what-it-does_30" title="Permanent link">&para;</a></h3>
+<p>Displays extended disk IO statistics every second.</p>
+<h3 id="important-flags-or-arguments_30">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_30" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>-x</code>: extended device statistics</li>
+<li><code>1</code>: one-second interval</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_30">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_30" title="Permanent link">&para;</a></h3>
+<p>To determine whether storage latency or device saturation was contributing to freezes.</p>
+<h3 id="expected-result_30">Expected result<a class="headerlink" href="#expected-result_30" title="Permanent link">&para;</a></h3>
+<p>Rolling per-device IO stats including utilization and wait times.</p>
+<h3 id="what-success-or-failure-would-indicate_30">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_30" title="Permanent link">&para;</a></h3>
+<ul>
+<li>High <code>%util</code> and <code>await</code> indicate a storage bottleneck.</li>
+<li>Low utilization suggests storage is not the main limiter.</li>
+</ul>
+<h3 id="risk_30">Risk<a class="headerlink" href="#risk_30" title="Permanent link">&para;</a></h3>
+<p>Low.</p>
+<h3 id="safer-alternative_30">Safer alternative<a class="headerlink" href="#safer-alternative_30" title="Permanent link">&para;</a></h3>
+<p>None needed.</p>
+<hr />
+<h2 id="command_31">Command<a class="headerlink" href="#command_31" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">Likely command used: stress-ng --cpu 8 --vm 2 --vm-bytes 75% --io 4 --timeout 30m
+</code></pre>
+<h3 id="what-it-does_31">What it does<a class="headerlink" href="#what-it-does_31" title="Permanent link">&para;</a></h3>
+<p>Generates synthetic CPU, memory, and IO load on the host.</p>
+<h3 id="important-flags-or-arguments_31">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_31" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>--cpu 8</code>: stress 8 CPU workers</li>
+<li><code>--vm 2</code>: memory stress workers</li>
+<li><code>--vm-bytes 75%</code>: target 75% memory usage</li>
+<li><code>--io 4</code>: IO stress workers</li>
+<li><code>--timeout 30m</code>: run for 30 minutes</li>
+</ul>
+<h3 id="why-it-was-discussed-at-that-moment">Why it was discussed at that moment<a class="headerlink" href="#why-it-was-discussed-at-that-moment" title="Permanent link">&para;</a></h3>
+<p>To separate generic hardware instability from workload-specific failures.</p>
+<h3 id="expected-result_31">Expected result<a class="headerlink" href="#expected-result_31" title="Permanent link">&para;</a></h3>
+<p>Thirty minutes of sustained synthetic load.</p>
+<h3 id="what-success-or-failure-would-indicate_31">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_31" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Stable run: hardware may be okay and workload pattern may matter more.</li>
+<li>Crash/hang: deeper hardware, firmware, or kernel issues become more likely.</li>
+</ul>
+<h3 id="risk_31">Risk<a class="headerlink" href="#risk_31" title="Permanent link">&para;</a></h3>
+<p>Moderate to high. Can push the node into failure and should be run only in a maintenance window.</p>
+<h3 id="safer-alternative_31">Safer alternative<a class="headerlink" href="#safer-alternative_31" title="Permanent link">&para;</a></h3>
+<p>Run a shorter-duration test first.</p>
+<hr />
+<h2 id="command_32">Command<a class="headerlink" href="#command_32" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">Likely command used: memtest86+ / MemTest86 boot run
+</code></pre>
+<h3 id="what-it-does_32">What it does<a class="headerlink" href="#what-it-does_32" title="Permanent link">&para;</a></h3>
+<p>Tests system RAM outside the normal operating system.</p>
+<h3 id="important-flags-or-arguments_32">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_32" title="Permanent link">&para;</a></h3>
+<ul>
+<li>boot-time utility rather than a shell command in this session</li>
+</ul>
+<h3 id="why-it-was-discussed-at-that-moment_1">Why it was discussed at that moment<a class="headerlink" href="#why-it-was-discussed-at-that-moment_1" title="Permanent link">&para;</a></h3>
+<p>To rule out faulty RAM after repeated host instability.</p>
+<h3 id="expected-result_32">Expected result<a class="headerlink" href="#expected-result_32" title="Permanent link">&para;</a></h3>
+<p>Multiple clean passes with zero errors.</p>
+<h3 id="what-success-or-failure-would-indicate_32">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_32" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Zero errors: RAM is less likely to be the issue.</li>
+<li>Any errors: memory or memory path faults are strongly suspected.</li>
+</ul>
+<h3 id="risk_32">Risk<a class="headerlink" href="#risk_32" title="Permanent link">&para;</a></h3>
+<p>Low runtime risk, but requires host downtime.</p>
+<h3 id="safer-alternative_32">Safer alternative<a class="headerlink" href="#safer-alternative_32" title="Permanent link">&para;</a></h3>
+<p>None equivalent from inside the running OS.</p>
+<hr />
+<h2 id="command_33">Command<a class="headerlink" href="#command_33" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">Likely command used: qm / Proxmox GUI disk option changes for iothread and discard
+</code></pre>
+<h3 id="what-it-does_33">What it does<a class="headerlink" href="#what-it-does_33" title="Permanent link">&para;</a></h3>
+<p>Applies VM disk options such as IOThreads and discard/TRIM handling.</p>
+<h3 id="important-flags-or-arguments_33">Important flags or arguments<a class="headerlink" href="#important-flags-or-arguments_33" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>iothread</code>: valid on supported virtio/virtio-scsi-single disk paths</li>
+<li><code>discard</code>: enables trim/unmap propagation when supported</li>
+</ul>
+<h3 id="why-it-was-discussed-at-that-moment_2">Why it was discussed at that moment<a class="headerlink" href="#why-it-was-discussed-at-that-moment_2" title="Permanent link">&para;</a></h3>
+<p>To improve VM disk behavior and explain why Proxmox ignored IOThread on an unsupported disk/controller combination.</p>
+<h3 id="expected-result_33">Expected result<a class="headerlink" href="#expected-result_33" title="Permanent link">&para;</a></h3>
+<p>Supported disks accept the setting; unsupported ones emit a warning and ignore it.</p>
+<h3 id="what-success-or-failure-would-indicate_33">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_33" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Warning about unsupported controller or disk type means IOThread is ignored safely.</li>
+<li>Correct use requires a virtio disk or <code>virtio-scsi-single</code> controller.</li>
+</ul>
+<h3 id="risk_33">Risk<a class="headerlink" href="#risk_33" title="Permanent link">&para;</a></h3>
+<p>Low to moderate depending on whether controller changes require downtime.</p>
+<h3 id="safer-alternative_33">Safer alternative<a class="headerlink" href="#safer-alternative_33" title="Permanent link">&para;</a></h3>
+<p>Verify disk bus and SCSI controller type before enabling IOThread.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

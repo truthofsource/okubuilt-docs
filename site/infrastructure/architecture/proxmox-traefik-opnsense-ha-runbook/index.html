@@ -1,0 +1,3804 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Infrastructure, cloud, automation, security, and operations documentation portfolio.">
+      
+      
+        <meta name="author" content="Kingsley Oku">
+      
+      
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../../automation/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Proxmox HA Design for GPU-Aware Media and Transcoding Workloads - OkuBuilt Infrastructure & Cloud Portfolio</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#proxmox-ha-design-for-gpu-aware-media-and-transcoding-workloads" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-header__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OkuBuilt Infrastructure & Cloud Portfolio
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Proxmox HA Design for GPU-Aware Media and Transcoding Workloads
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-nav__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OkuBuilt Infrastructure & Cloud Portfolio
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox, Traefik, OPNsense HA
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox, Traefik, OPNsense HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Automation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cephfs-snips-cloudinit-vm100-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox CephFS Snips Cloud-Init VM100
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloud-init-docker-vm-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Docker VM Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-vm100-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker VM100 Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-cicustom-snippet-storage-ha/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init cicustom Snippet Storage HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/vm100-docker-startup-mountguard-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Startup Mount Guard Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compute
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/debian-docker-vm-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/home-assistant-os-proxmox-ceph-vm-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home Assistant OS Proxmox Ceph VM Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/homelab-vm100-rebuild-restore-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab VM100 Rebuild Restore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Containers & Apps
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Containers & Apps
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/debian-docker-vm-rebuild-cloudinit-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM Rebuild Cloud-Init
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-apps-offen-restore-gluetun-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Apps Offen Restore Gluetun Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-compose-memos-image-tag-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Compose Memos Image Tag Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/gluetun-corrupted-servers-permissions-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gluetun Corrupted Servers Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/proxmox-traefik-console-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Traefik Console Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-docker29-upgrade-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Docker Upgrade Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-proxy-docker-network-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Proxy Docker Network
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm100-docker-data-disk-recovery-cloud-init-hardening/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Data Disk Recovery Cloud-Init Hardening
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm110-provisioning-guest-agent-docker-appdata-permissions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM110 Provisioning Guest Agent Docker AppData Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring & Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Monitoring & Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-ceph-memtest-ram-fault-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Ceph Memtest RAM Fault
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-host-kernel-ram-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Host Kernel RAM Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-nuc-e1000e-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox NUC e1000e Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networking
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Networking
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/att-fiber-opnsense-outage-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AT&T Fiber OPNsense Outage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-lan-instability-storm-control-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN Instability Storm Control
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-lan-ip-dhcp-static-device-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN IP DHCP Static Device
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-opt2-lan-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense OPT2 LAN
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-web-gui-documentation-and-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense Web GUI Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/wireguard-ec2-proxmox-lxc-homelab-remote-access/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WireGuard EC2 Proxmox LXC Homelab Remote Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Security
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/homelab-ssh-ansible-nut-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab SSH Ansible NUT Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/proxmox-root-login-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Root Login Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_9" id="__nav_2_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Storage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Storage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/ceph-mainframe-osd-mon-mgr-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Mainframe OSD MON MGR Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/ceph-monitor-crash-loop-mainframe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Monitor Crash Loop Mainframe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/proxmox-ha-live-migration-ceph-vm-state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox HA Live Migration Ceph VM State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/truenas-vm-zfs-hba-planning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TrueNAS VM ZFS HBA Planning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/vm100-ceph-gluetun-troubleshooting-runbook-15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Ceph Gluetun Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/vm100-docker-nas-offen-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker NAS Offen Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Runbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runbooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_11" id="__nav_2_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting Incidents
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting Incidents
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting-incidents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloud
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cloud
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cloud/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portfolio
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Portfolio
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../portfolio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/documentation-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation Standards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/placement-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Placement Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/recurring-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recurring Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/command-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="proxmox-ha-design-for-gpu-aware-media-and-transcoding-workloads">Proxmox HA Design for GPU-Aware Media and Transcoding Workloads<a class="headerlink" href="#proxmox-ha-design-for-gpu-aware-media-and-transcoding-workloads" title="Permanent link">&para;</a></h1>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>This work session focused on how Proxmox High Availability should be designed for media workloads that depend on hardware acceleration, especially Plex and Tdarr. The environment includes one custom PC with an NVIDIA GPU and four Intel NUC nodes with Intel integrated graphics. The goal was to understand how HA behaves when a VM with passed-through hardware fails over, and to design a robust layout for GPU-aware services.</p>
+<h2 id="environment">Environment<a class="headerlink" href="#environment" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Proxmox VE cluster</li>
+<li>1 custom PC node with NVIDIA GPU</li>
+<li>4 identical Intel NUC nodes with Intel iGPU</li>
+<li>Shared-storage-oriented homelab design implied for HA</li>
+<li>Docker workloads running inside VMs</li>
+<li>Plex in Docker</li>
+<li>Tdarr in Docker</li>
+<li>Proxmox HA groups and PCI passthrough under consideration</li>
+<li>Likely reverse-proxy and shared media workflows already present elsewhere in the homelab</li>
+</ul>
+<h2 id="problem">Problem<a class="headerlink" href="#problem" title="Permanent link">&para;</a></h2>
+<p>The main question was how Proxmox HA behaves for VMs that rely on GPU passthrough, and what happens when such a VM moves to another node that may not have the same hardware.</p>
+<h2 id="symptoms">Symptoms<a class="headerlink" href="#symptoms" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Uncertainty about whether HA was truly working for existing VMs</li>
+<li>Concern about Plex losing GPU functionality after failover</li>
+<li>Concern about how Tdarr should be designed in a mixed NVIDIA and Intel cluster</li>
+<li>Need to distinguish between true HA restart behavior and simple autostart behavior</li>
+</ul>
+<h2 id="actions-taken">Actions Taken<a class="headerlink" href="#actions-taken" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Reviewed how to verify Proxmox HA health and resource state.</li>
+<li>Examined how HA behaves when a VM has PCI passthrough attached.</li>
+<li>Evaluated failover behavior for a VM running Plex in Docker with a passed-through GPU.</li>
+<li>Mapped the user’s actual hardware topology: one NVIDIA-capable tower and four Intel NUCs.</li>
+<li>Developed two Plex design patterns:</li>
+<li>HA with degraded operation on non-GPU-equivalent nodes</li>
+<li>HA with per-node PCI mappings so the VM can receive either NVIDIA or Intel graphics depending on host</li>
+<li>Designed a recommended Tdarr architecture separating the server role from worker roles.</li>
+<li>Clarified the difference between VM autostart on boot and HA-managed state.</li>
+</ol>
+<h2 id="key-findings">Key Findings<a class="headerlink" href="#key-findings" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Proxmox HA can restart a VM on another node only if the VM’s storage is accessible there and the target node satisfies the VM’s hardware requirements.</li>
+<li>PCI passthrough prevents live migration. GPU-backed VMs should be expected to cold-start on failover, not live-migrate.</li>
+<li>A Plex VM with a passed-through NVIDIA GPU cannot simply restart on a node without a compatible passthrough mapping unless the VM is designed to tolerate running without GPU acceleration.</li>
+<li>Proxmox PCI mappings are the cleanest way to abstract different physical GPUs across different nodes under one logical device name.</li>
+<li>In this environment, Plex can be designed either to:</li>
+<li>run anywhere and fall back to CPU/software transcoding on the NUCs, or</li>
+<li>use per-node mappings so the tower provides NVIDIA acceleration and NUCs provide Intel Quick Sync.</li>
+<li>Tdarr benefits from being split into:</li>
+<li>one HA-capable server VM without GPU dependency</li>
+<li>multiple worker VMs or containers with node-local acceleration</li>
+<li>VM <code>onboot</code> is not the same as HA state. HA-managed VMs should be controlled by <code>ha-manager</code>, not by relying on <code>qm set --onboot 1</code>.</li>
+</ul>
+<h2 id="resolution">Resolution<a class="headerlink" href="#resolution" title="Permanent link">&para;</a></h2>
+<p>No single live issue was fixed in this portion of the session. Instead, the outcome was a design decision framework:</p>
+<ul>
+<li>For Plex:</li>
+<li>preferred simple design: allow failover anywhere, with NVIDIA acceleration on the custom PC and software fallback on NUCs</li>
+<li>
+<p>advanced design: use Proxmox PCI mappings so the VM receives the node’s available GPU type</p>
+</li>
+<li>
+<p>For Tdarr:</p>
+</li>
+<li>recommended design: separate Tdarr Server from Tdarr Nodes</li>
+<li>keep the server small, HA-enabled, and not GPU-dependent</li>
+<li>run workers with either NVIDIA or Intel hardware acceleration depending on node</li>
+<li>
+<p>use shared media storage and local cache/temp space for robustness</p>
+</li>
+<li>
+<p>For VM startup:</p>
+</li>
+<li>if VM 100 is HA-managed, use HA resource state rather than only node-boot autostart</li>
+</ul>
+<h2 id="validation">Validation<a class="headerlink" href="#validation" title="Permanent link">&para;</a></h2>
+<p>Validation guidance established during the session included:
+- confirm cluster quorum and HA daemon health
+- confirm the VM is registered in <code>ha-manager</code>
+- confirm the VM disks are on shared storage
+- test an HA migration or controlled failover
+- verify that GPU-dependent services behave correctly on the destination node
+- for Tdarr, verify that jobs requeue safely and that transcode temp files are isolated from final media paths</p>
+<h2 id="follow-up-tasks">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Create HA groups that reflect GPU capability and intended placement</li>
+<li>Build Proxmox PCI mappings for mixed NVIDIA and Intel GPU nodes</li>
+<li>Decide whether Plex should support software fallback on non-NVIDIA nodes</li>
+<li>Separate Tdarr Server and Tdarr Worker roles if not already done</li>
+<li>Verify all HA-targeted VMs use shared storage</li>
+<li>Test cold-failover behavior for media workloads during maintenance windows</li>
+</ul>
+<h2 id="lessons-learned">Lessons Learned<a class="headerlink" href="#lessons-learned" title="Permanent link">&para;</a></h2>
+<ul>
+<li>GPU passthrough and HA work best when hardware differences are abstracted with PCI mappings.</li>
+<li>HA for GPU-backed VMs should be designed as cold-restart HA, not live-migration HA.</li>
+<li>Media services and transcode workers should be architected differently; not every role needs the GPU.</li>
+<li>Proxmox HA and VM boot order/autostart are different control planes and should not be mixed conceptually.</li>
+</ul>
+<hr />
+<h1 id="opnsense-port-forwarding-and-traefik-reachability-troubleshooting">OPNsense Port Forwarding and Traefik Reachability Troubleshooting<a class="headerlink" href="#opnsense-port-forwarding-and-traefik-reachability-troubleshooting" title="Permanent link">&para;</a></h1>
+<h2 id="summary_1">Summary<a class="headerlink" href="#summary_1" title="Permanent link">&para;</a></h2>
+<p>This work session focused on verifying whether OPNsense was correctly forwarding ports 80 and 443 to Traefik, validating whether Traefik itself was listening properly, and deciding how LAN clients should resolve reverse-proxied services.</p>
+<h2 id="environment_1">Environment<a class="headerlink" href="#environment_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>OPNsense firewall/router</li>
+<li>Traefik running in Docker on Debian host <code>debian-docker</code></li>
+<li>Public-facing domain <code>dulynoted.cloud</code></li>
+<li>Dashboard hostnames such as <code>traefik.dulynoted.cloud</code></li>
+<li>Docker reverse-proxy network <code>traefik-proxy</code></li>
+<li>Split DNS / local DNS design discussion</li>
+<li>Cloudflare DNS and Cloudflare proxy considerations</li>
+<li>Likely NAT and firewall rules on WAN in OPNsense</li>
+</ul>
+<h2 id="problem_1">Problem<a class="headerlink" href="#problem_1" title="Permanent link">&para;</a></h2>
+<p>The objective was to confirm whether ports 80 and 443 were open and correctly forwarded through OPNsense to Traefik, and to determine the best internal DNS approach for LAN access to public service names.</p>
+<h2 id="symptoms_1">Symptoms<a class="headerlink" href="#symptoms_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Need to verify if OPNsense was forwarding ports 80 and 443 correctly</li>
+<li>Need help setting up port forward rules</li>
+<li>Need to decide between split DNS and local-only <code>.home</code>-style naming</li>
+<li>Need to interpret local Traefik test results after moving Docker to a new host that reused the prior IP address</li>
+</ul>
+<h2 id="actions-taken_1">Actions Taken<a class="headerlink" href="#actions-taken_1" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Checked whether Traefik was listening on ports 80 and 443 on the Docker host.</li>
+<li>Queried local HTTP and HTTPS responses directly from the host.</li>
+<li>Reviewed how to create OPNsense WAN port-forward rules for 80 and 443.</li>
+<li>Reviewed how to create LAN hairpin behavior either with split DNS or NAT reflection.</li>
+<li>Compared split DNS against a Pi-hole-only local-domain naming design.</li>
+<li>Considered host move implications after the new Docker host took the old IP address.</li>
+<li>Discussed how to verify if the reverse-proxy was being reached locally and from WAN.</li>
+</ol>
+<h2 id="key-findings_1">Key Findings<a class="headerlink" href="#key-findings_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Traefik was confirmed to be listening on:</li>
+<li><code>0.0.0.0:80</code></li>
+<li><code>0.0.0.0:443</code></li>
+<li>IPv6 equivalents</li>
+<li>Local HTTP returned <code>308 Permanent Redirect</code>, indicating HTTP-to-HTTPS redirection was working.</li>
+<li>Local HTTPS returned <code>404</code>, which strongly suggested Traefik itself was reachable, but the request did not match a configured router because it was sent to <code>127.0.0.1</code> without the expected Host header.</li>
+<li>The host move reused the old IP, so OPNsense NAT rules pointing at that IP likely remained logically correct, but ARP caches, host-level differences, or Traefik configuration mismatches still needed consideration.</li>
+<li>Split DNS using the real public domain is the better design for Traefik-backed applications because it preserves valid hostnames and TLS expectations.</li>
+<li>A private <code>.home</code> naming approach is better reserved for purely internal hostnames that are never intended to use public-domain TLS semantics.</li>
+</ul>
+<h2 id="resolution_1">Resolution<a class="headerlink" href="#resolution_1" title="Permanent link">&para;</a></h2>
+<p>The session established a working troubleshooting flow rather than a single final fix:
+- verify Traefik locally first
+- confirm OPNsense NAT and WAN rules
+- use split DNS for reverse-proxied services behind Traefik
+- account for ARP or DNS cache artifacts after moving Docker to a new host that reused the old address</p>
+<h2 id="validation_1">Validation<a class="headerlink" href="#validation_1" title="Permanent link">&para;</a></h2>
+<p>Successful local validation already achieved:</p>
+<pre><code class="language-bash">ss -ltnp '( sport = :80 or sport = :443 )'
+curl -sI http://127.0.0.1 | head -n1
+curl -sIk https://127.0.0.1 -k | head -n1
+</code></pre>
+<p>Observed results:
+- ports 80 and 443 listening
+- HTTP redirect functioning
+- HTTPS reaching Traefik but not matching a route without proper hostname</p>
+<p>Further validation steps discussed:
+- test from a LAN host using the actual hostname
+- test from outside the network
+- confirm OPNsense live firewall logs for TCP/80 and TCP/443
+- confirm DNS resolution for LAN clients points to the Traefik LAN IP under split DNS</p>
+<h2 id="follow-up-tasks_1">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Verify the exact OPNsense NAT rules for WAN TCP/80 and WAN TCP/443</li>
+<li>Confirm WAN firewall pass rules were auto-created or manually added</li>
+<li>Add or validate split DNS records for proxied services</li>
+<li>Flush stale ARP/DNS caches on clients if host-IP reuse causes ambiguity</li>
+<li>Confirm external path from WAN or cellular once local hostname tests pass</li>
+</ul>
+<h2 id="lessons-learned_1">Lessons Learned<a class="headerlink" href="#lessons-learned_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>A <code>404</code> from Traefik on localhost HTTPS often means routing mismatch, not transport failure.</li>
+<li>Reusing an old IP on a new Docker host keeps NAT logic simple but can still leave stale cache problems.</li>
+<li>Split DNS is cleaner than NAT reflection for most homelab reverse-proxy use cases.</li>
+<li>Public service names should generally resolve to the reverse-proxy’s LAN IP for internal clients.</li>
+</ul>
+<hr />
+<h1 id="traefik-migration-reverse-proxy-recovery-and-configuration-modernization">Traefik Migration, Reverse Proxy Recovery, and Configuration Modernization<a class="headerlink" href="#traefik-migration-reverse-proxy-recovery-and-configuration-modernization" title="Permanent link">&para;</a></h1>
+<h2 id="summary_2">Summary<a class="headerlink" href="#summary_2" title="Permanent link">&para;</a></h2>
+<p>This work session focused on recovering and modernizing a Traefik deployment after Docker was moved to a new host that inherited the old IP address. The work included analyzing a dashboard <code>500 Internal Server Error</code>, reviewing the existing Docker Compose file, updating Traefik to a current v3-based layout, modernizing dynamic and static configuration, and clarifying required file locations and permissions.</p>
+<h2 id="environment_2">Environment<a class="headerlink" href="#environment_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Debian Docker VM/host: <code>debian-docker</code></li>
+<li>Docker Compose</li>
+<li>Traefik originally on image <code>traefik:2.6</code></li>
+<li>Docker socket proxy: <code>tecnativa/docker-socket-proxy</code></li>
+<li>Cloudflare DNS-01 ACME challenge</li>
+<li>Domain: <code>dulynoted.cloud</code></li>
+<li>Dashboard hostname: <code>traefik.dulynoted.cloud</code></li>
+<li>Config root on host: <code>/opt/docker-apps/Traefik/config</code></li>
+<li>Dynamic config path under discussion: <code>/opt/docker-apps/Traefik/config/dynamic</code></li>
+<li>ACME storage: <code>/opt/docker-apps/Traefik/config/letsencrypt/acme.json</code></li>
+<li>Access log path: <code>/opt/docker-apps/Traefik/config/logs/access.log</code></li>
+</ul>
+<h2 id="problem_2">Problem<a class="headerlink" href="#problem_2" title="Permanent link">&para;</a></h2>
+<p>After moving Docker to a new host and reusing the prior IP, the Traefik dashboard returned <code>500 Internal Server Error</code>. The existing configuration needed to be inspected, corrected, and modernized.</p>
+<h2 id="symptoms_2">Symptoms<a class="headerlink" href="#symptoms_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Browser error:</li>
+<li><code>https://traefik.dulynoted.cloud/</code></li>
+<li><code>500 Internal Server Error</code></li>
+<li>Existing compose showed several likely issues:</li>
+<li>Traefik 2.6 in use</li>
+<li>missing explicit Docker provider flags for the socket proxy</li>
+<li>use of entrypoint names inconsistent with later config expectations</li>
+<li>file-based middleware reference <code>organizr-auth@file</code> without a confirmed file-provider layout</li>
+<li>legacy middleware names</li>
+<li>security-sensitive Cloudflare token exposed in compose</li>
+<li>Existing static config enabled <code>api.insecure: true</code></li>
+<li>Existing dynamic config used <code>ipWhiteList</code>, old entrypoint names, and Pi-hole redirect logic that needed review</li>
+</ul>
+<h2 id="actions-taken_2">Actions Taken<a class="headerlink" href="#actions-taken_2" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Reviewed the existing Traefik Docker Compose file.</li>
+<li>Identified specific configuration problems:</li>
+<li>missing provider wiring to the socket proxy</li>
+<li>dashboard service label conflict</li>
+<li>middleware dependency on file provider</li>
+<li>missing or inconsistent entrypoint definitions</li>
+<li>Recommended rotating the exposed Cloudflare DNS API token.</li>
+<li>Rewrote the Docker Compose file for Traefik v3.</li>
+<li>Standardized the configuration layout under <code>/opt/docker-apps/Traefik/config</code>.</li>
+<li>Updated the dynamic configuration:</li>
+<li>entrypoints changed from <code>https</code> to <code>websecure</code></li>
+<li><code>ipWhiteList</code> updated to <code>ipAllowList</code></li>
+<li>Pi-hole redirect logic corrected</li>
+<li>Updated the static <code>traefik.yml</code>:</li>
+<li>standardized <code>web</code> and <code>websecure</code></li>
+<li>moved file provider to a directory model</li>
+<li>disabled <code>api.insecure</code></li>
+<li>aligned with docker-socket-proxy</li>
+<li>Clarified <code>.env</code> format for <code>CF_DNS_API_TOKEN</code>.</li>
+<li>Clarified what DNS resolvers in ACME DNS-01 config do and why explicit resolvers may help.</li>
+</ol>
+<h2 id="key-findings_2">Key Findings<a class="headerlink" href="#key-findings_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The original compose depended on a docker-socket-proxy but did not configure Traefik’s Docker provider endpoint explicitly.</li>
+<li>The compose referenced <code>organizr-auth@file</code>, which required a valid dynamic file provider and readable config files.</li>
+<li>The dashboard should be exposed via <code>api@internal</code>, not through an invented load-balancer service definition on port 8080.</li>
+<li><code>api.insecure: true</code> was not appropriate when the dashboard was already being published through a secure router.</li>
+<li>Traefik v3 remains broadly compatible with the prior v2-style routing model, but static configuration needed cleanup and some deprecated constructs needed updating.</li>
+<li>Dynamic configuration should be stored under a directory such as <code>/etc/traefik/dynamic</code>, not tied to a single filename if the deployment is intended to grow.</li>
+<li><code>acme.json</code> permissions are critical; Traefik expects the file to exist and be restricted.</li>
+<li>Access log paths and dynamic file paths must exist on disk and be readable or writable as appropriate.</li>
+</ul>
+<h2 id="resolution_2">Resolution<a class="headerlink" href="#resolution_2" title="Permanent link">&para;</a></h2>
+<p>A new Traefik v3 configuration baseline was established:</p>
+<h3 id="static-config-location">Static config location<a class="headerlink" href="#static-config-location" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Host: <code>/opt/docker-apps/Traefik/config/traefik.yml</code></li>
+<li>Container: <code>/etc/traefik/traefik.yml</code></li>
+</ul>
+<h3 id="dynamic-config-location">Dynamic config location<a class="headerlink" href="#dynamic-config-location" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Host: <code>/opt/docker-apps/Traefik/config/dynamic/*.yml</code></li>
+<li>Container: <code>/etc/traefik/dynamic/*.yml</code></li>
+</ul>
+<h3 id="key-design-changes">Key design changes<a class="headerlink" href="#key-design-changes" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Traefik upgraded from <code>2.6</code> to a current v3-series image</li>
+<li>Docker provider explicitly enabled and pointed at <code>tcp://dockersocket:2375</code></li>
+<li>Dashboard served through <code>api@internal</code></li>
+<li>Entry points standardized to <code>web</code> and <code>websecure</code></li>
+<li>File provider changed to a directory-based layout</li>
+<li><code>api.insecure</code> disabled</li>
+<li>Cloudflare token moved to <code>.env</code></li>
+<li>Dynamic middleware modernized for Traefik v3</li>
+</ul>
+<h2 id="validation_2">Validation<a class="headerlink" href="#validation_2" title="Permanent link">&para;</a></h2>
+<p>Validation steps discussed or completed:
+- local Traefik transport checks succeeded
+- revised file locations and permissions were specified
+- post-change validation recommended:</p>
+<pre><code class="language-bash">docker compose restart traefik
+curl -Ik --resolve traefik.dulynoted.cloud:443:&lt;LAN_IP&gt; https://traefik.dulynoted.cloud
+</code></pre>
+<p>Expected result:
+- a valid dashboard response at the origin instead of a <code>500</code></p>
+<h2 id="follow-up-tasks_2">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Rotate the exposed Cloudflare API token immediately</li>
+<li>Replace old compose and static/dynamic config with the updated v3-compatible versions</li>
+<li>Ensure all dynamic files under <code>/opt/docker-apps/Traefik/config/dynamic</code> are readable</li>
+<li>Verify <code>acme.json</code> exists and has strict permissions</li>
+<li>Re-test dashboard origin path before testing through Cloudflare</li>
+<li>Re-enable Organizr or other forwardAuth only after base dashboard routing works</li>
+<li>Review all other router labels for consistent <code>websecure</code> entrypoint naming</li>
+</ul>
+<h2 id="lessons-learned_2">Lessons Learned<a class="headerlink" href="#lessons-learned_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>A <code>500</code> at the dashboard can be caused by middleware/provider wiring issues, not just transport errors.</li>
+<li>File-provider and permission mistakes are common failure points in Traefik migrations.</li>
+<li>Static and dynamic config should be separated cleanly before adding more services.</li>
+<li>Tokens should never be hardcoded in compose files.</li>
+<li>Modernizing Traefik is easier when the dashboard router is simplified first and auth is added back later.</li>
+</ul>
+<hr />
+<h1 id="traefik-dns-01-and-resolver-behavior-clarification">Traefik DNS-01 and Resolver Behavior Clarification<a class="headerlink" href="#traefik-dns-01-and-resolver-behavior-clarification" title="Permanent link">&para;</a></h1>
+<h2 id="summary_3">Summary<a class="headerlink" href="#summary_3" title="Permanent link">&para;</a></h2>
+<p>This short work segment clarified what the <code>resolvers</code> setting means in Traefik’s ACME DNS-01 configuration and why explicit public DNS resolvers may improve reliability.</p>
+<h2 id="environment_3">Environment<a class="headerlink" href="#environment_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Traefik</li>
+<li>ACME DNS-01 challenge</li>
+<li>Cloudflare DNS</li>
+<li>Public domain <code>dulynoted.cloud</code></li>
+</ul>
+<h2 id="problem_3">Problem<a class="headerlink" href="#problem_3" title="Permanent link">&para;</a></h2>
+<p>There was a need to understand the comment indicating that Cloudflare’s recursive resolvers could be preferred during DNS-01 validation.</p>
+<h2 id="symptoms_3">Symptoms<a class="headerlink" href="#symptoms_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Configuration included resolver lines but their role was unclear</li>
+<li>Need to understand whether the setting changed authoritative propagation or only validation behavior</li>
+</ul>
+<h2 id="actions-taken_3">Actions Taken<a class="headerlink" href="#actions-taken_3" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Explained the DNS-01 flow:</li>
+<li>create TXT record</li>
+<li>poll until visible</li>
+<li>Let’s Encrypt validates</li>
+<li>Clarified that the <code>resolvers</code> field controls which recursive resolvers Traefik uses to look up the TXT record.</li>
+<li>Explained why public resolvers such as <code>1.1.1.1</code> and <code>1.0.0.1</code> can be more reliable than local cached resolvers.</li>
+</ol>
+<h2 id="key-findings_3">Key Findings<a class="headerlink" href="#key-findings_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The setting does not force propagation.</li>
+<li>It can reduce failures caused by stale local caches, split DNS, or slow recursive resolvers.</li>
+<li>It is especially useful when the homelab uses Pi-hole, local DNS overrides, or other caching layers.</li>
+</ul>
+<h2 id="resolution_3">Resolution<a class="headerlink" href="#resolution_3" title="Permanent link">&para;</a></h2>
+<p>The meaning of the resolver block was clarified, and the current use of Cloudflare’s recursive resolvers remained acceptable.</p>
+<h2 id="validation_3">Validation<a class="headerlink" href="#validation_3" title="Permanent link">&para;</a></h2>
+<p>Suggested validation:</p>
+<pre><code class="language-bash">dig +short TXT _acme-challenge.dulynoted.cloud
+dig @1.1.1.1 +short TXT _acme-challenge.dulynoted.cloud
+</code></pre>
+<p>Compare what the default resolver sees versus what <code>1.1.1.1</code> sees.</p>
+<h2 id="follow-up-tasks_3">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Keep the explicit resolvers if DNS-01 propagation timing has ever been inconsistent</li>
+<li>Remove them only if there is a deliberate reason to rely on internal resolvers</li>
+</ul>
+<h2 id="lessons-learned_3">Lessons Learned<a class="headerlink" href="#lessons-learned_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>DNS challenge failures are often resolver-visibility problems, not provider-API problems.</li>
+<li>Public recursive resolvers can make ACME automation more deterministic in homelab environments.</li>
+</ul>
+<hr />
+<h1 id="command-reference">Command Reference<a class="headerlink" href="#command-reference" title="Permanent link">&para;</a></h1>
+<h2 id="command">Command<a class="headerlink" href="#command" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">pvecm status
+</code></pre>
+<p>Checks Proxmox cluster quorum and membership state.</p>
+<p>Why it was used:
+To confirm that the Proxmox cluster is healthy enough for HA decisions.</p>
+<p>Expected result:
+A quorate cluster with the expected nodes present.</p>
+<p>Success indicates:
+Cluster control plane is operational.</p>
+<p>Failure indicates:
+HA behavior may be unreliable or blocked by quorum issues.</p>
+<p>Risk:
+Low.</p>
+<hr />
+<h2 id="command_1">Command<a class="headerlink" href="#command_1" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">systemctl is-active pve-ha-crm pve-ha-lrm corosync
+</code></pre>
+<p>Checks whether Proxmox HA manager daemons and Corosync are active.</p>
+<p>Why it was used:
+To verify the HA stack is actually running on the nodes.</p>
+<p>Expected result:
+<code>active</code> for the relevant services.</p>
+<p>Success indicates:
+HA service processes are available.</p>
+<p>Failure indicates:
+HA cannot properly manage resources.</p>
+<p>Risk:
+Low.</p>
+<hr />
+<h2 id="command_2">Command<a class="headerlink" href="#command_2" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ha-manager status
+</code></pre>
+<p>Displays current Proxmox HA resource state.</p>
+<p>Why it was used:
+To confirm whether a VM is actually HA-managed and what state it is in.</p>
+<p>Expected result:
+The VM appears as an HA resource with expected state.</p>
+<p>Success indicates:
+The VM is under HA control.</p>
+<p>Failure indicates:
+The VM may only be using normal Proxmox startup behavior rather than HA.</p>
+<p>Risk:
+Low.</p>
+<hr />
+<h2 id="command_3">Command<a class="headerlink" href="#command_3" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ha-manager add vm:100 --group gpu-nodes --state started
+</code></pre>
+<p>Adds VM 100 to Proxmox HA and places it in an HA group.</p>
+<p>Why it was used:
+To manage startup/failover for a GPU-aware VM using HA.</p>
+<p>Important arguments:
+- <code>vm:100</code>: HA resource identifier
+- <code>--group gpu-nodes</code>: restricts eligible nodes
+- <code>--state started</code>: desired HA state</p>
+<p>Expected result:
+VM becomes an HA-managed resource.</p>
+<p>Success indicates:
+HA will attempt to keep the VM running on eligible nodes.</p>
+<p>Failure indicates:
+Resource or group config needs correction.</p>
+<p>Risk:
+Moderate. Changes HA behavior for a production VM.</p>
+<p>Safer alternative:
+Review <code>ha-manager status</code> and HA group definitions first.</p>
+<hr />
+<h2 id="command_4">Command<a class="headerlink" href="#command_4" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm set 100 --onboot 1
+</code></pre>
+<p>Enables node-boot autostart for VM 100.</p>
+<p>Why it was used:
+To make VM 100 start when a Proxmox node boots.</p>
+<p>Important arguments:
+- <code>100</code>: VM ID
+- <code>--onboot 1</code>: enable boot-time autostart</p>
+<p>Expected result:
+VM config reflects <code>onboot: 1</code>.</p>
+<p>Success indicates:
+The node will try to start the VM at boot if HA is not controlling it.</p>
+<p>Failure indicates:
+VM config change did not apply.</p>
+<p>Risk:
+Low.</p>
+<p>Important note:
+If the VM is HA-managed, HA state is the preferred control mechanism.</p>
+<hr />
+<h2 id="command_5">Command<a class="headerlink" href="#command_5" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm config 100 | grep -E 'onboot|startup'
+</code></pre>
+<p>Shows whether autostart and startup ordering are configured on VM 100.</p>
+<p>Why it was used:
+To verify boot-time VM settings.</p>
+<p>Expected result:
+Relevant config lines appear if configured.</p>
+<p>Success indicates:
+Autostart or startup order was saved.</p>
+<p>Failure indicates:
+Settings may not have been applied.</p>
+<p>Risk:
+Low.</p>
+<hr />
+<h2 id="command_6">Command<a class="headerlink" href="#command_6" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ss -ltnp '( sport = :80 or sport = :443 )'
+</code></pre>
+<p>Shows listening TCP sockets on ports 80 and 443.</p>
+<p>Why it was used:
+To confirm Traefik was actually listening on HTTP and HTTPS ports.</p>
+<p>Important arguments:
+- <code>-l</code>: listening sockets only
+- <code>-t</code>: TCP
+- <code>-n</code>: numeric output
+- <code>-p</code>: process info when available</p>
+<p>Expected result:
+Listeners on port 80 and 443 on the expected interfaces.</p>
+<p>Success indicates:
+The reverse proxy is bound to the right ports.</p>
+<p>Failure indicates:
+Traefik or container port publishing is broken.</p>
+<p>Risk:
+Low.</p>
+<hr />
+<h2 id="command_7">Command<a class="headerlink" href="#command_7" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">curl -sI http://127.0.0.1 | head -n1
+</code></pre>
+<p>Fetches only HTTP headers from local HTTP service and shows the first response line.</p>
+<p>Why it was used:
+To verify whether local HTTP on port 80 responds.</p>
+<p>Important arguments:
+- <code>-s</code>: silent
+- <code>-I</code>: HEAD request / headers only</p>
+<p>Expected result:
+A response such as <code>308 Permanent Redirect</code>.</p>
+<p>Success indicates:
+Local HTTP service is working.</p>
+<p>Failure indicates:
+Nothing is listening or the proxy is failing.</p>
+<p>Risk:
+Low.</p>
+<hr />
+<h2 id="command_8">Command<a class="headerlink" href="#command_8" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">curl -sIk https://127.0.0.1 -k | head -n1
+</code></pre>
+<p>Fetches HTTPS headers from localhost while ignoring certificate validation.</p>
+<p>Why it was used:
+To confirm HTTPS service reachability on the host.</p>
+<p>Important arguments:
+- <code>-I</code>: headers only
+- <code>-k</code>: ignore TLS certificate validation</p>
+<p>Expected result:
+An HTTPS response such as <code>404</code>, <code>200</code>, or redirect status.</p>
+<p>Success indicates:
+Traefik is reachable over HTTPS.</p>
+<p>Failure indicates:
+TLS listener or container publishing is broken.</p>
+<p>Risk:
+Low.</p>
+<hr />
+<h2 id="command_9">Command<a class="headerlink" href="#command_9" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">curl -Ik --resolve traefik.dulynoted.cloud:443:&lt;LAN_IP&gt; https://traefik.dulynoted.cloud
+</code></pre>
+<p>Forces a specific hostname to resolve to a chosen IP for a local origin test.</p>
+<p>Why it was used:
+To test Traefik routing using the real Host header without relying on public DNS.</p>
+<p>Important arguments:
+- <code>--resolve host:port:ip</code>: overrides DNS for this curl request</p>
+<p>Expected result:
+A proper dashboard response from the Traefik origin.</p>
+<p>Success indicates:
+Origin routing works and the issue may lie elsewhere.</p>
+<p>Failure indicates:
+Router, middleware, or certificate issues at the origin.</p>
+<p>Risk:
+Low.</p>
+<hr />
+<h2 id="command_10">Command<a class="headerlink" href="#command_10" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">docker network create traefik-proxy
+</code></pre>
+<p>Creates the external Docker bridge network used by Traefik and proxied services.</p>
+<p>Why it was used:
+To ensure the reverse-proxy network exists before starting services that rely on it.</p>
+<p>Expected result:
+Network exists after command completion.</p>
+<p>Success indicates:
+Containers can join the expected shared network.</p>
+<p>Failure indicates:
+Existing network conflict or Docker issue.</p>
+<p>Risk:
+Low.</p>
+<hr />
+<h2 id="command_11">Command<a class="headerlink" href="#command_11" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">docker compose pull
+</code></pre>
+<p>Pulls the latest images defined in the compose file.</p>
+<p>Why it was used:
+To update Traefik and related services.</p>
+<p>Expected result:
+Images download successfully.</p>
+<p>Success indicates:
+New versions are ready to deploy.</p>
+<p>Failure indicates:
+Registry, auth, or connectivity problems.</p>
+<p>Risk:
+Low to moderate. Pulling newer images may introduce behavior changes.</p>
+<hr />
+<h2 id="command_12">Command<a class="headerlink" href="#command_12" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">docker compose down
+</code></pre>
+<p>Stops and removes the current compose stack.</p>
+<p>Why it was used:
+To replace or restart the Traefik stack with updated configuration.</p>
+<p>Expected result:
+Containers are stopped and removed.</p>
+<p>Success indicates:
+The environment is ready for clean recreation.</p>
+<p>Failure indicates:
+Compose state or Docker daemon problems.</p>
+<p>Risk:
+Moderate. Causes service interruption.</p>
+<p>Safer alternative:
+For some changes, <code>docker compose restart</code> may be sufficient.</p>
+<hr />
+<h2 id="command_13">Command<a class="headerlink" href="#command_13" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">docker compose up -d
+</code></pre>
+<p>Starts the compose stack in detached mode.</p>
+<p>Why it was used:
+To bring the updated Traefik stack online.</p>
+<p>Important arguments:
+- <code>-d</code>: detached mode</p>
+<p>Expected result:
+Containers start successfully in the background.</p>
+<p>Success indicates:
+The stack is running.</p>
+<p>Failure indicates:
+Config, permissions, image, or dependency problems.</p>
+<p>Risk:
+Low to moderate.</p>
+<hr />
+<h2 id="command_14">Command<a class="headerlink" href="#command_14" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">docker compose restart traefik
+</code></pre>
+<p>Restarts only the Traefik service in the compose stack.</p>
+<p>Why it was used:
+To apply static or dynamic configuration changes.</p>
+<p>Expected result:
+Traefik restarts cleanly.</p>
+<p>Success indicates:
+New config is loaded.</p>
+<p>Failure indicates:
+Syntax, permission, or dependency problems.</p>
+<p>Risk:
+Low to moderate. Causes brief reverse-proxy outage.</p>
+<hr />
+<h2 id="command_15">Command<a class="headerlink" href="#command_15" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">docker logs --tail=200 traefik
+</code></pre>
+<p>Shows the most recent log lines for the Traefik container.</p>
+<p>Why it was used:
+To troubleshoot dashboard <code>500</code> errors and config parsing issues.</p>
+<p>Important arguments:
+- <code>--tail=200</code>: show recent lines only</p>
+<p>Expected result:
+Useful log output indicating router, provider, middleware, or TLS problems.</p>
+<p>Success indicates:
+Logs are available for diagnosis.</p>
+<p>Failure indicates:
+Container may not be running.</p>
+<p>Risk:
+Low.</p>
+<hr />
+<h2 id="command_16">Command<a class="headerlink" href="#command_16" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">arp -an | grep &lt;OLD_IP&gt;
+</code></pre>
+<p>Shows ARP cache entries for the reused old IP address.</p>
+<p>Why it was used:
+To verify whether clients were still associating the reused IP with the previous host MAC address.</p>
+<p>Expected result:
+ARP entry maps to the current host MAC.</p>
+<p>Success indicates:
+Layer-2 resolution is current.</p>
+<p>Failure indicates:
+Stale ARP caching may be misdirecting traffic.</p>
+<p>Risk:
+Low.</p>
+<hr />
+<h2 id="command_17">Command<a class="headerlink" href="#command_17" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ping -c2 &lt;OLD_IP&gt;
+</code></pre>
+<p>Tests basic IP connectivity to the reused old IP address.</p>
+<p>Why it was used:
+To confirm the new host is reachable on that address.</p>
+<p>Expected result:
+Successful replies.</p>
+<p>Success indicates:
+Host is reachable at layer 3.</p>
+<p>Failure indicates:
+Network path or host-address issue.</p>
+<p>Risk:
+Low.</p>
+<hr />
+<h2 id="command_18">Command<a class="headerlink" href="#command_18" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ssh &lt;OLD_IP&gt;
+</code></pre>
+<p>Attempts SSH connectivity to the host at the reused IP.</p>
+<p>Why it was used:
+To verify that the host answering on the reused IP is the expected system.</p>
+<p>Expected result:
+SSH connection to the new host.</p>
+<p>Success indicates:
+The new host is reachable and likely owns the IP.</p>
+<p>Failure indicates:
+Wrong system answering, firewall issue, or host down.</p>
+<p>Risk:
+Low.</p>
+<hr />
+<h2 id="command_19">Command<a class="headerlink" href="#command_19" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ip neigh flush all
+</code></pre>
+<p>Flushes the Linux ARP/neighbor cache.</p>
+<p>Why it was used:
+To clear stale client-side address resolution after a host-IP migration.</p>
+<p>Expected result:
+Neighbor cache is cleared and rebuilt on next traffic.</p>
+<p>Success indicates:
+Subsequent traffic should learn the current MAC.</p>
+<p>Failure indicates:
+Permissions or OS differences.</p>
+<p>Risk:
+Moderate. Temporarily disrupts cached neighbor entries.</p>
+<p>Safer alternative:
+Clear only the specific affected neighbor entry if possible.</p>
+<hr />
+<h2 id="command_20">Command<a class="headerlink" href="#command_20" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">chmod 600 /opt/docker-apps/Traefik/config/letsencrypt/acme.json
+</code></pre>
+<p>Restricts the ACME storage file so only the owner can read/write it.</p>
+<p>Why it was used:
+Traefik expects strict permissions on <code>acme.json</code>.</p>
+<p>Expected result:
+Mode becomes <code>600</code>.</p>
+<p>Success indicates:
+Traefik can use the file without permission complaints.</p>
+<p>Failure indicates:
+Permission or path issue.</p>
+<p>Risk:
+Low.</p>
+<hr />
+<h2 id="command_21">Command<a class="headerlink" href="#command_21" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">chown root:root /opt/docker-apps/Traefik/config/letsencrypt/acme.json
+</code></pre>
+<p>Sets file ownership of <code>acme.json</code> to root.</p>
+<p>Why it was used:
+To align ownership with Traefik container expectations when mounted.</p>
+<p>Expected result:
+File becomes owned by root.</p>
+<p>Success indicates:
+File ownership is standardized.</p>
+<p>Failure indicates:
+Filesystem or privilege issue.</p>
+<p>Risk:
+Low.</p>
+<hr />
+<h2 id="command_22">Command<a class="headerlink" href="#command_22" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">mkdir -p /opt/docker-apps/Traefik/config/{dynamic,logs,letsencrypt}
+</code></pre>
+<p>Creates required Traefik config directories.</p>
+<p>Why it was used:
+To establish the file layout expected by the compose and static config.</p>
+<p>Expected result:
+Directories exist.</p>
+<p>Success indicates:
+Traefik mount paths can contain required files.</p>
+<p>Failure indicates:
+Permission or filesystem issues.</p>
+<p>Risk:
+Low.</p>
+<hr />
+<h2 id="command_23">Command<a class="headerlink" href="#command_23" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">touch /opt/docker-apps/Traefik/config/logs/access.log
+</code></pre>
+<p>Creates the Traefik access log file if it does not already exist.</p>
+<p>Why it was used:
+The configured access log path must exist and be writable.</p>
+<p>Expected result:
+File exists.</p>
+<p>Success indicates:
+Traefik can write access logs.</p>
+<p>Failure indicates:
+Permission or path issue.</p>
+<p>Risk:
+Low.</p>
+<hr />
+<h2 id="command_24">Command<a class="headerlink" href="#command_24" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">touch /opt/docker-apps/Traefik/config/letsencrypt/acme.json
+</code></pre>
+<p>Creates the ACME storage file if it does not already exist.</p>
+<p>Why it was used:
+Traefik expects the file to exist at startup.</p>
+<p>Expected result:
+File exists and can then be permissioned correctly.</p>
+<p>Success indicates:
+ACME storage path is ready.</p>
+<p>Failure indicates:
+Permission or path issue.</p>
+<p>Risk:
+Low.</p>
+<hr />
+<h2 id="command_25">Command<a class="headerlink" href="#command_25" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">chmod 644 /opt/docker-apps/Traefik/config/dynamic/*.yml
+</code></pre>
+<p>Makes dynamic config files readable to the container.</p>
+<p>Why it was used:
+Traefik must be able to read file-provider configuration.</p>
+<p>Expected result:
+Files become world-readable.</p>
+<p>Success indicates:
+File provider can read them.</p>
+<p>Failure indicates:
+Path or shell expansion issue.</p>
+<p>Risk:
+Low.</p>
+<hr />
+<h2 id="command_26">Command<a class="headerlink" href="#command_26" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">dig +short TXT _acme-challenge.dulynoted.cloud
+</code></pre>
+<p>Queries the TXT record for the ACME challenge using the system default resolver.</p>
+<p>Why it was used:
+To see whether the challenge record is visible through the current DNS path.</p>
+<p>Expected result:
+Current challenge TXT record appears when present.</p>
+<p>Success indicates:
+Resolver sees the challenge record.</p>
+<p>Failure indicates:
+Propagation or resolver-visibility issue.</p>
+<p>Risk:
+Low.</p>
+<hr />
+<h2 id="command_27">Command<a class="headerlink" href="#command_27" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">dig @1.1.1.1 +short TXT _acme-challenge.dulynoted.cloud
+</code></pre>
+<p>Queries the TXT record for the ACME challenge specifically against Cloudflare’s recursive resolver.</p>
+<p>Why it was used:
+To compare public-recursive visibility versus local resolver visibility.</p>
+<p>Expected result:
+TXT record appears if public propagation is visible there.</p>
+<p>Success indicates:
+Public resolver sees the challenge correctly.</p>
+<p>Failure indicates:
+Propagation delay or authoritative publication issue.</p>
+<p>Risk:
+Low.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

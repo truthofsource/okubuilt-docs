@@ -1,0 +1,3781 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Infrastructure, cloud, automation, security, and operations documentation portfolio.">
+      
+      
+        <meta name="author" content="Kingsley Oku">
+      
+      
+      
+        <link rel="prev" href="../proxmox-cephfs-snips-cloudinit-vm100-runbook/">
+      
+      
+        <link rel="next" href="../proxmox-cloudinit-ceph-docker-runbook/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Cloud-Init Snippet Path and Storage Mapping Troubleshooting - OkuBuilt Infrastructure & Cloud Portfolio</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#cloud-init-snippet-path-and-storage-mapping-troubleshooting" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-header__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OkuBuilt Infrastructure & Cloud Portfolio
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Cloud-Init Snippet Path and Storage Mapping Troubleshooting
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-nav__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OkuBuilt Infrastructure & Cloud Portfolio
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/proxmox-traefik-opnsense-ha-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox, Traefik, OPNsense HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Automation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../proxmox-cephfs-snips-cloudinit-vm100-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox CephFS Snips Cloud-Init VM100
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Docker VM Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Docker VM Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../proxmox-cloudinit-ceph-docker-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../proxmox-cloudinit-ceph-docker-vm100-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker VM100 Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../proxmox-cloudinit-cicustom-snippet-storage-ha/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init cicustom Snippet Storage HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vm100-docker-startup-mountguard-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Startup Mount Guard Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compute
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/debian-docker-vm-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/home-assistant-os-proxmox-ceph-vm-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home Assistant OS Proxmox Ceph VM Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/homelab-vm100-rebuild-restore-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab VM100 Rebuild Restore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Containers & Apps
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Containers & Apps
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/debian-docker-vm-rebuild-cloudinit-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM Rebuild Cloud-Init
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-apps-offen-restore-gluetun-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Apps Offen Restore Gluetun Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-compose-memos-image-tag-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Compose Memos Image Tag Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/gluetun-corrupted-servers-permissions-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gluetun Corrupted Servers Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/proxmox-traefik-console-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Traefik Console Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-docker29-upgrade-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Docker Upgrade Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-proxy-docker-network-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Proxy Docker Network
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm100-docker-data-disk-recovery-cloud-init-hardening/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Data Disk Recovery Cloud-Init Hardening
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm110-provisioning-guest-agent-docker-appdata-permissions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM110 Provisioning Guest Agent Docker AppData Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring & Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Monitoring & Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-ceph-memtest-ram-fault-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Ceph Memtest RAM Fault
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-host-kernel-ram-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Host Kernel RAM Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-nuc-e1000e-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox NUC e1000e Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networking
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Networking
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/att-fiber-opnsense-outage-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AT&T Fiber OPNsense Outage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-lan-instability-storm-control-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN Instability Storm Control
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-lan-ip-dhcp-static-device-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN IP DHCP Static Device
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-opt2-lan-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense OPT2 LAN
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-web-gui-documentation-and-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense Web GUI Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/wireguard-ec2-proxmox-lxc-homelab-remote-access/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WireGuard EC2 Proxmox LXC Homelab Remote Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Security
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/homelab-ssh-ansible-nut-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab SSH Ansible NUT Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/proxmox-root-login-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Root Login Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_9" id="__nav_2_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Storage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Storage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/ceph-mainframe-osd-mon-mgr-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Mainframe OSD MON MGR Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/ceph-monitor-crash-loop-mainframe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Monitor Crash Loop Mainframe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/proxmox-ha-live-migration-ceph-vm-state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox HA Live Migration Ceph VM State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/truenas-vm-zfs-hba-planning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TrueNAS VM ZFS HBA Planning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/vm100-ceph-gluetun-troubleshooting-runbook-15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Ceph Gluetun Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/vm100-docker-nas-offen-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker NAS Offen Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Runbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runbooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_11" id="__nav_2_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting Incidents
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting Incidents
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting-incidents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloud
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cloud
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cloud/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portfolio
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Portfolio
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../portfolio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/documentation-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation Standards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/placement-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Placement Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/recurring-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recurring Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/command-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="cloud-init-snippet-path-and-storage-mapping-troubleshooting">Cloud-Init Snippet Path and Storage Mapping Troubleshooting<a class="headerlink" href="#cloud-init-snippet-path-and-storage-mapping-troubleshooting" title="Permanent link">&para;</a></h1>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>Work focused on getting a Proxmox VM to consume custom cloud-init user-data and network-data YAML files for a Debian Docker VM. The primary goal was to change the VM IP through cloud-init and preserve the existing homelab provisioning logic in YAML.</p>
+<h2 id="environment">Environment<a class="headerlink" href="#environment" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Proxmox VE host: <code>mainframe</code></li>
+<li>VM ID: <code>100</code></li>
+<li>VM role: Debian Docker VM</li>
+<li>Cloud-init snippets storage ID: <code>snips</code></li>
+<li><code>snips</code> storage config:</li>
+<li>type: <code>dir</code></li>
+<li>path: <code>/var/lib/vz/snips</code></li>
+<li>content: <code>snippets</code></li>
+<li>shared: <code>0</code></li>
+<li>Cloud-init disk storage: <code>cephpool</code></li>
+<li>Network: <code>192.168.16.0/24</code></li>
+<li>Gateway: <code>192.168.16.1</code></li>
+<li>Intended VM IP: <code>192.168.16.3</code></li>
+<li>Guest NIC names observed later: <code>eth0</code>, alternate names <code>enp0s18</code>, <code>ens18</code></li>
+</ul>
+<h2 id="problem">Problem<a class="headerlink" href="#problem" title="Permanent link">&para;</a></h2>
+<p>The VM was expected to read custom cloud-init YAML from Proxmox snippet storage, but Proxmox kept generating default cloud-init content instead of embedding the custom user-data.</p>
+<h2 id="symptoms">Symptoms<a class="headerlink" href="#symptoms" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>qm cloudinit dump 100 user</code> repeatedly showed only default content such as:</li>
+</ul>
+<pre><code class="language-yaml">#cloud-config
+hostname: debian-docker
+manage_etc_hosts: true
+fqdn: debian-docker
+chpasswd:
+  expire: False
+users:
+  - default
+package_upgrade: true
+</code></pre>
+<ul>
+<li>Initial snippet lookup failed because the file was not found in the assumed directory:</li>
+</ul>
+<pre><code class="language-text">ls: cannot access '/var/lib/vz/snippets/docker-userdata.yml': No such file or directory
+</code></pre>
+<ul>
+<li>Even after correcting the path, Proxmox still embedded default user-data instead of the custom YAML.</li>
+</ul>
+<h2 id="actions-taken">Actions Taken<a class="headerlink" href="#actions-taken" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Verified the <code>cicustom</code> setting on VM 100.</li>
+</ol>
+<pre><code class="language-bash">qm set 100 --cicustom &quot;user=snips:snippets/docker-userdata.yml,network=snips:snippets/docker-net.yml&quot;
+qm cloudinit update 100
+</code></pre>
+<p>Purpose: tell Proxmox to use custom user-data and network-data snippets.</p>
+<ol>
+<li>Confirmed the <code>snips</code> storage configuration.</li>
+</ol>
+<pre><code class="language-bash">cat /etc/pve/storage.cfg | grep -A3 snips
+</code></pre>
+<p>Purpose: identify the real snippet storage path.</p>
+<ol>
+<li>Determined that <code>snips</code> maps to:</li>
+</ol>
+<pre><code class="language-text">/var/lib/vz/snips/snippets/
+</code></pre>
+<p>not:</p>
+<pre><code class="language-text">/var/lib/vz/snippets/
+</code></pre>
+<ol>
+<li>Created or moved snippet files into the correct directory.</li>
+</ol>
+<pre><code class="language-bash">mkdir -p /var/lib/vz/snips/snippets
+</code></pre>
+<ol>
+<li>Verified Proxmox could see and resolve the snippet files.</li>
+</ol>
+<pre><code class="language-bash">pvesm list snips
+pvesm path snips:snippets/docker-userdata.yml
+pvesm path snips:snippets/docker-meta.yml
+</code></pre>
+<p>Purpose: confirm Proxmox storage resolution.</p>
+<ol>
+<li>Tested both <code>.yml</code> and <code>.yaml</code> naming, cleaned CRLF line endings, checked for BOM-like issues, and verified permissions.</li>
+</ol>
+<pre><code class="language-bash">sed -i 's/\r$//' /var/lib/vz/snips/snippets/docker-*.yml
+chmod 0644 /var/lib/vz/snips/snippets/docker-*.yml
+</code></pre>
+<ol>
+<li>Tested with a minimal cloud-init file to rule out YAML complexity.</li>
+</ol>
+<pre><code class="language-bash">cat &gt; /var/lib/vz/snips/snippets/user-min.yaml &lt;&lt;'EOF'
+#cloud-config
+write_files:
+  - path: /root/OK_MIN_SNIPS
+    permissions: '0644'
+    content: hi
+EOF
+</code></pre>
+<p>Purpose: isolate whether any valid <code>user=</code> snippet would embed.</p>
+<h2 id="key-findings">Key Findings<a class="headerlink" href="#key-findings" title="Permanent link">&para;</a></h2>
+<p><strong>Facts</strong>
+- The correct snippet storage path for <code>snips:</code> was <code>/var/lib/vz/snips/snippets/</code>.
+- Proxmox resolved the files correctly:</p>
+<pre><code class="language-bash">pvesm path snips:snippets/docker-userdata.yml
+</code></pre>
+<p>returned:</p>
+<pre><code class="language-text">/var/lib/vz/snips/snippets/docker-userdata.yml
+</code></pre>
+<ul>
+<li><code>pvesm list snips</code> showed the files as valid snippet objects.</li>
+<li>Despite this, <code>qm cloudinit dump 100 user</code> still showed only default user-data.</li>
+<li>The same fallback happened even with a minimal test file.</li>
+</ul>
+<p><strong>Interpretation</strong>
+- The problem was no longer the file path once <code>snips</code> was corrected.
+- The issue appeared to be in the Proxmox cloud-init embed step for <code>cicustom user=...</code>, because Proxmox could resolve the file but still generated default user-data.</p>
+<h2 id="resolution">Resolution<a class="headerlink" href="#resolution" title="Permanent link">&para;</a></h2>
+<p>Path confusion was resolved, but the core <code>cicustom user=</code> embedding issue remained unresolved in this session.</p>
+<h2 id="validation">Validation<a class="headerlink" href="#validation" title="Permanent link">&para;</a></h2>
+<p>Success was partially validated:
+- Proxmox storage resolved the files correctly.
+- Snippet files appeared in <code>pvesm list snips</code>.
+- Full validation failed because <code>qm cloudinit dump 100 user</code> never reflected the custom YAML.</p>
+<h2 id="follow-up-tasks">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Avoid assuming <code>/var/lib/vz/snippets/</code> when a custom snippets storage is configured.</li>
+<li>Prefer verifying snippet storage with <code>pvesm path</code> before troubleshooting YAML content.</li>
+<li>Use a manual NoCloud ISO as a fallback when <code>qm cloudinit dump</code> keeps showing default content.</li>
+</ul>
+<h2 id="lessons-learned">Lessons Learned<a class="headerlink" href="#lessons-learned" title="Permanent link">&para;</a></h2>
+<ul>
+<li>In Proxmox, <code>storageID:snippets/file.yml</code> maps to <code>&lt;storage path&gt;/snippets/file.yml</code>, not necessarily <code>/var/lib/vz/snippets/</code>.</li>
+<li><code>pvesm path</code> is the quickest way to prove the real filesystem mapping.</li>
+<li>If <code>qm cloudinit dump &lt;vmid&gt; user</code> keeps showing default content, the problem is likely the embed pipeline rather than YAML syntax alone.</li>
+</ul>
+<h1 id="vm-100-rebuild-attempt-and-accidental-ceph-rbd-data-disk-deletion">VM 100 Rebuild Attempt and Accidental Ceph RBD Data Disk Deletion<a class="headerlink" href="#vm-100-rebuild-attempt-and-accidental-ceph-rbd-data-disk-deletion" title="Permanent link">&para;</a></h1>
+<h2 id="summary_1">Summary<a class="headerlink" href="#summary_1" title="Permanent link">&para;</a></h2>
+<p>After repeated cloud-init failures, the VM was rebuilt. During that process, the secondary Ceph RBD disk intended for Docker data was detached incorrectly and deleted.</p>
+<h2 id="environment_1">Environment<a class="headerlink" href="#environment_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Proxmox host: <code>mainframe</code></li>
+<li>VM ID: <code>100</code></li>
+<li>Storage pool: <code>cephpool</code></li>
+<li>Data disk that was intended to be preserved: <code>cephpool:vm-100-disk-1</code></li>
+<li>Cloud-init disk: <code>cephpool:vm-100-cloudinit</code></li>
+</ul>
+<h2 id="problem_1">Problem<a class="headerlink" href="#problem_1" title="Permanent link">&para;</a></h2>
+<p>The goal was to preserve the Docker data disk while recreating VM 100, but the chosen Proxmox disk removal action deleted the Ceph RBD image instead.</p>
+<h2 id="symptoms_1">Symptoms<a class="headerlink" href="#symptoms_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>After deleting <code>scsi1</code>, Proxmox began removing an image from Ceph:</li>
+</ul>
+<pre><code class="language-text">Removing image: 100% complete...done.
+</code></pre>
+<ul>
+<li>Reattaching failed:</li>
+</ul>
+<pre><code class="language-text">rbd error: rbd: error opening image vm-100-disk-1: (2) No such file or directory
+</code></pre>
+<h2 id="actions-taken_1">Actions Taken<a class="headerlink" href="#actions-taken_1" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Attempted to detach the Docker data disk:</li>
+</ol>
+<pre><code class="language-bash">qm set 100 --delete scsi1
+</code></pre>
+<p>Purpose: intended to remove the disk from VM config while preserving the underlying RBD volume.</p>
+<ol>
+<li>
+<p>Destroyed and recreated the VM configuration.</p>
+</li>
+<li>
+<p>Attempted to reattach the old data disk:</p>
+</li>
+</ol>
+<pre><code class="language-bash">qm set 100 --scsi1 cephpool:vm-100-disk-1
+</code></pre>
+<p>Purpose: restore the preserved Docker data disk.</p>
+<h2 id="key-findings_1">Key Findings<a class="headerlink" href="#key-findings_1" title="Permanent link">&para;</a></h2>
+<p><strong>Facts</strong>
+- <code>qm set 100 --delete scsi1</code> removed the disk entry and triggered Ceph image deletion.
+- The RBD image <code>vm-100-disk-1</code> no longer existed afterward.
+- Later reattach attempts failed because the volume was gone.</p>
+<p><strong>Interpretation</strong>
+- On this setup, using <code>qm set --delete &lt;disk&gt;</code> on an attached Ceph disk was destructive.
+- The operation behaved as “remove and delete,” not “detach and preserve.”</p>
+<h2 id="resolution_1">Resolution<a class="headerlink" href="#resolution_1" title="Permanent link">&para;</a></h2>
+<p>The Docker data disk was lost during the rebuild attempt. The workflow was abandoned in favor of creating a fresh VM and fresh data disk.</p>
+<h2 id="validation_1">Validation<a class="headerlink" href="#validation_1" title="Permanent link">&para;</a></h2>
+<p>The loss was confirmed by:</p>
+<pre><code class="language-bash">qm set 100 --scsi1 cephpool:vm-100-disk-1
+</code></pre>
+<p>returning:</p>
+<pre><code class="language-text">rbd error: rbd: error opening image vm-100-disk-1: (2) No such file or directory
+</code></pre>
+<h2 id="follow-up-tasks_1">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Use the Proxmox GUI “Detach” behavior or explicitly move disks to <code>unusedX</code> if preservation is required.</li>
+<li>Treat <code>qm set --delete &lt;disk&gt;</code> as risky on Ceph-backed VM disks.</li>
+<li>Confirm backup or snapshot coverage before destructive disk operations.</li>
+</ul>
+<h2 id="lessons-learned_1">Lessons Learned<a class="headerlink" href="#lessons-learned_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Do not assume “delete from VM config” means “preserve storage volume.”</li>
+<li>On Proxmox with Ceph RBD, disk deletion commands can be immediately destructive.</li>
+<li>Secondary data disks should be backed up or snapshotted before rebuild operations.</li>
+</ul>
+<h1 id="fresh-vm-100-clone-from-debian-12-cloud-template">Fresh VM 100 Clone from Debian 12 Cloud Template<a class="headerlink" href="#fresh-vm-100-clone-from-debian-12-cloud-template" title="Permanent link">&para;</a></h1>
+<h2 id="summary_2">Summary<a class="headerlink" href="#summary_2" title="Permanent link">&para;</a></h2>
+<p>A fresh VM 100 was created from a Debian 12 cloud template. The Proxmox VM name was changed to <code>docker</code>, a new 200 GB data disk was attached, and cloud-init networking from Proxmox was configured successfully.</p>
+<h2 id="environment_2">Environment<a class="headerlink" href="#environment_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Proxmox host: <code>mainframe</code></li>
+<li>New VM ID: <code>100</code></li>
+<li>Proxmox VM name: <code>docker</code></li>
+<li>Template source: Debian 12 cloud template</li>
+<li>Boot disk: 50 GB clone of template</li>
+<li>Data disk: <code>cephpool:vm-100-disk-1,size=200G</code></li>
+<li>Cloud-init disk: <code>cephpool:vm-100-cloudinit</code></li>
+<li>Static IP from Proxmox: <code>192.168.16.3/24</code></li>
+<li>Gateway: <code>192.168.16.1</code></li>
+<li>Nameservers: <code>192.168.16.1</code>, <code>1.1.1.1</code></li>
+</ul>
+<h2 id="problem_2">Problem<a class="headerlink" href="#problem_2" title="Permanent link">&para;</a></h2>
+<p>A clean rebuild was needed after the earlier cloud-init and VM state became unreliable.</p>
+<h2 id="symptoms_2">Symptoms<a class="headerlink" href="#symptoms_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The new VM cloned successfully.</li>
+<li>Proxmox-generated network config worked.</li>
+<li>Proxmox still embedded default cloud-init user-data instead of the custom YAML, even after moving snippets to <code>local:snippets</code>.</li>
+</ul>
+<h2 id="actions-taken_2">Actions Taken<a class="headerlink" href="#actions-taken_2" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Cloned VM 100 from the Debian 12 cloud template.</li>
+<li>Set the Proxmox VM name to <code>docker</code>.</li>
+<li>Applied VM resources, networking, and console settings.</li>
+<li>Attached a new 200 GB Ceph data disk:</li>
+</ol>
+<pre><code class="language-bash">qm set 100 --scsi1 cephpool:200
+</code></pre>
+<ol>
+<li>Applied cloud-init network fields:</li>
+</ol>
+<pre><code class="language-bash">qm set 100 --ipconfig0 ip=192.168.16.3/24,gw=192.168.16.1
+qm set 100 --nameserver 192.168.16.1,1.1.1.1
+</code></pre>
+<ol>
+<li>Attempted to use <code>local:snippets</code> instead of <code>snips:snippets</code> for user-data and meta-data.</li>
+</ol>
+<h2 id="key-findings_2">Key Findings<a class="headerlink" href="#key-findings_2" title="Permanent link">&para;</a></h2>
+<p><strong>Facts</strong>
+- The clone succeeded and transferred approximately 50 GB from the template.
+- Proxmox created the new data disk successfully.
+- <code>qm cloudinit dump 100 network</code> showed a valid Proxmox-generated network configuration.
+- <code>qm cloudinit dump 100 user</code> still showed default user-data:</p>
+<pre><code class="language-yaml">users:
+  - default
+</code></pre>
+<p><strong>Interpretation</strong>
+- Network configuration via Proxmox fields worked even when custom user-data did not.
+- The custom user-data embed issue was not limited to the <code>snips</code> storage path.</p>
+<h2 id="resolution_2">Resolution<a class="headerlink" href="#resolution_2" title="Permanent link">&para;</a></h2>
+<p>The fresh VM was created successfully and was recoverable. Networking from Proxmox worked. Custom cloud-init user-data remained unresolved through the standard <code>cicustom</code> path.</p>
+<h2 id="validation_2">Validation<a class="headerlink" href="#validation_2" title="Permanent link">&para;</a></h2>
+<p>Successful parts were validated by:
+- clone completion
+- creation of <code>scsi1</code> on <code>cephpool</code>
+- valid network output in:</p>
+<pre><code class="language-bash">qm cloudinit dump 100 network
+</code></pre>
+<h2 id="follow-up-tasks_2">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Keep using Proxmox-generated networking for reliability.</li>
+<li>Use a manual NoCloud ISO for user-data if <code>cicustom user=</code> continues to fall back to defaults.</li>
+<li>Reintroduce provisioning steps in a controlled way after guest access is confirmed.</li>
+</ul>
+<h2 id="lessons-learned_2">Lessons Learned<a class="headerlink" href="#lessons-learned_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Separate cloud-init networking from cloud-init user-data when troubleshooting.</li>
+<li>Proxmox <code>ipconfig0</code> can work even when <code>cicustom user=</code> does not.</li>
+<li>Fresh cloning is often faster than prolonged recovery after cloud-init state corruption.</li>
+</ul>
+<h1 id="guest-recovery-console-access-and-network-boot-stall">Guest Recovery, Console Access, and Network Boot Stall<a class="headerlink" href="#guest-recovery-console-access-and-network-boot-stall" title="Permanent link">&para;</a></h1>
+<h2 id="summary_3">Summary<a class="headerlink" href="#summary_3" title="Permanent link">&para;</a></h2>
+<p>After the fresh VM was created, guest recovery focused on restoring console access, working login credentials, and stable networking. The VM later stalled at <code>systemd-networkd-wait-online</code>, which was fixed inside the guest.</p>
+<h2 id="environment_3">Environment<a class="headerlink" href="#environment_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Guest OS: Debian 12 cloud image</li>
+<li>Proxmox VM name: <code>docker</code></li>
+<li>Guest hostname observed in some stages: <code>debian-docker</code></li>
+<li>Console access methods:</li>
+<li>Proxmox noVNC / VGA console</li>
+<li>serial console</li>
+<li>Network manager in guest: <code>systemd-networkd</code></li>
+<li>Guest NIC observed as:</li>
+<li>primary runtime name: <code>eth0</code></li>
+<li>alternative names: <code>enp0s18</code>, <code>ens18</code></li>
+</ul>
+<h2 id="problem_3">Problem<a class="headerlink" href="#problem_3" title="Permanent link">&para;</a></h2>
+<p>The VM became hard to access after <code>cloud-init clean</code>, and later boot stalls occurred at <code>systemd-networkd-wait-online</code>.</p>
+<h2 id="symptoms_3">Symptoms<a class="headerlink" href="#symptoms_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Root login in console was blocked:</li>
+</ul>
+<pre><code class="language-text">root account blocked
+</code></pre>
+<ul>
+<li>Serial console usability was inconsistent.</li>
+<li>The VM stalled at:</li>
+</ul>
+<pre><code class="language-text">systemd-networkd-wait-online
+</code></pre>
+<ul>
+<li>Networking later showed the guest had:</li>
+<li>IPv4 <code>192.168.16.3</code></li>
+<li>gateway <code>192.168.16.1</code></li>
+</ul>
+<h2 id="actions-taken_3">Actions Taken<a class="headerlink" href="#actions-taken_3" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Set built-in cloud-init fields instead of relying on custom user-data:</li>
+</ol>
+<pre><code class="language-bash">qm set 100 --ciuser debian
+qm set 100 --cipassword 'Temp-Password-123!'
+qm set 100 --ipconfig0 ip=dhcp
+</code></pre>
+<p>Purpose: regain access with a known non-root user.</p>
+<ol>
+<li>Switched console behavior:</li>
+</ol>
+<pre><code class="language-bash">qm set 100 --serial0 socket --vga std
+</code></pre>
+<p>Purpose: improve console usability through Proxmox.</p>
+<ol>
+<li>Logged into the guest and disabled the wait-online service:</li>
+</ol>
+<pre><code class="language-bash">systemctl disable --now systemd-networkd-wait-online.service
+systemctl mask systemd-networkd-wait-online.service
+</code></pre>
+<p>Purpose: stop boot delays when the interface did not satisfy wait-online conditions.</p>
+<ol>
+<li>Disabled cloud-init guest-side network rendering:</li>
+</ol>
+<pre><code class="language-bash">printf 'network: {config: disabled}\n' &gt; /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
+</code></pre>
+<p>Purpose: prevent future conflicts between cloud-init and manual/systemd-networkd config.</p>
+<ol>
+<li>Created a static <code>systemd-networkd</code> file for the guest.</li>
+</ol>
+<pre><code class="language-bash">cat &gt;/etc/systemd/network/10-ens18.network &lt;&lt;'EOF'
+[Match]
+Name=ens18
+
+[Network]
+Address=192.168.16.3/24
+Gateway=192.168.16.1
+DNS=192.168.16.1
+DNS=1.1.1.1
+EOF
+</code></pre>
+<p>Purpose: define the desired static IP in-guest.</p>
+<ol>
+<li>Restarted network services and validated:</li>
+</ol>
+<pre><code class="language-bash">systemctl restart systemd-networkd
+networkctl status ens18
+</code></pre>
+<ol>
+<li>Noted the real runtime device naming:</li>
+<li><code>eth0</code> was the active name</li>
+<li>
+<p><code>ens18</code> and <code>enp0s18</code> were alternate names</p>
+</li>
+<li>
+<p>Planned a more robust match file using both names and MAC address.</p>
+</li>
+</ol>
+<h2 id="key-findings_3">Key Findings<a class="headerlink" href="#key-findings_3" title="Permanent link">&para;</a></h2>
+<p><strong>Facts</strong>
+- Root login was blocked because the cloud image kept root locked.
+- Console access worked with the <code>debian</code> user rather than root.
+- The network came up successfully with static IPv4 <code>192.168.16.3</code>.
+- <code>networkctl status ens18</code> showed the link as routable and online.
+- The interface naming was broader than expected; matching only <code>ens18</code> was less robust than matching <code>eth0</code> plus alternate names and/or MAC.</p>
+<p><strong>Interpretation</strong>
+- The boot stall was caused by wait-online behavior rather than total network failure.
+- Managing guest networking directly with <code>systemd-networkd</code> was more reliable than waiting on cloud-init user-data for this rebuild.</p>
+<h2 id="resolution_3">Resolution<a class="headerlink" href="#resolution_3" title="Permanent link">&para;</a></h2>
+<p>Console access was restored with a normal user, and the boot stall at <code>systemd-networkd-wait-online</code> was resolved by masking the wait service and managing the guest network directly with <code>systemd-networkd</code>.</p>
+<h2 id="validation_3">Validation<a class="headerlink" href="#validation_3" title="Permanent link">&para;</a></h2>
+<p>Validation succeeded with:</p>
+<pre><code class="language-bash">networkctl status ens18
+ip -4 addr show dev ens18
+ip route
+ping -c2 192.168.16.1
+ping -c2 1.1.1.1
+getent hosts debian.org
+</code></pre>
+<p>Observed state:
+- static IP assigned
+- default gateway present
+- DNS configured
+- network online</p>
+<h2 id="follow-up-tasks_3">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Replace the initial interface match file with a more robust file matching <code>eth0</code>, <code>ens18</code>, <code>enp0s18</code>, and MAC address.</li>
+<li>Set Proxmox cloud-init networking to manual if in-guest <code>systemd-networkd</code> becomes the long-term source of truth.</li>
+<li>Confirm boot remains fast after reboot.</li>
+</ul>
+<h2 id="lessons-learned_3">Lessons Learned<a class="headerlink" href="#lessons-learned_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Cloud images often lock root by default; use a non-root user for recovery.</li>
+<li><code>systemd-networkd-wait-online</code> can block boot even when the interface is nearly functional.</li>
+<li>In-guest network ownership should be explicit; do not let cloud-init and manual networking both try to manage the same interface.</li>
+</ul>
+<h1 id="manual-nocloud-iso-workaround-for-cloud-init-user-data">Manual NoCloud ISO Workaround for Cloud-Init User-Data<a class="headerlink" href="#manual-nocloud-iso-workaround-for-cloud-init-user-data" title="Permanent link">&para;</a></h1>
+<h2 id="summary_4">Summary<a class="headerlink" href="#summary_4" title="Permanent link">&para;</a></h2>
+<p>Because Proxmox kept embedding default user-data instead of the custom YAML, a manual NoCloud <code>cidata</code> ISO was built from the user-data file and attached directly to the VM as a CDROM.</p>
+<h2 id="environment_4">Environment<a class="headerlink" href="#environment_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Proxmox host: <code>mainframe</code></li>
+<li>VM ID: <code>100</code></li>
+<li>Manual ISO path: <code>/var/lib/vz/template/iso/ci-100-userdata.iso</code></li>
+<li>Source user-data file: <code>/var/lib/vz/snippets/docker-userdata.yml</code></li>
+<li>Temporary staging path: <code>/tmp/ci-100/</code></li>
+<li>ISO label: <code>cidata</code></li>
+</ul>
+<h2 id="problem_4">Problem<a class="headerlink" href="#problem_4" title="Permanent link">&para;</a></h2>
+<p>Standard <code>qm cloudinit update</code> never embedded the custom user-data file, even from <code>local:snippets</code>.</p>
+<h2 id="symptoms_4">Symptoms<a class="headerlink" href="#symptoms_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>qm cloudinit dump 100 user</code> kept returning the default fallback.</li>
+<li>Both <code>snips:</code> and <code>local:</code> snippet sources exhibited the same behavior.</li>
+<li>A manual ISO was needed to bypass the embed path.</li>
+</ul>
+<h2 id="actions-taken_4">Actions Taken<a class="headerlink" href="#actions-taken_4" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Staged user-data and meta-data:</li>
+</ol>
+<pre><code class="language-bash">mkdir -p /tmp/ci-100
+cp /var/lib/vz/snippets/docker-userdata.yml /tmp/ci-100/user-data
+printf 'instance-id: iid-%s\nlocal-hostname: docker\n' &quot;$VMID-$(date +%s)&quot; &gt; /tmp/ci-100/meta-data
+</code></pre>
+<ol>
+<li>Built a NoCloud ISO using <code>genisoimage</code> or equivalent.</li>
+<li>Mounted the ISO on the host and confirmed contents:</li>
+</ol>
+<pre><code class="language-text">meta-data
+user-data
+</code></pre>
+<ol>
+<li>Replaced the Proxmox cloud-init CDROM with the manual ISO:</li>
+</ol>
+<pre><code class="language-bash">qm set 100 --delete ide2
+qm set 100 --ide2 local:iso/ci-100-userdata.iso,media=cdrom
+</code></pre>
+<h2 id="key-findings_4">Key Findings<a class="headerlink" href="#key-findings_4" title="Permanent link">&para;</a></h2>
+<p><strong>Facts</strong>
+- The manual ISO was created successfully.
+- Mounting the ISO on the Proxmox host showed the expected files.
+- The ISO attachment to VM 100 succeeded.</p>
+<p><strong>Interpretation</strong>
+- This approach bypassed Proxmox’s failing <code>cicustom user=</code> embed mechanism.
+- The manual ISO became the most deterministic path to get the original cloud-init YAML into the guest.</p>
+<h2 id="resolution_4">Resolution<a class="headerlink" href="#resolution_4" title="Permanent link">&para;</a></h2>
+<p>The manual NoCloud ISO workaround was prepared and attached. At the point this documentation request was made, the workaround had been staged but not yet fully validated as the final long-term provisioning method.</p>
+<h2 id="validation_4">Validation<a class="headerlink" href="#validation_4" title="Permanent link">&para;</a></h2>
+<p>Successful host-side validation:
+- ISO built without error
+- ISO contents visible when loop-mounted
+- ISO attached to VM as <code>ide2</code></p>
+<p>Guest-side validation of full YAML execution was still pending at the end of the session.</p>
+<h2 id="follow-up-tasks_4">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Boot the guest with the manual ISO attached.</li>
+<li>Run:</li>
+</ul>
+<pre><code class="language-bash">cloud-init clean
+reboot
+</code></pre>
+<p>inside the VM if needed to force a fresh run.
+- Verify package installation, files, timers, and mount configuration from the YAML.
+- Decide whether to keep the manual ISO workflow or continue troubleshooting Proxmox embed behavior.</p>
+<h2 id="lessons-learned_4">Lessons Learned<a class="headerlink" href="#lessons-learned_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li>A manual NoCloud ISO is a strong fallback when Proxmox <code>cicustom</code> user-data embedding fails silently.</li>
+<li>Always verify the ISO contents before attaching it to a VM.</li>
+<li>Separating host-side ISO build validation from guest-side cloud-init execution validation keeps troubleshooting clearer.</li>
+</ul>
+<h1 id="command-reference">Command Reference<a class="headerlink" href="#command-reference" title="Permanent link">&para;</a></h1>
+<h2 id="command">Command<a class="headerlink" href="#command" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm set 100 --cicustom &quot;user=snips:snippets/docker-userdata.yml,network=snips:snippets/docker-net.yml&quot;
+</code></pre>
+<p><strong>What it does:</strong> Tells Proxmox VM 100 to use custom cloud-init user-data and network-data snippet files.<br />
+<strong>Why it was used:</strong> To make the VM consume the saved YAML instead of autogenerated defaults.<br />
+<strong>Expected result:</strong> <code>qm cloudinit update 100</code> should build an ISO containing the specified files.<br />
+<strong>Success indicates:</strong> <code>qm cloudinit dump 100 user</code> and <code>qm cloudinit dump 100 network</code> show the custom content.<br />
+<strong>Failure indicates:</strong> Proxmox fell back to defaults or could not embed the snippets.<br />
+<strong>Risk:</strong> Low.</p>
+<h2 id="command_1">Command<a class="headerlink" href="#command_1" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm cloudinit update 100
+</code></pre>
+<p><strong>What it does:</strong> Rebuilds the cloud-init ISO for VM 100.<br />
+<strong>Why it was used:</strong> Required after changing any cloud-init setting, such as <code>cicustom</code>, <code>ipconfig0</code>, or metadata.<br />
+<strong>Expected result:</strong> Proxmox prints <code>generating cloud-init ISO</code>.<br />
+<strong>Success indicates:</strong> New cloud-init data is available to the VM at next boot.<br />
+<strong>Failure indicates:</strong> The ISO was not rebuilt or underlying storage had an issue.<br />
+<strong>Risk:</strong> Low.</p>
+<h2 id="command_2">Command<a class="headerlink" href="#command_2" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm cloudinit dump 100 user
+</code></pre>
+<p><strong>What it does:</strong> Shows the effective user-data content currently embedded in the VM’s cloud-init ISO.<br />
+<strong>Why it was used:</strong> To prove whether custom user-data was actually embedded.<br />
+<strong>Expected result:</strong> Full YAML from the snippet file.<br />
+<strong>Success indicates:</strong> The VM should see the custom user-data on boot.<br />
+<strong>Failure indicates:</strong> If it shows default content, Proxmox embedded fallback data instead.<br />
+<strong>Risk:</strong> Low.</p>
+<h2 id="command_3">Command<a class="headerlink" href="#command_3" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm cloudinit dump 100 network
+</code></pre>
+<p><strong>What it does:</strong> Shows the effective network config embedded in the cloud-init ISO.<br />
+<strong>Why it was used:</strong> To verify whether Proxmox networking or custom network YAML was being applied.<br />
+<strong>Expected result:</strong> Either custom network YAML or Proxmox-generated v1 config.<br />
+<strong>Success indicates:</strong> Network configuration is present for the guest.<br />
+<strong>Failure indicates:</strong> Missing or incorrect network config in the ISO.<br />
+<strong>Risk:</strong> Low.</p>
+<h2 id="command_4">Command<a class="headerlink" href="#command_4" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">cat /etc/pve/storage.cfg | grep -A3 snips
+</code></pre>
+<p><strong>What it does:</strong> Displays the <code>snips</code> storage definition and its next three lines.<br />
+<strong>Why it was used:</strong> To find the real path and content type of the snippets storage.<br />
+<strong>Expected result:</strong> The <code>path</code> and <code>content snippets</code> lines.<br />
+<strong>Success indicates:</strong> You know where Proxmox expects snippet files.<br />
+<strong>Failure indicates:</strong> Storage config may be missing or misnamed.<br />
+<strong>Risk:</strong> Low.</p>
+<h2 id="command_5">Command<a class="headerlink" href="#command_5" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">mkdir -p /var/lib/vz/snips/snippets
+</code></pre>
+<p><strong>What it does:</strong> Creates the actual snippet directory path for the <code>snips</code> storage.<br />
+<strong>Why it was used:</strong> The original assumption about <code>/var/lib/vz/snippets</code> was wrong.<br />
+<strong>Expected result:</strong> Directory exists without error.<br />
+<strong>Success indicates:</strong> Snippet files can be placed where <code>snips:</code> expects them.<br />
+<strong>Failure indicates:</strong> Filesystem permission or path issue.<br />
+<strong>Risk:</strong> Low.</p>
+<h2 id="command_6">Command<a class="headerlink" href="#command_6" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">pvesm list snips
+</code></pre>
+<p><strong>What it does:</strong> Lists objects visible through the <code>snips</code> Proxmox storage.<br />
+<strong>Why it was used:</strong> To confirm Proxmox could see the snippet files.<br />
+<strong>Expected result:</strong> Entries like <code>snips:snippets/docker-userdata.yml</code>.<br />
+<strong>Success indicates:</strong> Storage registration and file presence are correct.<br />
+<strong>Failure indicates:</strong> Files are in the wrong place or storage is inactive.<br />
+<strong>Risk:</strong> Low.</p>
+<h2 id="command_7">Command<a class="headerlink" href="#command_7" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">pvesm path snips:snippets/docker-userdata.yml
+</code></pre>
+<p><strong>What it does:</strong> Resolves a Proxmox storage object into its real filesystem path.<br />
+<strong>Why it was used:</strong> To prove which directory Proxmox was actually using.<br />
+<strong>Expected result:</strong> <code>/var/lib/vz/snips/snippets/docker-userdata.yml</code>.<br />
+<strong>Success indicates:</strong> The snippet storage mapping is understood correctly.<br />
+<strong>Failure indicates:</strong> Proxmox cannot resolve the object.<br />
+<strong>Risk:</strong> Low.</p>
+<h2 id="command_8">Command<a class="headerlink" href="#command_8" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sed -i 's/\r$//' /var/lib/vz/snips/snippets/docker-*.yml
+</code></pre>
+<p><strong>What it does:</strong> Removes Windows CRLF carriage returns from the YAML files.<br />
+<strong>Why it was used:</strong> CRLF line endings can break YAML parsing or cloud-init behavior.<br />
+<strong>Expected result:</strong> Files remain present with Unix line endings.<br />
+<strong>Success indicates:</strong> Line-ending corruption is ruled out.<br />
+<strong>Failure indicates:</strong> File path or shell glob issue.<br />
+<strong>Risk:</strong> Low.</p>
+<h2 id="command_9">Command<a class="headerlink" href="#command_9" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">chmod 0644 /var/lib/vz/snips/snippets/docker-*.yml
+</code></pre>
+<p><strong>What it does:</strong> Sets standard readable permissions on the snippet files.<br />
+<strong>Why it was used:</strong> To ensure Proxmox could read the files.<br />
+<strong>Expected result:</strong> Files become owner-writable and world-readable.<br />
+<strong>Success indicates:</strong> Permissions are unlikely to block embed.<br />
+<strong>Failure indicates:</strong> File ownership or path issue.<br />
+<strong>Risk:</strong> Low.</p>
+<h2 id="command_10">Command<a class="headerlink" href="#command_10" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm config 100 | egrep -i 'cicustom|ide2|cloudinit|ipconfig|ciuser|sshkeys'
+</code></pre>
+<p><strong>What it does:</strong> Displays the cloud-init-relevant parts of the VM config.<br />
+<strong>Why it was used:</strong> To verify that cloud-init disk, custom snippets, and CI fields were actually set.<br />
+<strong>Expected result:</strong> <code>ide2</code>, <code>cicustom</code>, and other relevant lines.<br />
+<strong>Success indicates:</strong> Proxmox VM config contains the intended cloud-init settings.<br />
+<strong>Failure indicates:</strong> Required config values were not applied.<br />
+<strong>Risk:</strong> Low.</p>
+<h2 id="command_11">Command<a class="headerlink" href="#command_11" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm set 100 --delete scsi1
+</code></pre>
+<p><strong>What it does:</strong> Removes the <code>scsi1</code> disk definition from VM 100.<br />
+<strong>Why it was used:</strong> Intended as a detach step before rebuilding the VM.<br />
+<strong>Expected result:</strong> Disk no longer attached to VM.<br />
+<strong>Actual result in this session:</strong> The underlying Ceph RBD volume was deleted.<br />
+<strong>Success/failure meaning:</strong> On this setup, “success” was destructive.<br />
+<strong>Risk:</strong> <strong>High / destructive.</strong><br />
+<strong>Safer alternative:</strong> Use the Proxmox GUI detach workflow or move the disk to <code>unusedX</code> before rebuild.</p>
+<h2 id="command_12">Command<a class="headerlink" href="#command_12" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm destroy 100 --destroy-unreferenced-disks 0
+</code></pre>
+<p><strong>Likely command used</strong><br />
+<strong>What it does:</strong> Destroys VM 100 while attempting to preserve unreferenced disks.<br />
+<strong>Why it was used:</strong> To rebuild the VM without intentionally deleting preserved data disks.<br />
+<strong>Expected result:</strong> VM config removed, detached disks retained.<br />
+<strong>Failure indicates:</strong> Detached disk handling was not actually safe beforehand.<br />
+<strong>Risk:</strong> Medium to high if disk state is misunderstood.</p>
+<h2 id="command_13">Command<a class="headerlink" href="#command_13" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm clone &lt;TEMPLATE_VMID&gt; 100 --name docker --full 1 --storage cephpool
+</code></pre>
+<p><strong>Likely command used</strong><br />
+<strong>What it does:</strong> Creates a full clone of the Debian 12 cloud template as VM 100 with the Proxmox name <code>docker</code>.<br />
+<strong>Why it was used:</strong> To start fresh after the failed recovery/rebuild path.<br />
+<strong>Expected result:</strong> New VM 100 with a 50 GB boot disk copied from the template.<br />
+<strong>Success indicates:</strong> Clean starting point for provisioning.<br />
+<strong>Failure indicates:</strong> Template, storage, or cluster issue.<br />
+<strong>Risk:</strong> Medium due to storage consumption.</p>
+<h2 id="command_14">Command<a class="headerlink" href="#command_14" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm set 100 --name docker
+</code></pre>
+<p><strong>What it does:</strong> Sets the Proxmox display name of VM 100 to <code>docker</code>.<br />
+<strong>Why it was used:</strong> The user wanted the Proxmox VM name changed, not the in-guest hostname.<br />
+<strong>Expected result:</strong> VM appears as <code>docker</code> in Proxmox inventory.<br />
+<strong>Success indicates:</strong> Proxmox metadata updated.<br />
+<strong>Failure indicates:</strong> VMID conflict or CLI issue.<br />
+<strong>Risk:</strong> Low.</p>
+<h2 id="command_15">Command<a class="headerlink" href="#command_15" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm set 100 --scsi1 cephpool:200
+</code></pre>
+<p><strong>What it does:</strong> Creates and attaches a new 200 GB Ceph RBD disk at <code>scsi1</code>.<br />
+<strong>Why it was used:</strong> To replace the lost Docker data disk with a fresh one.<br />
+<strong>Expected result:</strong> New disk object such as <code>cephpool:vm-100-disk-1,size=200G</code>.<br />
+<strong>Success indicates:</strong> Fresh data disk available, usually as <code>/dev/sdb</code>.<br />
+<strong>Failure indicates:</strong> Storage syntax, pool, or Ceph issue.<br />
+<strong>Risk:</strong> Medium.</p>
+<h2 id="command_16">Command<a class="headerlink" href="#command_16" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm set 100 --ipconfig0 ip=192.168.16.3/24,gw=192.168.16.1
+</code></pre>
+<p><strong>What it does:</strong> Tells Proxmox to generate static cloud-init network config for the first NIC.<br />
+<strong>Why it was used:</strong> To reliably set networking even while custom user-data embedding was broken.<br />
+<strong>Expected result:</strong> <code>qm cloudinit dump 100 network</code> shows static IP and gateway.<br />
+<strong>Success indicates:</strong> Cloud-init networking from Proxmox should work on boot.<br />
+<strong>Failure indicates:</strong> Guest may not receive the expected IP.<br />
+<strong>Risk:</strong> Low.</p>
+<h2 id="command_17">Command<a class="headerlink" href="#command_17" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm set 100 --nameserver 192.168.16.1,1.1.1.1
+</code></pre>
+<p><strong>What it does:</strong> Sets DNS servers in Proxmox’s cloud-init network generation.<br />
+<strong>Why it was used:</strong> To match the intended static network configuration.<br />
+<strong>Expected result:</strong> Nameserver list appears in the generated network config.<br />
+<strong>Success indicates:</strong> Guest should receive those resolvers on boot.<br />
+<strong>Failure indicates:</strong> DNS may be missing or malformed in the generated config.<br />
+<strong>Risk:</strong> Low.</p>
+<h2 id="command_18">Command<a class="headerlink" href="#command_18" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm set 100 --ciuser debian
+qm set 100 --cipassword 'Temp-Password-123!'
+</code></pre>
+<p><strong>What they do:</strong> Set the default cloud-init username and password for the VM.<br />
+<strong>Why they were used:</strong> To recover guest access when custom user-data was not applying.<br />
+<strong>Expected result:</strong> A usable <code>debian</code> login account appears after cloud-init runs.<br />
+<strong>Success indicates:</strong> Console access can be restored without relying on root.<br />
+<strong>Failure indicates:</strong> Cloud-init did not rerun or did not apply the fields.<br />
+<strong>Risk:</strong> Medium because a temporary password is being stored in config.</p>
+<h2 id="command_19">Command<a class="headerlink" href="#command_19" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm set 100 --serial0 socket --vga std
+</code></pre>
+<p><strong>What it does:</strong> Enables a serial socket and uses a standard VGA console.<br />
+<strong>Why it was used:</strong> To improve console usability during guest recovery.<br />
+<strong>Expected result:</strong> Easier noVNC input and usable serial terminal fallback.<br />
+<strong>Success indicates:</strong> Console login becomes possible.<br />
+<strong>Failure indicates:</strong> The problem is in the guest boot/login path, not just console mode.<br />
+<strong>Risk:</strong> Low.</p>
+<h2 id="command_20">Command<a class="headerlink" href="#command_20" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">cloud-init clean
+</code></pre>
+<p><strong>What it does:</strong> Clears cloud-init instance state inside the guest so the next boot runs initialization again.<br />
+<strong>Why it was used:</strong> To force cloud-init to reapply configuration after changing metadata or the attached CD.<br />
+<strong>Expected result:</strong> Next boot reprocesses cloud-init inputs.<br />
+<strong>Success indicates:</strong> New cloud-init inputs should be consumed.<br />
+<strong>Failure indicates:</strong> Guest may reapply bad/default inputs and become inaccessible.<br />
+<strong>Risk:</strong> Medium. Use carefully when the cloud-init source is not yet confirmed.</p>
+<h2 id="command_21">Command<a class="headerlink" href="#command_21" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">systemctl disable --now systemd-networkd-wait-online.service
+systemctl mask systemd-networkd-wait-online.service
+</code></pre>
+<p><strong>What they do:</strong> Stop, disable, and hard-mask the wait-online service.<br />
+<strong>Why they were used:</strong> The VM stalled during boot at <code>systemd-networkd-wait-online</code>.<br />
+<strong>Expected result:</strong> Faster boot without blocking on network-online state.<br />
+<strong>Success indicates:</strong> Boot proceeds even if the network is slow or partially misdetected.<br />
+<strong>Failure indicates:</strong> Another boot dependency is still blocking startup.<br />
+<strong>Risk:</strong> Low. The tradeoff is that some services may start before networking is fully ready.</p>
+<h2 id="command_22">Command<a class="headerlink" href="#command_22" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">printf 'network: {config: disabled}\n' &gt; /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
+</code></pre>
+<p><strong>What it does:</strong> Disables cloud-init network rendering inside the guest.<br />
+<strong>Why it was used:</strong> To prevent cloud-init and <code>systemd-networkd</code> from both trying to manage the NIC.<br />
+<strong>Expected result:</strong> Guest networking is controlled only by local <code>.network</code> files.<br />
+<strong>Success indicates:</strong> Future reboots avoid config fights.<br />
+<strong>Failure indicates:</strong> Cloud-init may still overwrite network config.<br />
+<strong>Risk:</strong> Low.</p>
+<h2 id="command_23">Command<a class="headerlink" href="#command_23" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">cat &gt;/etc/systemd/network/10-ens18.network &lt;&lt;'EOF'
+[Match]
+Name=ens18
+
+[Network]
+Address=192.168.16.3/24
+Gateway=192.168.16.1
+DNS=192.168.16.1
+DNS=1.1.1.1
+EOF
+</code></pre>
+<p><strong>What it does:</strong> Creates a static <code>systemd-networkd</code> configuration file for the VM NIC.<br />
+<strong>Why it was used:</strong> To make networking work in-guest when cloud-init networking was unreliable.<br />
+<strong>Expected result:</strong> The guest comes up at <code>192.168.16.3/24</code> with the specified gateway and DNS.<br />
+<strong>Success indicates:</strong> <code>networkctl</code>, <code>ip route</code>, and ping tests succeed.<br />
+<strong>Failure indicates:</strong> Wrong interface match or another network manager conflict.<br />
+<strong>Risk:</strong> Low.</p>
+<h2 id="command_24">Command<a class="headerlink" href="#command_24" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">systemctl restart systemd-networkd
+networkctl status ens18
+</code></pre>
+<p><strong>What they do:</strong> Restart <code>systemd-networkd</code> and inspect the link state of the configured NIC.<br />
+<strong>Why they were used:</strong> To apply and validate the static network file.<br />
+<strong>Expected result:</strong> Interface shows <code>configured</code>, <code>routable</code>, and <code>online</code>.<br />
+<strong>Success indicates:</strong> Networking is healthy.<br />
+<strong>Failure indicates:</strong> The match file or route settings are wrong.<br />
+<strong>Risk:</strong> Low.</p>
+<h2 id="command_25">Command<a class="headerlink" href="#command_25" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">cat &gt;/home/debian/.ssh/authorized_keys &lt;&lt;'EOF'
+...
+EOF
+</code></pre>
+<p><strong>Likely command used</strong><br />
+<strong>What it does:</strong> Installs the user’s SSH public key for the <code>debian</code> account.<br />
+<strong>Why it was used:</strong> To restore key-based access after guest login was recovered.<br />
+<strong>Expected result:</strong> SSH key authentication works to the VM.<br />
+<strong>Success indicates:</strong> Passwordless login is possible.<br />
+<strong>Failure indicates:</strong> File permissions, home ownership, or key format issue.<br />
+<strong>Risk:</strong> Low.</p>
+<h2 id="command_26">Command<a class="headerlink" href="#command_26" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">mkdir -p /tmp/ci-100
+cp /var/lib/vz/snippets/docker-userdata.yml /tmp/ci-100/user-data
+printf 'instance-id: iid-%s\nlocal-hostname: docker\n' &quot;$VMID-$(date +%s)&quot; &gt; /tmp/ci-100/meta-data
+</code></pre>
+<p><strong>What it does:</strong> Stages NoCloud <code>user-data</code> and <code>meta-data</code> files for manual ISO creation.<br />
+<strong>Why it was used:</strong> To bypass Proxmox’s failing cloud-init embed path.<br />
+<strong>Expected result:</strong> Two plain-text files ready for inclusion in a <code>cidata</code> ISO.<br />
+<strong>Success indicates:</strong> Manual NoCloud ISO creation can proceed.<br />
+<strong>Failure indicates:</strong> Path or file-generation issue.<br />
+<strong>Risk:</strong> Low.</p>
+<h2 id="command_27">Command<a class="headerlink" href="#command_27" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">genisoimage -quiet -output /var/lib/vz/template/iso/ci-100-userdata.iso -volid cidata -joliet -rock /tmp/ci-100/user-data /tmp/ci-100/meta-data
+</code></pre>
+<p><strong>Likely command used</strong><br />
+<strong>What it does:</strong> Builds a NoCloud ISO labeled <code>cidata</code> from the staged user-data and meta-data files.<br />
+<strong>Why it was used:</strong> To provide cloud-init inputs without relying on Proxmox <code>cicustom</code> embedding.<br />
+<strong>Expected result:</strong> A bootable cloud-init ISO file containing <code>user-data</code> and <code>meta-data</code>.<br />
+<strong>Success indicates:</strong> The guest can consume the YAML directly from the ISO.<br />
+<strong>Failure indicates:</strong> Missing ISO tool or file path issue.<br />
+<strong>Risk:</strong> Low.</p>
+<h2 id="command_28">Command<a class="headerlink" href="#command_28" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">mount -o loop /var/lib/vz/template/iso/ci-100-userdata.iso /mnt/ci
+ls -lah /mnt/ci
+umount /mnt/ci
+</code></pre>
+<p><strong>What they do:</strong> Loop-mount the generated ISO, list its contents, and unmount it.<br />
+<strong>Why they were used:</strong> To verify that <code>meta-data</code> and <code>user-data</code> actually made it into the ISO.<br />
+<strong>Expected result:</strong> Both files are visible in the mounted ISO.<br />
+<strong>Success indicates:</strong> Host-side ISO creation succeeded.<br />
+<strong>Failure indicates:</strong> The ISO is empty or malformed.<br />
+<strong>Risk:</strong> Low.</p>
+<h2 id="command_29">Command<a class="headerlink" href="#command_29" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm set 100 --delete ide2
+qm set 100 --ide2 local:iso/ci-100-userdata.iso,media=cdrom
+</code></pre>
+<p><strong>What they do:</strong> Remove the existing cloud-init CD and attach the manually built NoCloud ISO as the VM’s CDROM.<br />
+<strong>Why they were used:</strong> To bypass Proxmox’s embedded cloud-init disk and present a known-good <code>cidata</code> ISO instead.<br />
+<strong>Expected result:</strong> VM boots with the manual ISO attached on <code>ide2</code>.<br />
+<strong>Success indicates:</strong> Cloud-init can read the attached NoCloud ISO directly.<br />
+<strong>Failure indicates:</strong> ISO path or VM CD configuration issue.<br />
+<strong>Risk:</strong> Medium if the wrong CD is detached or replaced.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

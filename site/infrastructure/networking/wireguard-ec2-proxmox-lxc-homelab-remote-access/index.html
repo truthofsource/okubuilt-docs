@@ -1,0 +1,3560 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Infrastructure, cloud, automation, security, and operations documentation portfolio.">
+      
+      
+        <meta name="author" content="Kingsley Oku">
+      
+      
+      
+        <link rel="prev" href="../opnsense-web-gui-documentation-and-runbook/">
+      
+      
+        <link rel="next" href="../../security/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>WireGuard Hub-and-Spoke Remote Access (EC2 Hub + Proxmox LXC Spoke) - OkuBuilt Infrastructure & Cloud Portfolio</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#wireguard-hub-and-spoke-remote-access-ec2-hub-proxmox-lxc-spoke" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-header__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OkuBuilt Infrastructure & Cloud Portfolio
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              WireGuard Hub-and-Spoke Remote Access (EC2 Hub + Proxmox LXC Spoke)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-nav__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OkuBuilt Infrastructure & Cloud Portfolio
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/proxmox-traefik-opnsense-ha-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox, Traefik, OPNsense HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Automation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cephfs-snips-cloudinit-vm100-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox CephFS Snips Cloud-Init VM100
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloud-init-docker-vm-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Docker VM Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-vm100-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker VM100 Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-cicustom-snippet-storage-ha/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init cicustom Snippet Storage HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/vm100-docker-startup-mountguard-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Startup Mount Guard Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compute
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/debian-docker-vm-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/home-assistant-os-proxmox-ceph-vm-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home Assistant OS Proxmox Ceph VM Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/homelab-vm100-rebuild-restore-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab VM100 Rebuild Restore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Containers & Apps
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Containers & Apps
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/debian-docker-vm-rebuild-cloudinit-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM Rebuild Cloud-Init
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-apps-offen-restore-gluetun-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Apps Offen Restore Gluetun Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-compose-memos-image-tag-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Compose Memos Image Tag Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/gluetun-corrupted-servers-permissions-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gluetun Corrupted Servers Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/proxmox-traefik-console-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Traefik Console Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-docker29-upgrade-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Docker Upgrade Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-proxy-docker-network-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Proxy Docker Network
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm100-docker-data-disk-recovery-cloud-init-hardening/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Data Disk Recovery Cloud-Init Hardening
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm110-provisioning-guest-agent-docker-appdata-permissions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM110 Provisioning Guest Agent Docker AppData Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring & Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Monitoring & Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-ceph-memtest-ram-fault-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Ceph Memtest RAM Fault
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-host-kernel-ram-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Host Kernel RAM Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-nuc-e1000e-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox NUC e1000e Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networking
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Networking
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../att-fiber-opnsense-outage-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AT&T Fiber OPNsense Outage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../opnsense-lan-instability-storm-control-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN Instability Storm Control
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../opnsense-lan-ip-dhcp-static-device-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN IP DHCP Static Device
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../opnsense-opt2-lan-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense OPT2 LAN
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../opnsense-web-gui-documentation-and-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense Web GUI Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WireGuard EC2 Proxmox LXC Homelab Remote Access
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WireGuard EC2 Proxmox LXC Homelab Remote Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Actions Taken">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-created-an-aws-ec2-hub-for-wireguard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1) Created an AWS EC2 “Hub” for WireGuard
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-installed-and-configured-wireguard-on-ec2-via-installer-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2) Installed and configured WireGuard on EC2 via installer script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-provisioned-a-proxmox-lxc-spoke-to-maintain-a-tunnel-to-ec2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3) Provisioned a Proxmox LXC “Spoke” to maintain a tunnel to EC2
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-installed-wireguard-tooling-inside-the-lxc-and-brought-up-wg0" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4) Installed WireGuard tooling inside the LXC and brought up wg0
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-added-a-mobile-client-spoke-2-and-imported-config-via-qr-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5) Added a mobile client (“Spoke 2”) and imported config via QR code
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-enabled-full-access-to-homelab-lan-through-the-lxc-routing-nat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6) Enabled full access to homelab LAN through the LXC (routing + NAT)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Findings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hub-vs-spoke-clarification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hub vs Spoke clarification
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-this-bypasses-cgnat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How this bypasses CGNAT
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dynamic-home-ip-is-irrelevant-in-this-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dynamic home IP is irrelevant in this design
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#allowedips-determines-split-vs-full-tunnel-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AllowedIPs determines split vs full tunnel behavior
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Security
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/homelab-ssh-ansible-nut-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab SSH Ansible NUT Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/proxmox-root-login-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Root Login Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_9" id="__nav_2_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Storage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Storage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/ceph-mainframe-osd-mon-mgr-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Mainframe OSD MON MGR Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/ceph-monitor-crash-loop-mainframe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Monitor Crash Loop Mainframe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/proxmox-ha-live-migration-ceph-vm-state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox HA Live Migration Ceph VM State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/truenas-vm-zfs-hba-planning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TrueNAS VM ZFS HBA Planning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/vm100-ceph-gluetun-troubleshooting-runbook-15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Ceph Gluetun Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/vm100-docker-nas-offen-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker NAS Offen Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Runbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runbooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_11" id="__nav_2_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting Incidents
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting Incidents
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting-incidents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloud
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cloud
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cloud/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portfolio
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Portfolio
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../portfolio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/documentation-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation Standards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/placement-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Placement Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/recurring-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recurring Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/command-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Actions Taken">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-created-an-aws-ec2-hub-for-wireguard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1) Created an AWS EC2 “Hub” for WireGuard
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-installed-and-configured-wireguard-on-ec2-via-installer-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2) Installed and configured WireGuard on EC2 via installer script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-provisioned-a-proxmox-lxc-spoke-to-maintain-a-tunnel-to-ec2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3) Provisioned a Proxmox LXC “Spoke” to maintain a tunnel to EC2
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-installed-wireguard-tooling-inside-the-lxc-and-brought-up-wg0" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4) Installed WireGuard tooling inside the LXC and brought up wg0
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-added-a-mobile-client-spoke-2-and-imported-config-via-qr-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5) Added a mobile client (“Spoke 2”) and imported config via QR code
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-enabled-full-access-to-homelab-lan-through-the-lxc-routing-nat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6) Enabled full access to homelab LAN through the LXC (routing + NAT)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Findings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hub-vs-spoke-clarification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hub vs Spoke clarification
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-this-bypasses-cgnat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How this bypasses CGNAT
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dynamic-home-ip-is-irrelevant-in-this-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dynamic home IP is irrelevant in this design
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#allowedips-determines-split-vs-full-tunnel-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AllowedIPs determines split vs full tunnel behavior
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="wireguard-hub-and-spoke-remote-access-ec2-hub-proxmox-lxc-spoke">WireGuard Hub-and-Spoke Remote Access (EC2 Hub + Proxmox LXC Spoke)<a class="headerlink" href="#wireguard-hub-and-spoke-remote-access-ec2-hub-proxmox-lxc-spoke" title="Permanent link">&para;</a></h1>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>Designed a remote-access approach for a homelab that avoids ISP limitations (notably CGNAT and changing home public IPs) by using a publicly reachable AWS EC2 instance as a WireGuard “hub” and a Proxmox LXC container as a persistent “spoke” that also routes traffic into the home LAN. A mobile device is added as a second spoke for anywhere-access.</p>
+<h2 id="environment">Environment<a class="headerlink" href="#environment" title="Permanent link">&para;</a></h2>
+<p><strong>Cloud</strong>
+- AWS EC2 instance (“wireguard-hub”)
+- OS: Amazon Linux 2 (per guide)
+- Inbound access controlled by AWS Security Group
+- WireGuard UDP port: <strong>61517/UDP</strong> (per guide)</p>
+<p><strong>Homelab</strong>
+- Proxmox VE (host)
+- Proxmox LXC container (Debian/Ubuntu template suggested)
+- WireGuard client inside LXC (wg-quick)
+- LXC requires host TUN device access (<code>/dev/net/tun</code>)
+- Local home LAN subnet example referenced: <strong>192.168.2.0/24</strong> (from the guide’s examples)</p>
+<p><strong>Client</strong>
+- Mobile device using official WireGuard app (Android/iOS)
+- Client config imported via QR code</p>
+<p><strong>Assumptions (explicitly labeled)</strong>
+- <strong>Assumption:</strong> The WireGuard tunnel interface is <code>wg0</code> and the LAN interface inside the LXC is <code>eth0</code> (guide states <code>eth0</code>; actual interface names may vary).
+- <strong>Assumption:</strong> The WireGuard VPN subnet is a private range (commonly <code>10.x.x.x/24</code>), but the exact range is not provided in the pasted text.</p>
+<h2 id="problem">Problem<a class="headerlink" href="#problem" title="Permanent link">&para;</a></h2>
+<p>Enable secure remote access to internal homelab services (e.g., Docker apps on LAN IPs) from anywhere <strong>without</strong> relying on inbound connectivity to the home network, which may be blocked or complicated by:
+- CGNAT (no true public IP / no inbound port-forwarding possible)
+- Changing home public IP addresses (dynamic WAN IP)</p>
+<h2 id="symptoms">Symptoms<a class="headerlink" href="#symptoms" title="Permanent link">&para;</a></h2>
+<p>No direct “break/fix” symptoms were presented; this was primarily a design + implementation discussion. The key constraints being addressed:
+- Inability/unreliability of inbound access to home due to CGNAT
+- Home public IP changes over time</p>
+<h2 id="actions-taken">Actions Taken<a class="headerlink" href="#actions-taken" title="Permanent link">&para;</a></h2>
+<h3 id="1-created-an-aws-ec2-hub-for-wireguard">1) Created an AWS EC2 “Hub” for WireGuard<a class="headerlink" href="#1-created-an-aws-ec2-hub-for-wireguard" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Launched EC2 instance (Amazon Linux 2) sized as micro instance.</li>
+<li>Configured Security Group inbound rules:</li>
+<li>SSH from “My IP” (restricted management access)</li>
+<li>Custom UDP port <strong>61517</strong> from anywhere (WireGuard transport)</li>
+</ul>
+<h3 id="2-installed-and-configured-wireguard-on-ec2-via-installer-script">2) Installed and configured WireGuard on EC2 via installer script<a class="headerlink" href="#2-installed-and-configured-wireguard-on-ec2-via-installer-script" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Connected via SSH using a key pair.</li>
+<li>Downloaded and ran a setup script which:</li>
+<li>installs/configures WireGuard server on EC2</li>
+<li>creates initial client config for the homelab (<code>homelab01.conf</code>)</li>
+<li>supports adding additional clients later</li>
+</ul>
+<h3 id="3-provisioned-a-proxmox-lxc-spoke-to-maintain-a-tunnel-to-ec2">3) Provisioned a Proxmox LXC “Spoke” to maintain a tunnel to EC2<a class="headerlink" href="#3-provisioned-a-proxmox-lxc-spoke-to-maintain-a-tunnel-to-ec2" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Created a new LXC (Debian/Ubuntu suggested).</li>
+<li>Enabled LXC capabilities needed for WireGuard:</li>
+<li>Exposed host TUN device to the container: <code>dev0: /dev/net/tun</code></li>
+<li>Enabled LXC features <code>nesting=1,keyctl=1</code> (as suggested)</li>
+</ul>
+<h3 id="4-installed-wireguard-tooling-inside-the-lxc-and-brought-up-wg0">4) Installed WireGuard tooling inside the LXC and brought up wg0<a class="headerlink" href="#4-installed-wireguard-tooling-inside-the-lxc-and-brought-up-wg0" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Installed packages: <code>wireguard-tools</code>, <code>resolvconf</code>, <code>iptables</code></li>
+<li>Created <code>/etc/wireguard/wg0.conf</code> using the client config from EC2 (<code>homelab01.conf</code>)</li>
+<li>Enabled and started <code>wg-quick@wg0</code></li>
+<li>Verified tunnel state using <code>wg show</code> (expected handshake info)</li>
+</ul>
+<h3 id="5-added-a-mobile-client-spoke-2-and-imported-config-via-qr-code">5) Added a mobile client (“Spoke 2”) and imported config via QR code<a class="headerlink" href="#5-added-a-mobile-client-spoke-2-and-imported-config-via-qr-code" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Re-ran setup script on EC2 to “Add a new client”</li>
+<li>Generated QR code using <code>qrencode</code></li>
+<li>Imported into the mobile WireGuard app</li>
+<li>Adjusted <code>AllowedIPs</code> to include homelab subnet (e.g., <code>192.168.2.0/24</code>) or optionally <code>0.0.0.0/0</code> for full-tunnel</li>
+</ul>
+<h3 id="6-enabled-full-access-to-homelab-lan-through-the-lxc-routing-nat">6) Enabled full access to homelab LAN through the LXC (routing + NAT)<a class="headerlink" href="#6-enabled-full-access-to-homelab-lan-through-the-lxc-routing-nat" title="Permanent link">&para;</a></h3>
+<p>To allow the phone to access <strong>LAN hosts</strong> (not only the LXC), configured the LXC to behave like a router between:
+- the WireGuard tunnel network (wg0)
+- the home LAN (eth0)</p>
+<p>Steps:
+- Enabled IPv4 forwarding:
+  - <code>net.ipv4.ip_forward=1</code> in <code>/etc/sysctl.conf</code>, applied via <code>sysctl -p</code>
+- Added WireGuard <code>PostUp</code>/<code>PostDown</code> iptables rules in <code>/etc/wireguard/wg0.conf</code> under <code>[Interface]</code> to:
+  - allow forwarding between wg0 and eth0
+  - NAT (MASQUERADE) traffic going out via eth0 so LAN devices reply correctly
+- Restarted WireGuard (<code>systemctl restart wg-quick@wg0</code>)</p>
+<h2 id="key-findings">Key Findings<a class="headerlink" href="#key-findings" title="Permanent link">&para;</a></h2>
+<h3 id="hub-vs-spoke-clarification">Hub vs Spoke clarification<a class="headerlink" href="#hub-vs-spoke-clarification" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>EC2 is the only internet-facing “server endpoint.”</strong></li>
+<li>Mobile devices and the homelab connect to EC2’s public IP/port.</li>
+<li>The <strong>Proxmox LXC is a WireGuard client (“spoke”), not the public server.</strong></li>
+<li>It maintains an outbound tunnel to EC2.</li>
+<li>It additionally acts as a <strong>LAN gateway</strong> (router/NAT) so the phone can reach other LAN hosts.</li>
+</ul>
+<h3 id="how-this-bypasses-cgnat">How this bypasses CGNAT<a class="headerlink" href="#how-this-bypasses-cgnat" title="Permanent link">&para;</a></h3>
+<ul>
+<li>CGNAT breaks inbound connectivity to the home network (no workable port-forwarding).</li>
+<li>This design does not require inbound to home:</li>
+<li>Home LXC <strong>initiates outbound</strong> VPN traffic to EC2 (allowed through NAT/CGNAT)</li>
+<li>Phone <strong>initiates outbound</strong> VPN traffic to EC2</li>
+<li>EC2 routes traffic between connected peers inside the VPN overlay</li>
+</ul>
+<h3 id="dynamic-home-ip-is-irrelevant-in-this-design">Dynamic home IP is irrelevant in this design<a class="headerlink" href="#dynamic-home-ip-is-irrelevant-in-this-design" title="Permanent link">&para;</a></h3>
+<ul>
+<li>The phone’s endpoint is EC2 (stable public endpoint), not the home WAN IP.</li>
+<li>Even if the home WAN IP changes, the LXC re-initiates outbound traffic to EC2 and the tunnel is re-established.</li>
+</ul>
+<h3 id="allowedips-determines-split-vs-full-tunnel-behavior">AllowedIPs determines split vs full tunnel behavior<a class="headerlink" href="#allowedips-determines-split-vs-full-tunnel-behavior" title="Permanent link">&para;</a></h3>
+<ul>
+<li>If phone’s <code>AllowedIPs</code> includes only <code>192.168.2.0/24</code>, then only homelab traffic goes through VPN (split tunnel).</li>
+<li>If phone’s <code>AllowedIPs</code> is <code>0.0.0.0/0</code>, then all traffic goes through EC2 (full tunnel).</li>
+<li><strong>Note:</strong> The guide implies public IP checks “should show EC2”; that is only true with full tunnel (<code>0.0.0.0/0</code>), not with split tunnel.</li>
+</ul>
+<h2 id="resolution">Resolution<a class="headerlink" href="#resolution" title="Permanent link">&para;</a></h2>
+<p>Implemented an architecture and configuration approach (per the guide) that provides:
+- stable remote access through an EC2 hub
+- persistent homelab connectivity via a WireGuard LXC spoke
+- optional routing/NAT on the LXC to reach the entire home LAN from the VPN</p>
+<p><strong>Current status:</strong> Documented setup and rationale; no post-change issues or rollbacks were described in this conversation.</p>
+<h2 id="validation">Validation<a class="headerlink" href="#validation" title="Permanent link">&para;</a></h2>
+<p>Validation steps described in the guide:
+1. On mobile (off Wi-Fi), enable WireGuard and access an internal LAN service by private IP (example: <code>http://192.168.2.100:2283</code>).
+2. Check public IP from phone using a “what is my IP” site:
+   - Should show EC2 public IP <strong>only if</strong> full tunnel is configured (<code>AllowedIPs = 0.0.0.0/0</code>).</p>
+<h2 id="follow-up-tasks">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>AWS cost control:</strong> Create an AWS Budget or CloudWatch billing alarm to avoid surprise charges.</li>
+<li><strong>Harden SSH access:</strong> Keep SSH restricted to a known IP or use an alternative secure method (e.g., Session Manager) if IP changes frequently.</li>
+<li><strong>Confirm interface names:</strong> Validate actual LXC LAN interface name (may not be <code>eth0</code>).</li>
+<li><strong>Persistence and resilience:</strong> Consider adding WireGuard keepalives on the LXC peer config if NAT mappings time out (not explicitly included in pasted guide text).</li>
+<li><strong>Logging/monitoring:</strong> Add basic tunnel health checks (handshake age) and alerting.</li>
+</ul>
+<h2 id="lessons-learned">Lessons Learned<a class="headerlink" href="#lessons-learned" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Using a public “hub” (EC2) avoids needing inbound access to home and cleanly sidesteps CGNAT.</li>
+<li>Running WireGuard in an LXC is viable but requires access to <code>/dev/net/tun</code> and sometimes <code>nesting/keyctl</code>.</li>
+<li>To access the entire LAN through the VPN, the LXC must do <strong>IP forwarding + NAT</strong> unless you implement return routing on your LAN devices/router.</li>
+<li><code>AllowedIPs</code> is the key knob that controls split tunnel vs full tunnel behavior.</li>
+</ul>
+<hr />
+<h1 id="command-reference">Command Reference<a class="headerlink" href="#command-reference" title="Permanent link">&para;</a></h1>
+<h2 id="command">Command<a class="headerlink" href="#command" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ssh -i /path/to/your-key.pem ec2-user@YOUR_EC2_PUBLIC_IP
+</code></pre>
+<p><strong>What it does:</strong> SSH into the EC2 instance using an SSH private key file.<br />
+<strong>Important parts:</strong>
+- <code>-i ...pem</code> selects the key used for authentication.
+- <code>ec2-user@...</code> is the default login user for Amazon Linux 2.<br />
+<strong>Why used:</strong> Required to administer the EC2 hub and install WireGuard.<br />
+<strong>Expected result:</strong> Successful shell prompt on EC2.<br />
+<strong>Failure indicates:</strong> Wrong key permissions, wrong IP, security group blocking SSH, wrong username, or IP restriction mismatch.<br />
+<strong>Risk:</strong> Low, but exposing SSH broadly is risky; the guide restricts SSH to “My IP.”</p>
+<hr />
+<h2 id="command_1">Command<a class="headerlink" href="#command_1" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">curl -O https://github.com/codeunbound/homelab/blob/main/automation/wireguard/wireguard-setup.sh
+</code></pre>
+<p><strong>What it does:</strong> Downloads a file from a URL and saves it locally using the remote filename.<br />
+<strong>Important parts:</strong>
+- <code>-O</code> writes output to a local file named like the remote file.<br />
+<strong>Why used:</strong> Retrieve the installer script to set up WireGuard on EC2.<br />
+<strong>Expected result:</strong> A local file <code>wireguard-setup.sh</code> exists in the current directory.<br />
+<strong>Failure indicates:</strong> Wrong URL, network/DNS issues, permissions, or GitHub HTML download vs raw file issue.<br />
+<strong>Risk:</strong> Medium. Running scripts from the internet is inherently risky.<br />
+<strong>Safer alternative:</strong> Download from a trusted “raw” URL and inspect first (<code>less wireguard-setup.sh</code>) before executing.</p>
+<hr />
+<h2 id="command_2">Command<a class="headerlink" href="#command_2" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">chmod +x wireguard-setup.sh
+</code></pre>
+<p><strong>What it does:</strong> Marks the script as executable.<br />
+<strong>Why used:</strong> Allows running <code>./wireguard-setup.sh</code>.<br />
+<strong>Expected result:</strong> File becomes executable.<br />
+<strong>Failure indicates:</strong> Permission issue or missing file.<br />
+<strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_3">Command<a class="headerlink" href="#command_3" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo ./wireguard-setup.sh
+</code></pre>
+<p><strong>What it does:</strong> Executes the setup script as root.<br />
+<strong>Why used:</strong> Installing packages and configuring networking/services requires root.<br />
+<strong>Expected result:</strong> WireGuard installed/configured; client config(s) generated.<br />
+<strong>Failure indicates:</strong> Missing dependencies, OS mismatch, script errors, or permission issues.<br />
+<strong>Risk:</strong> High (root execution).<br />
+<strong>Safer alternative:</strong> Inspect script contents first; consider pinning versions or using a known-good installer method.</p>
+<hr />
+<h2 id="command_4">Command<a class="headerlink" href="#command_4" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo cat /etc/wireguard/wg0-clients/homelab01.conf
+</code></pre>
+<p><strong>What it does:</strong> Displays the generated client configuration for the homelab.<br />
+<strong>Why used:</strong> Copy config contents into the LXC’s <code>/etc/wireguard/wg0.conf</code>.<br />
+<strong>Expected result:</strong> Full WireGuard client config printed.<br />
+<strong>Failure indicates:</strong> File path differs, script didn’t generate configs, or permissions issue.<br />
+<strong>Risk:</strong> Low, but avoid leaking private keys.</p>
+<hr />
+<h2 id="command_5">Command<a class="headerlink" href="#command_5" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">pct enter &lt;VMID&gt;
+</code></pre>
+<p><strong>What it does:</strong> Opens a shell inside a Proxmox LXC container.<br />
+<strong>Why used:</strong> To install WireGuard and configure the tunnel inside the container.<br />
+<strong>Expected result:</strong> Shell inside container.<br />
+<strong>Failure indicates:</strong> Wrong VMID, container not running, insufficient permissions.<br />
+<strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_6">Command<a class="headerlink" href="#command_6" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">apt update &amp;&amp; apt upgrade -y
+</code></pre>
+<p><strong>What it does:</strong> Updates package lists and upgrades installed packages on Debian/Ubuntu-based LXC.<br />
+<strong>Important parts:</strong>
+- <code>-y</code> auto-confirms prompts.<br />
+<strong>Why used:</strong> Ensure system is current before installing new packages.<br />
+<strong>Expected result:</strong> Packages updated/upgraded successfully.<br />
+<strong>Failure indicates:</strong> DNS/network issues, repo errors, or broken package state.<br />
+<strong>Risk:</strong> Medium, because upgrades can change behavior.<br />
+<strong>Safer alternative:</strong> Review upgrades first by omitting <code>-y</code> on sensitive systems.</p>
+<hr />
+<h2 id="command_7">Command<a class="headerlink" href="#command_7" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">apt install wireguard-tools resolvconf iptables -y
+</code></pre>
+<p><strong>What it does:</strong> Installs WireGuard tooling, DNS management helper, and firewall tools.<br />
+<strong>Why used:</strong> Needed to bring up wg0 and implement forwarding/NAT rules.<br />
+<strong>Expected result:</strong> Packages installed successfully.<br />
+<strong>Failure indicates:</strong> Repo problems or incompatible distro base.<br />
+<strong>Risk:</strong> Low to medium.</p>
+<hr />
+<h2 id="command_8">Command<a class="headerlink" href="#command_8" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">mkdir -p /etc/wireguard
+</code></pre>
+<p><strong>What it does:</strong> Creates the WireGuard config directory if it does not exist.<br />
+<strong>Why used:</strong> Standard location for WireGuard configs.<br />
+<strong>Expected result:</strong> Directory exists.<br />
+<strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_9">Command<a class="headerlink" href="#command_9" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">nano /etc/wireguard/wg0.conf
+</code></pre>
+<p><strong>What it does:</strong> Opens the wg0 configuration file for editing.<br />
+<strong>Why used:</strong> Paste the client config from EC2 into the LXC.<br />
+<strong>Expected result:</strong> File saved with correct WireGuard config.<br />
+<strong>Failure indicates:</strong> Syntax errors, wrong permissions, or wrong file path.<br />
+<strong>Risk:</strong> Medium, because misconfiguration can break the tunnel.</p>
+<hr />
+<h2 id="command_10">Command<a class="headerlink" href="#command_10" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">systemctl enable wg-quick@wg0
+systemctl start wg-quick@wg0
+</code></pre>
+<p><strong>What it does:</strong> Enables WireGuard tunnel <code>wg0</code> to start at boot and starts it now.<br />
+<strong>Why used:</strong> Make the tunnel persistent and active.<br />
+<strong>Expected result:</strong> Service active; tunnel interface created.<br />
+<strong>Failure indicates:</strong> Bad config, missing kernel module, no TUN access, or service errors.<br />
+<strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_11">Command<a class="headerlink" href="#command_11" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">wg show
+</code></pre>
+<p><strong>What it does:</strong> Displays WireGuard interface and peer status, including handshakes.<br />
+<strong>Why used:</strong> Verify that the tunnel is up and exchanging keepalive/handshake traffic.<br />
+<strong>Expected result:</strong> Shows interface <code>wg0</code> and peer handshake timestamps.<br />
+<strong>Failure indicates:</strong> Routing/firewall issues, wrong keys, endpoint unreachable.<br />
+<strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_12">Command<a class="headerlink" href="#command_12" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo yum install qrencode -y
+</code></pre>
+<p><strong>What it does:</strong> Installs QR code generation tool on Amazon Linux (yum-based).<br />
+<strong>Why used:</strong> To convert a client config file into a scannable QR code for the phone.<br />
+<strong>Expected result:</strong> <code>qrencode</code> available.<br />
+<strong>Failure indicates:</strong> Repo issues or package name differences.<br />
+<strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_13">Command<a class="headerlink" href="#command_13" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo qrencode -t ansiutf8 -r /home/ec2-user/wg0-client-codeunbound01.conf
+</code></pre>
+<p><strong>What it does:</strong> Prints a QR code in the terminal encoding the client config file.<br />
+<strong>Important parts:</strong>
+- <code>-t ansiutf8</code> outputs a terminal-friendly QR code.
+- <code>-r &lt;file&gt;</code> reads content from file.<br />
+<strong>Why used:</strong> Fast import into mobile WireGuard app.<br />
+<strong>Expected result:</strong> QR code displayed.<br />
+<strong>Failure indicates:</strong> Wrong path, missing file, permissions.<br />
+<strong>Risk:</strong> Low, but the config includes private keys, so do not screen-share it.</p>
+<hr />
+<h2 id="command_14">Command<a class="headerlink" href="#command_14" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">nano /etc/sysctl.conf
+</code></pre>
+<p><strong>What it does:</strong> Edits kernel parameter configuration.<br />
+<strong>Why used:</strong> Enable IPv4 forwarding for routing from wg0 to LAN.<br />
+<strong>Expected result:</strong> <code>net.ipv4.ip_forward=1</code> set.<br />
+<strong>Risk:</strong> Medium, because it affects networking system-wide in the container.<br />
+<strong>Safer alternative:</strong> Use a drop-in file under <code>/etc/sysctl.d/</code> for more controlled configuration.</p>
+<hr />
+<h2 id="command_15">Command<a class="headerlink" href="#command_15" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sysctl -p
+</code></pre>
+<p><strong>What it does:</strong> Applies sysctl settings from <code>/etc/sysctl.conf</code> immediately.<br />
+<strong>Why used:</strong> Turn on forwarding without reboot.<br />
+<strong>Expected result:</strong> Forwarding enabled.<br />
+<strong>Failure indicates:</strong> Syntax errors or permissions.<br />
+<strong>Risk:</strong> Low.</p>
+<hr />
+<h2 id="command_16">Command<a class="headerlink" href="#command_16" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">systemctl restart wg-quick@wg0
+</code></pre>
+<p><strong>What it does:</strong> Restarts the wg0 tunnel service to apply config changes (<code>PostUp</code>/<code>PostDown</code> rules).<br />
+<strong>Why used:</strong> Ensures new iptables/NAT rules are applied.<br />
+<strong>Expected result:</strong> Tunnel returns to active; LAN access works.<br />
+<strong>Failure indicates:</strong> Config syntax errors, iptables failures, missing kernel features.<br />
+<strong>Risk:</strong> Medium, because it creates a brief disconnect and could fail to come back up if config is wrong.</p>
+<hr />
+<h2 id="iptables-rules-from-wg0conf-postuppostdown">iptables rules from wg0.conf PostUp/PostDown<a class="headerlink" href="#iptables-rules-from-wg0conf-postuppostdown" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">iptables -A FORWARD -i %i -o eth0 -j ACCEPT
+iptables -A FORWARD -i eth0 -o %i -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+</code></pre>
+<p>Corresponding <code>PostDown</code> rules remove the same rules using <code>-D</code>.</p>
+<p><strong>What they do:</strong>
+- Allow forwarding from WireGuard interface (<code>%i</code>, which expands to <code>wg0</code>) to LAN interface (<code>eth0</code>).
+- Allow return traffic back into the tunnel for established connections.
+- NAT outbound traffic to the LAN so LAN hosts reply to the LXC without needing routes to the VPN subnet.</p>
+<p><strong>Why used:</strong> Enables phone → VPN → LXC → LAN host connectivity reliably.<br />
+<strong>Expected result:</strong> Remote clients can reach <code>192.168.2.0/24</code> hosts while connected to VPN.<br />
+<strong>Failure indicates:</strong> Wrong interface name, iptables not installed, forwarding disabled, or routing/AllowedIPs mismatch.<br />
+<strong>Risk:</strong> Medium to high because firewall/routing changes can affect connectivity.<br />
+<strong>Safer alternative:</strong> Prefer explicit routing on the LAN gateway/router instead of NAT if you control it and want end-to-end visibility, but NAT is simpler and often “just works.”</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

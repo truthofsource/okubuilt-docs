@@ -1,0 +1,3921 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Infrastructure, cloud, automation, security, and operations documentation portfolio.">
+      
+      
+        <meta name="author" content="Kingsley Oku">
+      
+      
+      
+        <link rel="prev" href="../debian-docker-vm-rebuild-cloudinit-runbook/">
+      
+      
+        <link rel="next" href="../docker-compose-memos-image-tag-troubleshooting/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Restore `/opt/docker-apps` from Offen Backup - OkuBuilt Infrastructure & Cloud Portfolio</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#restore-optdocker-apps-from-offen-backup" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-header__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OkuBuilt Infrastructure & Cloud Portfolio
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Restore `/opt/docker-apps` from Offen Backup
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-nav__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OkuBuilt Infrastructure & Cloud Portfolio
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/proxmox-traefik-opnsense-ha-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox, Traefik, OPNsense HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Automation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cephfs-snips-cloudinit-vm100-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox CephFS Snips Cloud-Init VM100
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloud-init-docker-vm-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Docker VM Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-vm100-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker VM100 Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-cicustom-snippet-storage-ha/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init cicustom Snippet Storage HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/vm100-docker-startup-mountguard-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Startup Mount Guard Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compute
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/debian-docker-vm-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/home-assistant-os-proxmox-ceph-vm-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home Assistant OS Proxmox Ceph VM Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/homelab-vm100-rebuild-restore-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab VM100 Rebuild Restore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Containers & Apps
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Containers & Apps
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../debian-docker-vm-rebuild-cloudinit-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM Rebuild Cloud-Init
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Apps Offen Restore Gluetun Recovery
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Apps Offen Restore Gluetun Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docker-compose-memos-image-tag-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Compose Memos Image Tag Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gluetun-corrupted-servers-permissions-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gluetun Corrupted Servers Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../proxmox-traefik-console-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Traefik Console Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../traefik-docker29-upgrade-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Docker Upgrade Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../traefik-proxy-docker-network-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Proxy Docker Network
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vm100-docker-data-disk-recovery-cloud-init-hardening/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Data Disk Recovery Cloud-Init Hardening
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vm110-provisioning-guest-agent-docker-appdata-permissions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM110 Provisioning Guest Agent Docker AppData Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring & Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Monitoring & Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-ceph-memtest-ram-fault-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Ceph Memtest RAM Fault
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-host-kernel-ram-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Host Kernel RAM Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-nuc-e1000e-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox NUC e1000e Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networking
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Networking
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/att-fiber-opnsense-outage-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AT&T Fiber OPNsense Outage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-lan-instability-storm-control-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN Instability Storm Control
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-lan-ip-dhcp-static-device-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN IP DHCP Static Device
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-opt2-lan-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense OPT2 LAN
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-web-gui-documentation-and-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense Web GUI Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/wireguard-ec2-proxmox-lxc-homelab-remote-access/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WireGuard EC2 Proxmox LXC Homelab Remote Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Security
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/homelab-ssh-ansible-nut-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab SSH Ansible NUT Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/proxmox-root-login-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Root Login Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_9" id="__nav_2_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Storage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Storage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/ceph-mainframe-osd-mon-mgr-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Mainframe OSD MON MGR Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/ceph-monitor-crash-loop-mainframe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Monitor Crash Loop Mainframe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/proxmox-ha-live-migration-ceph-vm-state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox HA Live Migration Ceph VM State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/truenas-vm-zfs-hba-planning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TrueNAS VM ZFS HBA Planning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/vm100-ceph-gluetun-troubleshooting-runbook-15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Ceph Gluetun Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/vm100-docker-nas-offen-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker NAS Offen Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Runbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runbooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_11" id="__nav_2_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting Incidents
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting Incidents
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting-incidents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloud
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cloud
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cloud/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portfolio
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Portfolio
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../portfolio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/documentation-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation Standards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/placement-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Placement Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/recurring-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recurring Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/command-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="restore-optdocker-apps-from-offen-backup">Restore <code>/opt/docker-apps</code> from Offen Backup<a class="headerlink" href="#restore-optdocker-apps-from-offen-backup" title="Permanent link">&para;</a></h1>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>Restored the Docker application data tree at <code>/opt/docker-apps</code> from an Offen backup archive after JSON, YAML, and other configuration files were accidentally deleted. The restore was done as a full tree overlay, not as a restore of a single app called “Offen.”</p>
+<h2 id="environment">Environment<a class="headerlink" href="#environment" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Host/VM context:</li>
+<li>Debian Docker VM: <code>debian-docker</code></li>
+<li>Proxmox VM ID referenced elsewhere in the session: VM 110</li>
+<li>Backup source:</li>
+<li>NAS-mounted CIFS path: <code>/srv/remotemount/NAS/Tools/Backups/Docker/offen/backup-[date removed].tar.gz</code></li>
+<li>Restore target:</li>
+<li><code>/opt/docker-apps</code></li>
+<li>Relevant tooling:</li>
+<li><code>tar</code></li>
+<li><code>rsync</code></li>
+<li><code>find</code></li>
+<li><code>chown</code></li>
+<li>Docker / Docker Compose</li>
+<li>Related app directories observed under <code>/opt/docker-apps</code>:</li>
+<li><code>Traefik</code>, <code>Dockge</code>, <code>Plex</code>, <code>qBittorrent</code>, <code>Deluge</code>, <code>Overseerr</code>, <code>Tautulli</code>, <code>Kometa</code>, <code>SABnzbd</code>, <code>Prowlarr</code>, <code>Sonarr</code>, <code>Radarr</code>, and others</li>
+<li>Storage/mount context:</li>
+<li>NAS mounted over CIFS</li>
+<li>Local application data stored under <code>/opt/docker-apps</code></li>
+</ul>
+<h2 id="problem">Problem<a class="headerlink" href="#problem" title="Permanent link">&para;</a></h2>
+<p>Important configuration files under <code>/opt/docker-apps</code> had been accidentally deleted. The missing files were confirmed to still exist inside an Offen backup archive on the NAS.</p>
+<h2 id="symptoms">Symptoms<a class="headerlink" href="#symptoms" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Missing JSON, YAML, and related app configuration files under <code>/opt/docker-apps</code></li>
+<li>Need to restore the entire <code>docker-apps</code> tree, not a folder named <code>Offen</code></li>
+<li>Need to preserve app directory layout and permissions for Docker-managed services such as Dockge and Compose-managed stacks</li>
+</ul>
+<h2 id="actions-taken">Actions Taken<a class="headerlink" href="#actions-taken" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Confirmed the restore target was the full <code>/opt/docker-apps</code> tree.</li>
+<li>Reused an already extracted backup payload located under:
+   <code>bash
+   /opt/docker-apps/backup/my-app-backup/</code>
+   and moved its contents into <code>/opt/docker-apps</code>.</li>
+<li>Cleaned up empty wrapper directories left behind after flattening the extracted backup structure.</li>
+<li>Reset ownership of <code>/opt/docker-apps</code> to <code>debian:debian</code>.</li>
+<li>Verified restored top-level app directories under <code>/opt/docker-apps</code>.</li>
+<li>Built a safer repeatable restore workflow using:</li>
+<li>backup archive variable</li>
+<li>destination variable</li>
+<li>staging directory</li>
+<li><code>rsync</code> merge from <code>backup/my-app-backup/</code> into <code>/opt/docker-apps/</code></li>
+<li>Created a pre-restore snapshot tarball under:
+   <code>bash
+   /opt/docker-apps/.pre-restore/</code></li>
+<li>Extracted the Offen archive to a temporary local staging directory and re-applied the backup onto <code>/opt/docker-apps</code>.</li>
+<li>Re-ran <code>chown -R debian:debian /opt/docker-apps</code> after the restore.</li>
+</ol>
+<p>Important commands used:</p>
+<pre><code class="language-bash">sudo rsync -a --remove-source-files /opt/docker-apps/backup/my-app-backup/ /opt/docker-apps/
+</code></pre>
+<p>Purpose: flatten previously extracted backup contents into the live appdata tree.</p>
+<pre><code class="language-bash">sudo find /opt/docker-apps/backup/my-app-backup -type d -empty -delete
+sudo rmdir -p /opt/docker-apps/backup/my-app-backup 2&gt;/dev/null || true
+</code></pre>
+<p>Purpose: remove empty wrapper directories left after the file move.</p>
+<pre><code class="language-bash">sudo chown -R debian:debian /opt/docker-apps
+</code></pre>
+<p>Purpose: restore writable ownership for Dockge and other app config paths.</p>
+<pre><code class="language-bash">sudo tar -xzpf &quot;$ARCH&quot; -C &quot;$STAGE&quot;
+</code></pre>
+<p>Purpose: extract the Offen backup into a staging directory.</p>
+<pre><code class="language-bash">sudo rsync -aHAX --checksum --inplace &quot;$STAGE/backup/my-app-backup/&quot; &quot;$DEST/&quot;
+</code></pre>
+<p>Purpose: overlay the backup contents onto the live <code>/opt/docker-apps</code> tree.</p>
+<h2 id="key-findings">Key Findings<a class="headerlink" href="#key-findings" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The Offen archive structure was rooted at:
+  <code>text
+  /backup/my-app-backup/...</code>
+  so restore operations had to copy the <em>contents</em> of <code>my-app-backup/</code> into <code>/opt/docker-apps/</code>.</li>
+<li>The restore was not for an app named <code>Offen</code>; Offen was only the backup tool and the backup file naming context.</li>
+<li>Trailing slashes on <code>rsync</code> source and destination paths were critical to avoid creating an unwanted nested directory.</li>
+<li>The pre-restore tar command produced:
+  <code>text
+  tar: ./.pre-restore/full-pre-restore-[date removed]-17_181715.tgz: file changed as we read it</code>
+  because the snapshot file was being written inside the directory being archived.</li>
+<li>The restore logic itself was sound; the warning applied to the snapshot tar operation, not the Offen restore.</li>
+</ul>
+<h2 id="resolution">Resolution<a class="headerlink" href="#resolution" title="Permanent link">&para;</a></h2>
+<p>The full <code>/opt/docker-apps</code> tree was restored by overlaying the backup contents from <code>backup/my-app-backup/</code> into <code>/opt/docker-apps</code>, followed by resetting ownership to <code>debian:debian</code>.</p>
+<h2 id="validation">Validation<a class="headerlink" href="#validation" title="Permanent link">&para;</a></h2>
+<p>Validation was performed by:
+- Confirming expected top-level app directories existed under <code>/opt/docker-apps</code>
+- Listing restored directories such as:
+  - <code>/opt/docker-apps/Traefik/config</code>
+  - <code>/opt/docker-apps/Dockge/config</code>
+  - <code>/opt/docker-apps/Plex/config</code>
+- Checking directory size and structure:
+  <code>bash
+  du -sh /opt/docker-apps
+  find /opt/docker-apps -maxdepth 2 -type d | sed -n '1,60p'</code>
+- Verifying that a later re-application of the same backup with <code>rsync</code> completed successfully</p>
+<h2 id="follow-up-tasks">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Consider storing pre-restore safety archives <em>outside</em> <code>/opt/docker-apps</code> to avoid tar self-inclusion warnings.</li>
+<li>Keep a reusable local staging path for this backup if repeat restores are expected.</li>
+<li>Spot-check critical application config files under:</li>
+<li><code>Traefik/config</code></li>
+<li><code>Dockge/config</code></li>
+<li>other restored app paths that had known deleted files</li>
+<li>Start and validate application stacks one by one after restore.</li>
+</ul>
+<h2 id="lessons-learned">Lessons Learned<a class="headerlink" href="#lessons-learned" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Offen backup restores should be treated as filesystem tree restores, not app-specific restores.</li>
+<li>Reusing a previously extracted backup payload can save time if its structure is already known and trusted.</li>
+<li><code>rsync</code> with trailing slashes is safer than ad hoc copy/move operations when restoring nested trees.</li>
+<li>Ownership repair is often required after bulk restores so app management tools can write their configs again.</li>
+<li>Saving a snapshot tarball inside the directory being archived is noisy and can be misleading; use an external snapshot location when possible.</li>
+</ul>
+<hr />
+<h1 id="host-instability-during-nas-to-nas-cifs-staging">Host Instability During NAS-to-NAS CIFS Staging<a class="headerlink" href="#host-instability-during-nas-to-nas-cifs-staging" title="Permanent link">&para;</a></h1>
+<h2 id="summary_1">Summary<a class="headerlink" href="#summary_1" title="Permanent link">&para;</a></h2>
+<p>Attempted to optimize future restores by extracting the Offen backup to a reusable staging directory on the NAS itself. This correlated with repeated host/node lockups severe enough that the Proxmox node became unreachable from the cluster and required a power cycle.</p>
+<h2 id="environment_1">Environment<a class="headerlink" href="#environment_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Proxmox node: <code>pve1</code></li>
+<li>Same physical machine also hosted the Debian Docker VM performing the restore work</li>
+<li>Relevant VM:</li>
+<li>VM 110</li>
+<li>NAS path used for staging:</li>
+<li><code>/srv/remotemount/NAS/Tools/Backups/Docker/offen/stage-[date removed]</code></li>
+<li>Archive source:</li>
+<li><code>/srv/remotemount/NAS/Tools/Backups/Docker/offen/backup-[date removed].tar.gz</code></li>
+<li>Storage/network context:</li>
+<li>CIFS-mounted NAS</li>
+<li>Large archive extraction with many small file writes back to CIFS</li>
+<li>Cluster context:</li>
+<li>Proxmox cluster quorum services on <code>pve1</code></li>
+<li>Other nodes reported <code>pve1</code> as offline during the hang</li>
+</ul>
+<h2 id="problem_1">Problem<a class="headerlink" href="#problem_1" title="Permanent link">&para;</a></h2>
+<p>Extracting the backup archive from the NAS back onto a staging directory on the same NAS caused repeated instability. The node became unreachable from the GUI and from the rest of the cluster and had to be power-cycled.</p>
+<h2 id="symptoms_1">Symptoms<a class="headerlink" href="#symptoms_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>During <code>tar -xzpf</code> extraction to NAS staging, connection dropped</li>
+<li>Clarified later that this was not just SSH loss:</li>
+<li>the whole node/host went offline</li>
+<li>GUI stopped loading</li>
+<li>node showed offline to the other cluster nodes</li>
+<li>Required physical power cycle to recover</li>
+<li>CIFS-related messages appeared when the staging path was accessed:
+  <code>text
+  CIFS: Attempting to mount \\192.168.16.21\Media</code></li>
+<li>When extracting to NAS stage, <code>tar</code> also hit:
+  <code>text
+  backup/my-app-backup/DoubleCommander/config/.XDG/doublecmd.pipe: Cannot mkfifo: Operation not permitted</code>
+  which was related to CIFS not supporting FIFO creation for that runtime pipe</li>
+</ul>
+<h2 id="actions-taken_1">Actions Taken<a class="headerlink" href="#actions-taken_1" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Removed old temporary local staging directory:
+   <code>bash
+   sudo rm -rf /tmp/offen-stage-*</code></li>
+<li>Attempted to create a reusable staging directory directly on the NAS:
+   <code>bash
+   sudo mkdir -p "$NAS_STAGE"</code></li>
+<li>Attempted to extract the Offen archive to the NAS stage:
+   <code>bash
+   sudo tar -xzpf "$ARCH" -C "$NAS_STAGE"</code></li>
+<li>Observed CIFS mount activity and FIFO creation errors.</li>
+<li>Considered excluding the problematic <code>.XDG</code> pipe path from extraction.</li>
+<li>After repeated node hangs, re-evaluated the strategy and concluded NAS-to-NAS staging was not worth the risk.</li>
+<li>Reviewed prior-boot logs from <code>pve1</code> after recovery to look for evidence of the failure.</li>
+</ol>
+<p>Important commands used:</p>
+<pre><code class="language-bash">sudo rm -rf /tmp/offen-stage-*
+</code></pre>
+<p>Purpose: remove previous local temporary staging directories.</p>
+<pre><code class="language-bash">sudo mkdir -p &quot;$NAS_STAGE&quot;
+</code></pre>
+<p>Purpose: create a persistent staging directory on the NAS.</p>
+<pre><code class="language-bash">sudo tar -xzpf &quot;$ARCH&quot; -C &quot;$NAS_STAGE&quot;
+</code></pre>
+<p>Purpose: extract the backup archive onto the NAS staging path.</p>
+<pre><code class="language-bash">sudo tar -xzpf &quot;$ARCH&quot; --exclude='backup/my-app-backup/DoubleCommander/config/.XDG/*' -C &quot;$NAS_STAGE&quot;
+</code></pre>
+<p>Purpose: avoid CIFS extraction failure on a runtime FIFO path.</p>
+<h2 id="key-findings_1">Key Findings<a class="headerlink" href="#key-findings_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>CIFS-backed NAS staging was a poor fit for this restore workload.</li>
+<li>The archive contained a FIFO runtime artifact for DoubleCommander:
+  <code>text
+  backup/my-app-backup/DoubleCommander/config/.XDG/doublecmd.pipe</code>
+  which CIFS could not create.</li>
+<li>The repeated failures were not simple SSH disconnects. The entire Proxmox node became unreachable and required a power cycle.</li>
+<li>Review of prior boot logs showed:
+  <code>text
+  VM 110 qmp command 'guest-ping' failed - got timeout</code>
+  indicating VM 110 had become unresponsive before the host was power-cycled.</li>
+<li>The logs did not show a clean shutdown sequence, which was consistent with a hard lock followed by a forced power cycle.</li>
+<li>The cluster log errors:
+  <code>text
+  pmxcfs ... quorum_initialize failed</code>
+  were consistent with the node being isolated from cluster quorum after the failure, but they were not root cause evidence by themselves.</li>
+<li>The observed behavior suggested host-level instability under this specific heavy CIFS I/O pattern, not merely a broadcast/multicast storm.</li>
+</ul>
+<h2 id="resolution_1">Resolution<a class="headerlink" href="#resolution_1" title="Permanent link">&para;</a></h2>
+<p>Abandoned the idea of maintaining a reusable NAS-based staging directory for this backup. The safer workaround was to use local staging only, or skip staging entirely if the live restore had already succeeded.</p>
+<h2 id="validation_1">Validation<a class="headerlink" href="#validation_1" title="Permanent link">&para;</a></h2>
+<p>Validation was based on:
+- Repeated reproduction of node instability only when performing NAS-to-NAS staging activity
+- Confirmation that the live restore itself had already worked before attempting the NAS optimization
+- Log review from the previous boot showing VM unresponsiveness and lack of clean shutdown evidence</p>
+<h2 id="follow-up-tasks_1">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Avoid extracting large archive trees from NAS to NAS over CIFS on this host.</li>
+<li>Prefer:</li>
+<li>direct restore to live data, or</li>
+<li>local staging on VM disk, followed by local-to-local rsync into <code>/opt/docker-apps</code></li>
+<li>Investigate host stability further if similar hard locks occur under other high-I/O workloads.</li>
+<li>Review host thermals, memory stability, NIC behavior, and storage load if future hangs recur.</li>
+<li>Consider memtest or host-level stability testing when convenient.</li>
+</ul>
+<h2 id="lessons-learned_1">Lessons Learned<a class="headerlink" href="#lessons-learned_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>“Lost connection” must be clarified: VM loss, SSH loss, and full host lock are very different failure domains.</li>
+<li>CIFS is a weak choice for staging workloads that create many files and special file types.</li>
+<li>Optimization steps that stress the host are not worth it once the production restore has already succeeded.</li>
+<li>Proxmox cluster symptoms after a hang are often secondary effects, not the original cause.</li>
+</ul>
+<hr />
+<h1 id="re-run-restore-using-local-staging">Re-Run Restore Using Local Staging<a class="headerlink" href="#re-run-restore-using-local-staging" title="Permanent link">&para;</a></h1>
+<h2 id="summary_2">Summary<a class="headerlink" href="#summary_2" title="Permanent link">&para;</a></h2>
+<p>After abandoning NAS-based staging, re-ran the backup extraction using a local staging path on VM disk. This reduced CIFS write stress and preserved the ability to reapply the Offen backup safely if needed.</p>
+<h2 id="environment_2">Environment<a class="headerlink" href="#environment_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Debian Docker VM: <code>debian-docker</code></li>
+<li>Archive source:</li>
+<li><code>/srv/remotemount/NAS/Tools/Backups/Docker/offen/backup-[date removed].tar.gz</code></li>
+<li>Local staging target:</li>
+<li><code>/opt/offen-stage-[date removed]</code></li>
+<li>Live restore target:</li>
+<li><code>/opt/docker-apps</code></li>
+</ul>
+<h2 id="problem_2">Problem<a class="headerlink" href="#problem_2" title="Permanent link">&para;</a></h2>
+<p>Needed a safer way to reapply the Offen backup without writing a large extracted tree back to the NAS over CIFS.</p>
+<h2 id="symptoms_2">Symptoms<a class="headerlink" href="#symptoms_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>NAS staging had already correlated with host instability</li>
+<li>Needed to see all extracted folders in local stage, not just the first 40 lines of output</li>
+<li>Ownership needed to be reset after restore</li>
+</ul>
+<h2 id="actions-taken_2">Actions Taken<a class="headerlink" href="#actions-taken_2" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Switched to a local staging path:
+   <code>bash
+   /opt/offen-stage-[date removed]</code></li>
+<li>Checked available space on <code>/opt</code> before extraction.</li>
+<li>Stopped Docker before restore operations.</li>
+<li>Created a fresh local staging directory.</li>
+<li>Extracted the backup archive locally.</li>
+<li>Used full listing commands to inspect all staged folders.</li>
+<li>Re-applied ownership to <code>/opt/docker-apps</code>.</li>
+<li>Restarted application stacks after restore.</li>
+</ol>
+<p>Important commands used:</p>
+<pre><code class="language-bash">df -h /opt
+</code></pre>
+<p>Purpose: verify local disk capacity for staging.</p>
+<pre><code class="language-bash">sudo rm -rf &quot;$LOCAL_STAGE&quot;
+sudo mkdir -p &quot;$LOCAL_STAGE&quot;
+</code></pre>
+<p>Purpose: recreate a clean local staging directory.</p>
+<pre><code class="language-bash">sudo tar -xzpf &quot;$ARCH&quot; -C &quot;$LOCAL_STAGE&quot;
+</code></pre>
+<p>Purpose: extract the Offen archive locally.</p>
+<pre><code class="language-bash">ls -la &quot;$LOCAL_STAGE/backup/my-app-backup&quot; | less
+</code></pre>
+<p>Purpose: view the full extracted tree with paging.</p>
+<pre><code class="language-bash">find &quot;$LOCAL_STAGE/backup/my-app-backup&quot; -maxdepth 1 -mindepth 1 -type d | sort
+</code></pre>
+<p>Purpose: list all top-level staged directories cleanly.</p>
+<pre><code class="language-bash">sudo rsync -aHAX --checksum --inplace &quot;$LOCAL_STAGE/backup/my-app-backup/&quot; &quot;$DEST/&quot;
+</code></pre>
+<p>Purpose: overlay the local stage onto the live appdata tree.</p>
+<pre><code class="language-bash">sudo chown -R debian:debian /opt/docker-apps
+</code></pre>
+<p>Purpose: restore writable ownership for container config paths.</p>
+<h2 id="key-findings_2">Key Findings<a class="headerlink" href="#key-findings_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Local staging avoided the special-file limitations and instability seen with CIFS NAS staging.</li>
+<li>The earlier <code>sed -n '1,40p'</code> output limitation was only a display truncation choice, not an extraction problem.</li>
+<li>Full listings confirmed the local stage contained the expected backup tree.</li>
+<li>Ownership repair was still required after restore operations.</li>
+</ul>
+<h2 id="resolution_2">Resolution<a class="headerlink" href="#resolution_2" title="Permanent link">&para;</a></h2>
+<p>Local staging on <code>/opt/offen-stage-[date removed]</code> replaced NAS staging as the preferred reusable restore workflow.</p>
+<h2 id="validation_2">Validation<a class="headerlink" href="#validation_2" title="Permanent link">&para;</a></h2>
+<p>Validation was performed by:
+- Confirming the local staging directory contained the expected backup tree
+- Reapplying the backup to <code>/opt/docker-apps</code>
+- Resetting ownership successfully
+- Proceeding to restart and test application stacks afterwards</p>
+<h2 id="follow-up-tasks_2">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Keep local staging as the standard repeat-restore method for this backup set.</li>
+<li>Optionally delete the local stage later if disk space is needed.</li>
+<li>Continue validating critical app configurations after restore.</li>
+</ul>
+<h2 id="lessons-learned_2">Lessons Learned<a class="headerlink" href="#lessons-learned_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Read-from-NAS and write-to-local is much safer than read-from-NAS and write-back-to-NAS over CIFS.</li>
+<li>Truncated output commands can make a healthy restore look incomplete.</li>
+<li>A reusable local stage is a practical middle ground between speed and safety.</li>
+</ul>
+<hr />
+<h1 id="container-stack-recovery-plex-hardware-device-error-and-gluetun-healthcheck-fix">Container Stack Recovery: Plex Hardware Device Error and Gluetun Healthcheck Fix<a class="headerlink" href="#container-stack-recovery-plex-hardware-device-error-and-gluetun-healthcheck-fix" title="Permanent link">&para;</a></h1>
+<h2 id="summary_3">Summary<a class="headerlink" href="#summary_3" title="Permanent link">&para;</a></h2>
+<p>After restoring appdata, container stacks were brought back up. Two notable issues were encountered: Plex failed due to a missing <code>/dev/dri</code> device in the VM, and the <code>gluetun_stack</code> remained blocked because a custom Docker healthcheck did not match Gluetun’s actual control/health behavior.</p>
+<h2 id="environment_3">Environment<a class="headerlink" href="#environment_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Compose-managed stacks:</li>
+<li><code>plex_stack</code></li>
+<li><code>gluetun_stack</code></li>
+<li>Relevant containers:</li>
+<li><code>plexms</code></li>
+<li><code>plexautoskip</code></li>
+<li><code>overseerr</code></li>
+<li><code>tautulli</code></li>
+<li><code>intro-editor-for-plex</code></li>
+<li><code>kometa</code></li>
+<li><code>gluetun</code></li>
+<li><code>deluge-vpn</code></li>
+<li><code>qbittorrent-vpn</code></li>
+<li><code>sabnzbd-vpn</code></li>
+<li><code>metube-stash-vpn</code></li>
+<li><code>jdownloader2-stash-vpn</code></li>
+<li><code>gallery-dl-stash-vpn</code></li>
+<li>Reverse proxy/network:</li>
+<li>external Docker network <code>traefik-proxy</code></li>
+<li>Traefik labels for HTTPS hostnames under <code>*.dulynoted.cloud</code></li>
+<li>VPN:</li>
+<li>Gluetun with Mullvad WireGuard</li>
+<li>Country selection set to Canada</li>
+</ul>
+<h2 id="problem_3">Problem<a class="headerlink" href="#problem_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Plex stack failed because the VM did not have <code>/dev/dri</code>.</li>
+<li>Gluetun stack containers were stuck waiting because <code>gluetun</code> was marked unhealthy even though the VPN connection itself was working.</li>
+</ul>
+<h2 id="symptoms_3">Symptoms<a class="headerlink" href="#symptoms_3" title="Permanent link">&para;</a></h2>
+<h3 id="plex">Plex<a class="headerlink" href="#plex" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Docker returned:
+  <code>text
+  error gathering device information while adding custom device "/dev/dri": no such file or directory</code></li>
+<li>Plex compose included:
+  ```yaml
+  devices:<ul>
+<li>/dev/dri:/dev/dri
+  ```</li>
+</ul>
+</li>
+</ul>
+<h3 id="gluetun">Gluetun<a class="headerlink" href="#gluetun" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>gluetun_stack</code> services stayed in waiting/unhealthy state.</li>
+<li>Gluetun logs showed successful VPN startup, for example:
+  <code>text
+  Public IP address is 146.70.198.216 (Canada, Quebec, Montréal - source: ipinfo)</code></li>
+<li>Logs also showed:
+  <code>text
+  WARN HEALTH_VPN_DURATION_INITIAL is obsolete</code></li>
+<li>Gluetun settings summary indicated:</li>
+<li>Control server on port <code>8000</code></li>
+<li>Health server on <code>127.0.0.1:9999</code></li>
+<li>Custom compose healthcheck attempted:
+  <code>yaml
+  curl -fsS http://127.0.0.1:8000/v1/health || exit 1</code></li>
+<li>Dependent containers used:
+  <code>yaml
+  depends_on:
+    gluetun:
+      condition: service_healthy</code></li>
+</ul>
+<h2 id="actions-taken_3">Actions Taken<a class="headerlink" href="#actions-taken_3" title="Permanent link">&para;</a></h2>
+<h3 id="plex_1">Plex<a class="headerlink" href="#plex_1" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Identified that the error was caused by the host/VM lacking <code>/dev/dri</code>.</li>
+<li>Determined that the quick workaround was to comment out the <code>devices</code> section in the Plex service to allow software transcoding.</li>
+<li>Deferred hardware transcoding rework for later.</li>
+</ol>
+<h3 id="gluetun_1">Gluetun<a class="headerlink" href="#gluetun_1" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Checked logs for the Gluetun container:
+   <code>bash
+   docker logs gluetun | tail -n 80</code></li>
+<li>Confirmed Gluetun had:</li>
+<li>enabled firewall</li>
+<li>started DNS</li>
+<li>brought up WireGuard</li>
+<li>obtained a VPN public IP</li>
+<li>Determined that the custom Docker healthcheck was incorrect.</li>
+<li>Removed the custom <code>healthcheck:</code> block from the <code>gluetun</code> service.</li>
+<li>Removed obsolete environment variable:
+   <code>yaml
+   HEALTH_VPN_DURATION_INITIAL=60s</code></li>
+<li>Simplified dependent container startup conditions from:
+   <code>yaml
+   condition: service_healthy</code>
+   to:
+   ```yaml
+   depends_on:<ul>
+<li>gluetun
+   ```</li>
+</ul>
+</li>
+<li>Replaced the inline <code>WIREGUARD_PRIVATE_KEY</code> with an environment variable reference:
+   <code>yaml
+   WIREGUARD_PRIVATE_KEY=${MULLVAD_WG_KEY}</code></li>
+<li>Re-deployed the stack successfully.</li>
+</ol>
+<p>Important commands used:</p>
+<pre><code class="language-bash">docker logs gluetun | tail -n 80
+</code></pre>
+<p>Purpose: review recent Gluetun startup and VPN status logs.</p>
+<pre><code class="language-bash">docker logs -f gluetun
+</code></pre>
+<p>Purpose: follow Gluetun logs live.</p>
+<pre><code class="language-bash">cd /opt/compose/gluetun_stack
+docker compose down
+docker compose up -d
+</code></pre>
+<p>Purpose: redeploy the corrected VPN stack.</p>
+<pre><code class="language-bash">docker ps --format 'table {{.Names}}\t{{.Status}}'
+</code></pre>
+<p>Purpose: confirm containers are running and not stuck waiting.</p>
+<h2 id="key-findings_3">Key Findings<a class="headerlink" href="#key-findings_3" title="Permanent link">&para;</a></h2>
+<h3 id="plex_2">Plex<a class="headerlink" href="#plex_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li>The Plex failure was not related to the restore itself.</li>
+<li>The Docker VM currently lacked <code>/dev/dri</code>, so the compose file’s device passthrough was invalid.</li>
+<li>Commenting out the <code>/dev/dri</code> mapping is an acceptable short-term workaround when hardware transcoding is unavailable.</li>
+</ul>
+<h3 id="gluetun_2">Gluetun<a class="headerlink" href="#gluetun_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Gluetun itself was healthy at the VPN level.</li>
+<li>The problem was Docker health logic, not VPN connectivity.</li>
+<li>The deciding evidence in the logs was:</li>
+<li>DNS ready</li>
+<li>firewall enabled</li>
+<li>WireGuard setup complete</li>
+<li>public VPN IP obtained</li>
+<li>The custom healthcheck was calling a path that did not match Gluetun’s real behavior.</li>
+<li>Dependent services were blocked only because <code>condition: service_healthy</code> chained their startup to a failing custom probe.</li>
+<li><code>HEALTH_VPN_DURATION_INITIAL</code> is obsolete and should be removed from current Gluetun configs.</li>
+</ul>
+<h2 id="resolution_3">Resolution<a class="headerlink" href="#resolution_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Plex: use the stack without <code>/dev/dri</code> until GPU passthrough or device exposure is fixed.</li>
+<li>Gluetun: removed the bad custom healthcheck, removed the obsolete health environment variable, simplified <code>depends_on</code>, and re-deployed successfully.</li>
+<li>The updated stack came up and worked.</li>
+</ul>
+<h2 id="validation_3">Validation<a class="headerlink" href="#validation_3" title="Permanent link">&para;</a></h2>
+<p>Validation was confirmed by:
+- Successful <code>docker compose up -d</code> after the Gluetun stack changes
+- <code>docker ps</code> showing the stack containers running
+- User confirmation that the updated Gluetun stack worked
+- Gluetun logs showing a valid VPN public IP in Canada</p>
+<h2 id="follow-up-tasks_3">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Rotate the Mullvad WireGuard private key that was exposed during troubleshooting.</li>
+<li>Store the new key in a <code>.env</code> file rather than inline in the compose file.</li>
+<li>Revisit <code>/dev/dri</code> passthrough for Plex if hardware transcoding is desired again.</li>
+<li>Optionally add a correct future Gluetun healthcheck only after confirming the intended endpoint and behavior against the current image version.</li>
+<li>Validate application UIs through Traefik after full stack recovery:</li>
+<li>qBittorrent</li>
+<li>Deluge</li>
+<li>SABnzbd</li>
+<li>Plex</li>
+<li>Overseerr</li>
+<li>Tautulli</li>
+</ul>
+<h2 id="lessons-learned_3">Lessons Learned<a class="headerlink" href="#lessons-learned_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>A service can be operational while Docker still marks it unhealthy if the custom probe is wrong.</li>
+<li>Startup gating with <code>condition: service_healthy</code> can freeze an entire stack when the primary healthcheck is incorrect.</li>
+<li>Logs that show successful firewall, DNS, VPN, and public IP acquisition are strong evidence that the core service is working.</li>
+<li>Secrets should not be pasted into compose files during troubleshooting.</li>
+</ul>
+<hr />
+<h1 id="command-reference">Command Reference<a class="headerlink" href="#command-reference" title="Permanent link">&para;</a></h1>
+<h2 id="command">Command<a class="headerlink" href="#command" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo rsync -a --remove-source-files /opt/docker-apps/backup/my-app-backup/ /opt/docker-apps/
+</code></pre>
+<p><strong>What it does</strong><br />
+Moves the contents of a previously extracted backup payload into the live <code>/opt/docker-apps</code> tree while preserving permissions, timestamps, symlinks, and basic metadata.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>-a</code> — archive mode; preserves structure and metadata
+- <code>--remove-source-files</code> — removes source files after successful transfer
+- trailing <code>/</code> on source — copies contents of <code>my-app-backup/</code>, not the directory itself</p>
+<p><strong>Why it was used</strong><br />
+To flatten a previously extracted Offen backup tree into the live appdata location.</p>
+<p><strong>Expected result</strong><br />
+App folders such as <code>Traefik</code>, <code>Dockge</code>, <code>Plex</code>, and others appear directly under <code>/opt/docker-apps</code>.</p>
+<p><strong>Success indicates</strong><br />
+The extracted backup payload has been merged into the live app tree.</p>
+<p><strong>Failure indicates</strong><br />
+Incorrect source path, permission issues, or interrupted file move.</p>
+<p><strong>Risk</strong>
+- Moderate. <code>--remove-source-files</code> is destructive to the source tree after successful transfer.
+- Safer alternative: omit <code>--remove-source-files</code> if you want to preserve the source payload.</p>
+<hr />
+<h2 id="command_1">Command<a class="headerlink" href="#command_1" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo find /opt/docker-apps/backup/my-app-backup -type d -empty -delete
+sudo rmdir -p /opt/docker-apps/backup/my-app-backup 2&gt;/dev/null || true
+</code></pre>
+<p><strong>What it does</strong><br />
+Deletes empty directories left behind after moving files out of the extracted backup wrapper.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>-type d</code> — directory only
+- <code>-empty</code> — match empty directories only
+- <code>-delete</code> — remove matches
+- <code>rmdir -p</code> — remove parent directories if they are empty</p>
+<p><strong>Why it was used</strong><br />
+To clean up the old backup wrapper structure after flattening.</p>
+<p><strong>Expected result</strong><br />
+<code>backup/my-app-backup</code> and its empty parents are removed if no files remain.</p>
+<p><strong>Success indicates</strong><br />
+The flattening operation completed and left only empty wrappers behind.</p>
+<p><strong>Failure indicates</strong><br />
+Some files or subdirectories still remain, or permissions prevent deletion.</p>
+<p><strong>Risk</strong>
+- Low, provided the path is correct.</p>
+<hr />
+<h2 id="command_2">Command<a class="headerlink" href="#command_2" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo chown -R debian:debian /opt/docker-apps
+</code></pre>
+<p><strong>What it does</strong><br />
+Recursively changes ownership of the appdata tree to user <code>debian</code> and group <code>debian</code>.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>-R</code> — recurse through all files and directories</p>
+<p><strong>Why it was used</strong><br />
+To ensure Dockge, Compose-managed services, and file-based app configs were writable by the intended user.</p>
+<p><strong>Expected result</strong><br />
+Config files and directories become owned by <code>debian:debian</code>.</p>
+<p><strong>Success indicates</strong><br />
+The app management user can edit and maintain the files again.</p>
+<p><strong>Failure indicates</strong><br />
+Permission or path issues.</p>
+<p><strong>Risk</strong>
+- Moderate. This can override intentional ownership on some special files if used indiscriminately.
+- Safer alternative: limit the path or reapply ownership only to the affected app directories.</p>
+<hr />
+<h2 id="command_3">Command<a class="headerlink" href="#command_3" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo tar -czpf &quot;$DEST/.pre-restore/full-pre-restore-$STAMP.tgz&quot; --exclude=&quot;$DEST/.pre-restore&quot; -C &quot;$DEST&quot; .
+</code></pre>
+<p><strong>What it does</strong><br />
+Creates a compressed tar snapshot of the current <code>/opt/docker-apps</code> tree before restoring.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>-c</code> — create archive
+- <code>-z</code> — gzip compression
+- <code>-p</code> — preserve permissions
+- <code>-f</code> — output file
+- <code>-C "$DEST"</code> — change into target directory before archiving
+- <code>.</code> — archive the current directory contents</p>
+<p><strong>Why it was used</strong><br />
+As a safety snapshot before overlaying the Offen backup onto the live appdata.</p>
+<p><strong>Expected result</strong><br />
+A tarball appears under <code>.pre-restore</code>.</p>
+<p><strong>Success indicates</strong><br />
+There is a rollback snapshot available.</p>
+<p><strong>Failure indicates</strong><br />
+Path problems, insufficient space, or self-inclusion issues.</p>
+<p><strong>Risk</strong>
+- Low to moderate. Storing the snapshot inside the directory being archived can generate self-read warnings.
+- Safer alternative: save the snapshot outside <code>/opt/docker-apps</code>.</p>
+<hr />
+<h2 id="command_4">Command<a class="headerlink" href="#command_4" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo tar -xzpf &quot;$ARCH&quot; -C &quot;$STAGE&quot;
+</code></pre>
+<p><strong>What it does</strong><br />
+Extracts the Offen backup archive to a staging directory.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>-x</code> — extract
+- <code>-z</code> — gzip input
+- <code>-p</code> — preserve permissions
+- <code>-f</code> — archive file
+- <code>-C "$STAGE"</code> — extract into the chosen staging directory</p>
+<p><strong>Why it was used</strong><br />
+To inspect and stage the backup before merging it into the live appdata tree.</p>
+<p><strong>Expected result</strong><br />
+A tree such as <code>backup/my-app-backup/...</code> appears under the staging path.</p>
+<p><strong>Success indicates</strong><br />
+The archive is readable and extractable.</p>
+<p><strong>Failure indicates</strong><br />
+Path issues, storage problems, or filesystem incompatibilities such as unsupported special files on CIFS.</p>
+<p><strong>Risk</strong>
+- Low on local filesystems.
+- Higher on CIFS if the archive contains special files like FIFOs.</p>
+<hr />
+<h2 id="command_5">Command<a class="headerlink" href="#command_5" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo tar -xzpf &quot;$ARCH&quot; --exclude='backup/my-app-backup/DoubleCommander/config/.XDG/*' -C &quot;$NAS_STAGE&quot;
+</code></pre>
+<p><strong>What it does</strong><br />
+Extracts the archive while excluding a problematic runtime <code>.XDG</code> path containing a FIFO.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>--exclude=...</code> — skip matching paths during extraction</p>
+<p><strong>Why it was used</strong><br />
+CIFS could not create the <code>doublecmd.pipe</code> FIFO contained in that path.</p>
+<p><strong>Expected result</strong><br />
+The archive extracts without trying to create unsupported special files.</p>
+<p><strong>Success indicates</strong><br />
+The rest of the backup is staged even though a nonessential runtime artifact is omitted.</p>
+<p><strong>Failure indicates</strong><br />
+Other unsupported files, CIFS mount problems, or path issues remain.</p>
+<p><strong>Risk</strong>
+- Low.
+- Tradeoff: excluded files are not restored. In this case the excluded FIFO was a runtime artifact, not core config.</p>
+<hr />
+<h2 id="command_6">Command<a class="headerlink" href="#command_6" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo rsync -aHAX --checksum --inplace &quot;$STAGE/backup/my-app-backup/&quot; &quot;$DEST/&quot;
+</code></pre>
+<p><strong>What it does</strong><br />
+Overlays the staged backup contents onto the live <code>/opt/docker-apps</code> tree.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>-a</code> — archive mode
+- <code>-H</code> — preserve hard links
+- <code>-A</code> — preserve ACLs
+- <code>-X</code> — preserve extended attributes
+- <code>--checksum</code> — compare by checksum, not just size/time
+- <code>--inplace</code> — update destination files in place
+- trailing <code>/</code> — merge contents, not parent folder</p>
+<p><strong>Why it was used</strong><br />
+To restore missing files and refresh the live appdata tree from the staged backup.</p>
+<p><strong>Expected result</strong><br />
+Missing and changed files under <code>/opt/docker-apps</code> are restored from the backup.</p>
+<p><strong>Success indicates</strong><br />
+The live tree now matches the backup contents for the paths involved.</p>
+<p><strong>Failure indicates</strong><br />
+Path, permission, or I/O problems.</p>
+<p><strong>Risk</strong>
+- Moderate. This overwrites destination files.
+- Safer alternative: snapshot the destination first.</p>
+<hr />
+<h2 id="command_7">Command<a class="headerlink" href="#command_7" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">du -sh /opt/docker-apps
+</code></pre>
+<p><strong>What it does</strong><br />
+Shows the total size of the appdata directory in human-readable form.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>-s</code> — summary only
+- <code>-h</code> — human-readable units</p>
+<p><strong>Why it was used</strong><br />
+To sanity-check the presence and approximate size of restored data.</p>
+<p><strong>Expected result</strong><br />
+A size value such as <code>23G /opt/docker-apps</code>.</p>
+<p><strong>Success indicates</strong><br />
+The directory exists and contains substantial data.</p>
+<p><strong>Failure indicates</strong><br />
+Path issues or access problems.</p>
+<hr />
+<h2 id="command_8">Command<a class="headerlink" href="#command_8" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">find /opt/docker-apps -maxdepth 2 -type d | sed -n '1,60p'
+</code></pre>
+<p><strong>What it does</strong><br />
+Lists top-level and near-top-level directories under <code>/opt/docker-apps</code>.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>-maxdepth 2</code> — limit recursion
+- <code>-type d</code> — directories only
+- <code>sed -n '1,60p'</code> — print the first 60 lines only</p>
+<p><strong>Why it was used</strong><br />
+To quickly confirm the restored app directory structure.</p>
+<p><strong>Expected result</strong><br />
+Common app folders appear in the output.</p>
+<p><strong>Success indicates</strong><br />
+The restore produced the expected directory layout.</p>
+<p><strong>Failure indicates</strong><br />
+Missing paths or unexpectedly sparse output.</p>
+<hr />
+<h2 id="command_9">Command<a class="headerlink" href="#command_9" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">df -h /opt
+</code></pre>
+<p><strong>What it does</strong><br />
+Shows free and used space on the filesystem containing <code>/opt</code>.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>-h</code> — human-readable output</p>
+<p><strong>Why it was used</strong><br />
+To check if local staging had enough disk space.</p>
+<p><strong>Expected result</strong><br />
+Displays total, used, and available space.</p>
+<p><strong>Success indicates</strong><br />
+Sufficient free space exists for staging.</p>
+<p><strong>Failure indicates</strong><br />
+The filesystem may be full or inaccessible.</p>
+<hr />
+<h2 id="command_10">Command<a class="headerlink" href="#command_10" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo rm -rf /tmp/offen-stage-*
+</code></pre>
+<p><strong>What it does</strong><br />
+Removes old temporary staging directories.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>-r</code> — recursive
+- <code>-f</code> — force removal without prompting</p>
+<p><strong>Why it was used</strong><br />
+To clean up obsolete temporary restore staging directories.</p>
+<p><strong>Expected result</strong><br />
+Matching temporary staging directories are deleted.</p>
+<p><strong>Success indicates</strong><br />
+The temp workspace is cleaned up.</p>
+<p><strong>Failure indicates</strong><br />
+Path issues or filesystem problems.</p>
+<p><strong>Risk</strong>
+- High if the glob is wrong.
+- Safer alternative: list matches first with <code>ls -d /tmp/offen-stage-*</code>.</p>
+<hr />
+<h2 id="command_11">Command<a class="headerlink" href="#command_11" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo rm -rf &quot;$LOCAL_STAGE&quot;
+sudo mkdir -p &quot;$LOCAL_STAGE&quot;
+</code></pre>
+<p><strong>What it does</strong><br />
+Recreates a clean local staging directory.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>rm -rf</code> — forcibly remove prior staging content
+- <code>mkdir -p</code> — create directory and parents if needed</p>
+<p><strong>Why it was used</strong><br />
+To ensure the new local stage did not contain stale files from an earlier extract.</p>
+<p><strong>Expected result</strong><br />
+An empty, clean staging directory exists.</p>
+<p><strong>Success indicates</strong><br />
+The local stage is ready for extraction.</p>
+<p><strong>Failure indicates</strong><br />
+Permission or filesystem issues.</p>
+<p><strong>Risk</strong>
+- Moderate to high if <code>$LOCAL_STAGE</code> is wrong.
+- Safer alternative: echo the variable first and verify it before deletion.</p>
+<hr />
+<h2 id="command_12">Command<a class="headerlink" href="#command_12" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ls -la &quot;$LOCAL_STAGE/backup/my-app-backup&quot; | less
+</code></pre>
+<p><strong>What it does</strong><br />
+Displays the full staged backup tree listing with paging.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>-l</code> — long listing
+- <code>-a</code> — include hidden entries
+- <code>less</code> — pager for long output</p>
+<p><strong>Why it was used</strong><br />
+To inspect the complete extracted backup rather than only the first 40 lines.</p>
+<p><strong>Expected result</strong><br />
+A scrollable directory listing of all top-level entries.</p>
+<p><strong>Success indicates</strong><br />
+The local stage contains the expected backup tree.</p>
+<p><strong>Failure indicates</strong><br />
+Extraction was incomplete or the path is wrong.</p>
+<hr />
+<h2 id="command_13">Command<a class="headerlink" href="#command_13" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">find &quot;$LOCAL_STAGE/backup/my-app-backup&quot; -maxdepth 1 -mindepth 1 -type d | sort
+</code></pre>
+<p><strong>What it does</strong><br />
+Lists all top-level directories in the extracted backup.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>-maxdepth 1</code> — only top level
+- <code>-mindepth 1</code> — exclude the root directory itself
+- <code>-type d</code> — directories only
+- <code>sort</code> — alphabetize output</p>
+<p><strong>Why it was used</strong><br />
+To get a clean inventory of all staged app folders.</p>
+<p><strong>Expected result</strong><br />
+A sorted list of app directory paths.</p>
+<p><strong>Success indicates</strong><br />
+The expected app set is present in the staged backup.</p>
+<p><strong>Failure indicates</strong><br />
+Extraction problems or wrong path selection.</p>
+<hr />
+<h2 id="command_14">Command<a class="headerlink" href="#command_14" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">docker compose down
+docker compose up -d
+</code></pre>
+<p><strong>What it does</strong><br />
+Stops and removes the current stack, then recreates and starts it in detached mode.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>down</code> — stop and remove containers, networks defined by the compose project
+- <code>up -d</code> — start containers in background mode</p>
+<p><strong>Why it was used</strong><br />
+To restart corrected stacks such as <code>gluetun_stack</code> after compose changes.</p>
+<p><strong>Expected result</strong><br />
+Containers stop cleanly and restart with updated configuration.</p>
+<p><strong>Success indicates</strong><br />
+The compose changes were accepted and services start.</p>
+<p><strong>Failure indicates</strong><br />
+Bad compose syntax, missing mounts/devices, or service-level startup errors.</p>
+<p><strong>Risk</strong>
+- Moderate. Stops services during redeploy.
+- Safer alternative: use <code>docker compose up -d</code> after targeted edits if you do not need a full down/up cycle.</p>
+<hr />
+<h2 id="command_15">Command<a class="headerlink" href="#command_15" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">docker logs gluetun | tail -n 80
+</code></pre>
+<p><strong>What it does</strong><br />
+Shows the last 80 lines of logs from the <code>gluetun</code> container.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>tail -n 80</code> — show recent log lines only</p>
+<p><strong>Why it was used</strong><br />
+To determine whether Gluetun itself was failing or only its Docker health logic was failing.</p>
+<p><strong>Expected result</strong><br />
+Recent Gluetun startup logs including firewall, DNS, VPN, and public IP information.</p>
+<p><strong>Success indicates</strong><br />
+Useful evidence is available for troubleshooting startup and health status.</p>
+<p><strong>Failure indicates</strong><br />
+The container may not exist, may not be running, or logging may be unavailable.</p>
+<hr />
+<h2 id="command_16">Command<a class="headerlink" href="#command_16" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">docker logs -f gluetun
+</code></pre>
+<p><strong>What it does</strong><br />
+Follows Gluetun logs live.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>-f</code> — follow log output continuously</p>
+<p><strong>Why it was used</strong><br />
+To watch Gluetun startup and status changes in real time.</p>
+<p><strong>Expected result</strong><br />
+Live streaming log output until interrupted with <code>Ctrl+C</code>.</p>
+<p><strong>Success indicates</strong><br />
+The container is running and producing log events.</p>
+<p><strong>Failure indicates</strong><br />
+Container naming or runtime issues.</p>
+<hr />
+<h2 id="command_17">Command<a class="headerlink" href="#command_17" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">docker ps --format 'table {{.Names}}\t{{.Status}}'
+</code></pre>
+<p><strong>What it does</strong><br />
+Shows container names and status in a compact table.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>--format</code> — custom output format for quick status review</p>
+<p><strong>Why it was used</strong><br />
+To confirm whether <code>gluetun</code> and dependent containers were up, waiting, or unhealthy.</p>
+<p><strong>Expected result</strong><br />
+A table showing names and container status.</p>
+<p><strong>Success indicates</strong><br />
+Services are running as expected.</p>
+<p><strong>Failure indicates</strong><br />
+Containers may be exited, restarting, or absent.</p>
+<hr />
+<h2 id="command_18">Command<a class="headerlink" href="#command_18" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">cd /opt/compose/gluetun_stack
+</code></pre>
+<p><strong>What it does</strong><br />
+Changes into the compose project directory for the Gluetun-based stack.</p>
+<p><strong>Why it was used</strong><br />
+Docker Compose commands should be run from the correct project directory to target the intended stack files.</p>
+<p><strong>Expected result</strong><br />
+Subsequent <code>docker compose</code> commands apply to the Gluetun stack.</p>
+<p><strong>Success indicates</strong><br />
+The correct compose directory exists.</p>
+<p><strong>Failure indicates</strong><br />
+Wrong path or missing stack files.</p>
+<hr />
+<h2 id="command_19">Command<a class="headerlink" href="#command_19" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ls -l /dev/net/tun
+</code></pre>
+<p><strong>Likely command used</strong></p>
+<p><strong>What it does</strong><br />
+Checks whether the TUN device required by VPN containers exists inside the VM.</p>
+<p><strong>Why it would be used</strong><br />
+Gluetun requires <code>/dev/net/tun</code>; absence would prevent WireGuard/OpenVPN tunnel setup.</p>
+<p><strong>Expected result</strong><br />
+A character device entry for <code>/dev/net/tun</code>.</p>
+<p><strong>Success indicates</strong><br />
+The VM exposes the TUN device correctly.</p>
+<p><strong>Failure indicates</strong><br />
+VPN containers may fail to initialize their tunnel interface.</p>
+<hr />
+<h2 id="command_20">Command<a class="headerlink" href="#command_20" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ls -l /dev/dri
+</code></pre>
+<p><strong>Likely command used</strong></p>
+<p><strong>What it does</strong><br />
+Checks whether GPU render device nodes are available.</p>
+<p><strong>Why it would be used</strong><br />
+Plex attempted to map <code>/dev/dri:/dev/dri</code> for hardware transcoding.</p>
+<p><strong>Expected result</strong><br />
+Device nodes such as <code>card0</code> and <code>renderD128</code>.</p>
+<p><strong>Success indicates</strong><br />
+The VM or host exposes graphics device nodes for container passthrough.</p>
+<p><strong>Failure indicates</strong><br />
+Plex hardware transcoding device mapping will fail.</p>
+<hr />
+<h2 id="command_21">Command<a class="headerlink" href="#command_21" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">journalctl -b -1 | tail -n 100
+</code></pre>
+<p><strong>Likely command used</strong></p>
+<p><strong>What it does</strong><br />
+Shows the last 100 lines from the previous boot’s logs.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>-b -1</code> — previous boot
+- <code>tail -n 100</code> — only recent lines</p>
+<p><strong>Why it was used</strong><br />
+To inspect what happened before the Proxmox node was power-cycled after the hang.</p>
+<p><strong>Expected result</strong><br />
+Recent logs from the failed boot, including service errors or VM timeouts.</p>
+<p><strong>Success indicates</strong><br />
+There is enough retained journal data to inspect the failure window.</p>
+<p><strong>Failure indicates</strong><br />
+The journal may be incomplete or old logs unavailable.</p>
+<hr />
+<h2 id="command_22">Command<a class="headerlink" href="#command_22" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">journalctl -b -1 -p 0..3 | less
+</code></pre>
+<p><strong>Likely command used</strong></p>
+<p><strong>What it does</strong><br />
+Shows high-priority errors from the previous boot with paging.</p>
+<p><strong>Important flags / arguments</strong>
+- <code>-p 0..3</code> — emergency through error priority
+- <code>less</code> — page long output</p>
+<p><strong>Why it was used</strong><br />
+To focus on serious errors that could explain the host/node failure.</p>
+<p><strong>Expected result</strong><br />
+Critical log messages such as kernel, service, or cluster errors.</p>
+<p><strong>Success indicates</strong><br />
+Actionable high-severity logs are available.</p>
+<p><strong>Failure indicates</strong><br />
+No high-severity logs were written before the hard lock or power cycle.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

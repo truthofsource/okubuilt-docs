@@ -1,0 +1,3531 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Infrastructure, cloud, automation, security, and operations documentation portfolio.">
+      
+      
+        <meta name="author" content="Kingsley Oku">
+      
+      
+      
+        <link rel="prev" href="../opnsense-opt2-lan-runbook/">
+      
+      
+        <link rel="next" href="../wireguard-ec2-proxmox-lxc-homelab-remote-access/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>OPNsense Web GUI Failure Recovery Documentation and Runbook - OkuBuilt Infrastructure & Cloud Portfolio</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#opnsense-web-gui-failure-recovery-documentation-and-runbook" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-header__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OkuBuilt Infrastructure & Cloud Portfolio
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              OPNsense Web GUI Failure Recovery Documentation and Runbook
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-nav__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OkuBuilt Infrastructure & Cloud Portfolio
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/proxmox-traefik-opnsense-ha-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox, Traefik, OPNsense HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Automation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cephfs-snips-cloudinit-vm100-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox CephFS Snips Cloud-Init VM100
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloud-init-docker-vm-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Docker VM Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-vm100-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker VM100 Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-cicustom-snippet-storage-ha/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init cicustom Snippet Storage HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/vm100-docker-startup-mountguard-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Startup Mount Guard Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compute
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/debian-docker-vm-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/home-assistant-os-proxmox-ceph-vm-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home Assistant OS Proxmox Ceph VM Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/homelab-vm100-rebuild-restore-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab VM100 Rebuild Restore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Containers & Apps
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Containers & Apps
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/debian-docker-vm-rebuild-cloudinit-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM Rebuild Cloud-Init
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-apps-offen-restore-gluetun-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Apps Offen Restore Gluetun Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-compose-memos-image-tag-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Compose Memos Image Tag Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/gluetun-corrupted-servers-permissions-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gluetun Corrupted Servers Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/proxmox-traefik-console-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Traefik Console Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-docker29-upgrade-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Docker Upgrade Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-proxy-docker-network-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Proxy Docker Network
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm100-docker-data-disk-recovery-cloud-init-hardening/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Data Disk Recovery Cloud-Init Hardening
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm110-provisioning-guest-agent-docker-appdata-permissions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM110 Provisioning Guest Agent Docker AppData Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring & Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Monitoring & Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-ceph-memtest-ram-fault-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Ceph Memtest RAM Fault
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-host-kernel-ram-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Host Kernel RAM Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-nuc-e1000e-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox NUC e1000e Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networking
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Networking
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../att-fiber-opnsense-outage-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AT&T Fiber OPNsense Outage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../opnsense-lan-instability-storm-control-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN Instability Storm Control
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../opnsense-lan-ip-dhcp-static-device-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN IP DHCP Static Device
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../opnsense-opt2-lan-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense OPT2 LAN
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense Web GUI Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../wireguard-ec2-proxmox-lxc-homelab-remote-access/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WireGuard EC2 Proxmox LXC Homelab Remote Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Security
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/homelab-ssh-ansible-nut-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab SSH Ansible NUT Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/proxmox-root-login-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Root Login Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_9" id="__nav_2_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Storage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Storage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/ceph-mainframe-osd-mon-mgr-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Mainframe OSD MON MGR Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/ceph-monitor-crash-loop-mainframe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Monitor Crash Loop Mainframe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/proxmox-ha-live-migration-ceph-vm-state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox HA Live Migration Ceph VM State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/truenas-vm-zfs-hba-planning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TrueNAS VM ZFS HBA Planning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/vm100-ceph-gluetun-troubleshooting-runbook-15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Ceph Gluetun Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/vm100-docker-nas-offen-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker NAS Offen Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Runbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runbooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_11" id="__nav_2_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting Incidents
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting Incidents
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting-incidents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloud
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cloud
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cloud/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portfolio
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Portfolio
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../portfolio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/documentation-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation Standards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/placement-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Placement Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/recurring-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recurring Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/command-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="opnsense-web-gui-failure-recovery-documentation-and-runbook">OPNsense Web GUI Failure Recovery Documentation and Runbook<a class="headerlink" href="#opnsense-web-gui-failure-recovery-documentation-and-runbook" title="Permanent link">&para;</a></h1>
+<p>This document contains two parts:</p>
+<ol>
+<li>A dated troubleshooting/change record for the OPNsense Web GUI recovery session.</li>
+<li>A reusable OPNsense Web GUI recovery runbook for future incidents.</li>
+</ol>
+<hr />
+<h1 id="part-1-troubleshooting-and-change-record">Part 1 — Troubleshooting and Change Record<a class="headerlink" href="#part-1-troubleshooting-and-change-record" title="Permanent link">&para;</a></h1>
+<h1 id="opnsense-web-gui-failure-and-factory-reset-recovery">OPNsense Web GUI Failure and Factory Reset Recovery<a class="headerlink" href="#opnsense-web-gui-failure-and-factory-reset-recovery" title="Permanent link">&para;</a></h1>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>The OPNsense Web GUI stopped working correctly. Initial troubleshooting focused on recovering the Web GUI service stack through shell commands, service restarts, template regeneration, package repair, and console menu recovery options.</p>
+<p>The issue progressed through several states:</p>
+<ul>
+<li>Web GUI not working</li>
+<li><code>lighttpd</code> failing to restart</li>
+<li>Web GUI config file initially missing</li>
+<li><code>configctl</code> returning <code>action not allowed</code></li>
+<li>Web GUI partially loading the OPNsense “Hi there…” splash page</li>
+<li>Login functionality still not working</li>
+<li>Final recovery through console menu <strong>Option 4: Reset to factory defaults</strong></li>
+</ul>
+<p>The final resolution was a factory reset, which restored the Web GUI but also wiped the active OPNsense configuration.</p>
+<h2 id="environment">Environment<a class="headerlink" href="#environment" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Platform: OPNsense firewall</li>
+<li>Environment: Homelab</li>
+<li>Access methods:</li>
+<li>OPNsense console menu</li>
+<li>OPNsense shell</li>
+<li>Relevant services:</li>
+<li><code>lighttpd</code> — Web GUI frontend web server</li>
+<li><code>php-fpm</code> — PHP execution backend for Web GUI pages</li>
+<li><code>configd</code> — OPNsense backend configuration daemon</li>
+<li>Relevant files:</li>
+<li><code>/var/etc/lighty-webConfigurator.conf</code></li>
+<li>Relevant firewall component:</li>
+<li><code>pf</code>, managed with <code>pfctl</code></li>
+<li>Relevant update path:</li>
+<li>OPNsense console menu Option 12</li>
+<li>Final recovery method:</li>
+<li>OPNsense console menu Option 4</li>
+</ul>
+<h2 id="problem">Problem<a class="headerlink" href="#problem" title="Permanent link">&para;</a></h2>
+<p>The OPNsense Web GUI was not working. The user needed a way to restore management access from the shell or console menu.</p>
+<h2 id="symptoms">Symptoms<a class="headerlink" href="#symptoms" title="Permanent link">&para;</a></h2>
+<p>Observed or discussed symptoms included:</p>
+<ul>
+<li>Web GUI not functioning</li>
+<li><code>lighttpd</code> unable to restart</li>
+<li>Initial reference to <code>/var/etc/lighty-webConfigurator.conf</code> returning a “no such directory” / missing file condition</li>
+<li><code>configctl</code> producing an <code>action not allowed</code> error</li>
+<li>Web GUI later showing the OPNsense splash text:</li>
+</ul>
+<pre><code class="language-text">Hi there, for over a decade now OPNsense is driving...
+</code></pre>
+<ul>
+<li>Despite the splash page loading, the GUI was still not usable</li>
+<li>This suggested static content could be served, but PHP/backend functionality was still broken</li>
+</ul>
+<h2 id="actions-taken">Actions Taken<a class="headerlink" href="#actions-taken" title="Permanent link">&para;</a></h2>
+<h3 id="1-attempted-to-restart-web-gui-services">1. Attempted to restart Web GUI services<a class="headerlink" href="#1-attempted-to-restart-web-gui-services" title="Permanent link">&para;</a></h3>
+<p>The first recovery step was to check and restart the Web GUI service stack.</p>
+<pre><code class="language-bash">service configd restart
+service lighttpd restart
+</code></pre>
+<p>Purpose:</p>
+<ul>
+<li>Restart the OPNsense backend daemon</li>
+<li>Restart the Web GUI frontend service</li>
+</ul>
+<h3 id="2-attempted-to-verify-web-gui-config">2. Attempted to verify Web GUI config<a class="headerlink" href="#2-attempted-to-verify-web-gui-config" title="Permanent link">&para;</a></h3>
+<p>The expected Web GUI config file was discussed:</p>
+<pre><code class="language-text">/var/etc/lighty-webConfigurator.conf
+</code></pre>
+<p>The file or path was initially reported as missing.</p>
+<h3 id="3-attempted-to-regenerate-web-gui-templates">3. Attempted to regenerate Web GUI templates<a class="headerlink" href="#3-attempted-to-regenerate-web-gui-templates" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash">configctl template reload OPNsense/WebGui
+</code></pre>
+<p>Purpose:</p>
+<ul>
+<li>Regenerate the Web GUI configuration, including <code>lighty-webConfigurator.conf</code></li>
+</ul>
+<p>Result:</p>
+<ul>
+<li>The user reported an <code>action not allowed</code> response.</li>
+</ul>
+<h3 id="4-attempted-to-force-http-on-port-80">4. Attempted to force HTTP on port 80<a class="headerlink" href="#4-attempted-to-force-http-on-port-80" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash">configctl webgui set protocol=http
+configctl webgui set port=80
+service lighttpd restart
+</code></pre>
+<p>Purpose:</p>
+<ul>
+<li>Bypass HTTPS, TLS, or certificate problems</li>
+<li>Attempt to restore GUI access over plain HTTP</li>
+</ul>
+<h3 id="5-confirmed-configs-and-lighttpd-later-existed">5. Confirmed configs and <code>lighttpd</code> later existed<a class="headerlink" href="#5-confirmed-configs-and-lighttpd-later-existed" title="Permanent link">&para;</a></h3>
+<p>The user later reported:</p>
+<pre><code class="language-text">Configs and lighttpd are there now
+</code></pre>
+<p>At this stage, recovery shifted toward checking whether the service was actually listening and whether the backend was functional.</p>
+<h3 id="6-discussed-serviceport-validation">6. Discussed service/port validation<a class="headerlink" href="#6-discussed-serviceport-validation" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash">sockstat -4 -l | grep lighttpd
+</code></pre>
+<p>Purpose:</p>
+<ul>
+<li>Confirm whether <code>lighttpd</code> was listening on a Web GUI port such as 80 or 443</li>
+</ul>
+<p>Also discussed local access testing:</p>
+<pre><code class="language-bash">curl -vk https://127.0.0.1:443
+</code></pre>
+<p>or, if HTTP was configured:</p>
+<pre><code class="language-bash">curl -vk http://127.0.0.1
+</code></pre>
+<p>Purpose:</p>
+<ul>
+<li>Determine whether the Web GUI responded locally from the firewall itself</li>
+</ul>
+<h3 id="7-discussed-temporary-firewall-bypass">7. Discussed temporary firewall bypass<a class="headerlink" href="#7-discussed-temporary-firewall-bypass" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash">pfctl -d
+</code></pre>
+<p>Purpose:</p>
+<ul>
+<li>Temporarily disable packet filtering to determine whether firewall rules were blocking GUI access</li>
+</ul>
+<p>Risk:</p>
+<ul>
+<li>This temporarily disables firewall enforcement and should only be used briefly during troubleshooting.</li>
+</ul>
+<p>Re-enable with:</p>
+<pre><code class="language-bash">pfctl -e
+</code></pre>
+<h3 id="8-discussed-package-repair">8. Discussed package repair<a class="headerlink" href="#8-discussed-package-repair" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash">pkg install -f opnsense
+pkg install -f lighttpd
+</code></pre>
+<p>Also later discussed PHP package repair:</p>
+<pre><code class="language-bash">pkg install -f php82 php82-extensions
+</code></pre>
+<p>Purpose:</p>
+<ul>
+<li>Repair or reinstall potentially broken OPNsense, web server, or PHP backend components</li>
+</ul>
+<h3 id="9-used-console-update-workflow">9. Used console update workflow<a class="headerlink" href="#9-used-console-update-workflow" title="Permanent link">&para;</a></h3>
+<p>The user asked how to update through the shell and console menu.</p>
+<p>Console menu Option 12 was discussed:</p>
+<pre><code class="language-text">12) Update from console
+</code></pre>
+<p>When prompted for a branch/version, the correct general input was discussed as:</p>
+<pre><code class="language-text">latest
+</code></pre>
+<p>The user mentioned entering:</p>
+<pre><code class="language-text">25.7
+</code></pre>
+<p>This was clarified as likely being interpreted as a version/branch prompt inside the updater, not the original console menu option.</p>
+<h3 id="10-web-gui-partially-loaded">10. Web GUI partially loaded<a class="headerlink" href="#10-web-gui-partially-loaded" title="Permanent link">&para;</a></h3>
+<p>The user reached a page containing the OPNsense splash text:</p>
+<pre><code class="language-text">Hi there, for over a decade now OPNsense is driving...
+</code></pre>
+<p>This indicated:</p>
+<ul>
+<li><code>lighttpd</code> was at least partially working</li>
+<li>Static files could be served</li>
+<li>The Web GUI was still not fully functional</li>
+</ul>
+<p>Likely issue:</p>
+<ul>
+<li>PHP-FPM or backend services were not executing/rendering the login UI correctly</li>
+</ul>
+<h3 id="11-discussed-phpbackend-restart">11. Discussed PHP/backend restart<a class="headerlink" href="#11-discussed-phpbackend-restart" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash">service php-fpm restart
+service configd restart
+service lighttpd restart
+</code></pre>
+<p>Purpose:</p>
+<ul>
+<li>Restart the full backend/frontend Web GUI chain</li>
+</ul>
+<h3 id="12-asked-whether-recovery-could-be-done-through-menu-options">12. Asked whether recovery could be done through menu options<a class="headerlink" href="#12-asked-whether-recovery-could-be-done-through-menu-options" title="Permanent link">&para;</a></h3>
+<p>The following console menu options were identified as useful:</p>
+<pre><code class="language-text">11) Reload all services
+12) Update from console
+4) Reset to factory defaults
+</code></pre>
+<p>Recommended order was:</p>
+<ol>
+<li>Option 11 — reload all services</li>
+<li>Option 12 — update from console</li>
+<li>Option 4 — reset to factory defaults as last resort</li>
+</ol>
+<h3 id="13-final-recovery-action-option-4-factory-reset">13. Final recovery action: Option 4 factory reset<a class="headerlink" href="#13-final-recovery-action-option-4-factory-reset" title="Permanent link">&para;</a></h3>
+<p>The user chose:</p>
+<pre><code class="language-text">4) Reset to factory defaults
+</code></pre>
+<p>Purpose:</p>
+<ul>
+<li>Fully reset OPNsense back to factory defaults</li>
+</ul>
+<p>Impact:</p>
+<ul>
+<li>Restored default configuration</li>
+<li>Wiped custom firewall, interface, DHCP, NAT, DNS, VLAN, and other settings</li>
+</ul>
+<h2 id="key-findings">Key Findings<a class="headerlink" href="#key-findings" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>lighttpd</code> failure can be caused by missing or broken generated Web GUI config.</li>
+<li><code>/var/etc/lighty-webConfigurator.conf</code> is generated by OPNsense, not normally hand-maintained.</li>
+<li><code>configctl template reload OPNsense/WebGui</code> is the correct path to regenerate the Web GUI template.</li>
+<li><code>configctl</code> returning <code>action not allowed</code> points toward a <code>configd</code> backend or permission issue.</li>
+<li>Seeing the OPNsense static “Hi there…” page means the web server is serving at least some static content.</li>
+<li>A static splash page without a usable login flow suggests PHP-FPM or backend execution failure.</li>
+<li>Console menu recovery options can fix many GUI issues without full reset:</li>
+<li>Option 11 reloads services</li>
+<li>Option 12 updates from console</li>
+<li>Option 4 factory reset is effective but destructive.</li>
+</ul>
+<h2 id="resolution">Resolution<a class="headerlink" href="#resolution" title="Permanent link">&para;</a></h2>
+<p>The issue was ultimately resolved by using OPNsense console menu:</p>
+<pre><code class="language-text">4) Reset to factory defaults
+</code></pre>
+<p>This reset OPNsense to its default state and restored Web GUI availability.</p>
+<p>Default post-reset access:</p>
+<pre><code class="language-text">http://192.168.1.1
+</code></pre>
+<p>Default credentials:</p>
+<pre><code class="language-text">root / opnsense
+</code></pre>
+<h2 id="validation">Validation<a class="headerlink" href="#validation" title="Permanent link">&para;</a></h2>
+<p>Validation should include:</p>
+<ul>
+<li>Web GUI loads fully</li>
+<li>Login form appears</li>
+<li>Login succeeds</li>
+<li>OPNsense dashboard opens</li>
+<li><code>lighttpd</code>, <code>php-fpm</code>, and <code>configd</code> are running</li>
+<li>Firewall packet filtering is enabled</li>
+<li>LAN clients can reach the firewall GUI</li>
+<li>WAN/LAN interfaces are assigned correctly after reset</li>
+</ul>
+<p>Useful validation commands:</p>
+<pre><code class="language-bash">service lighttpd status
+service php-fpm status
+service configd status
+sockstat -4 -l | grep lighttpd
+</code></pre>
+<h2 id="follow-up-tasks">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks" title="Permanent link">&para;</a></h2>
+<p>Because a factory reset was used, the following should be restored or rebuilt:</p>
+<ul>
+<li>WAN interface assignment</li>
+<li>LAN interface assignment</li>
+<li>LAN IP address</li>
+<li>DHCP server settings</li>
+<li>DNS resolver / Unbound settings</li>
+<li>Firewall rules</li>
+<li>NAT outbound rules</li>
+<li>Port forwards</li>
+<li>VLANs, if used</li>
+<li>Gateway configuration</li>
+<li>Static DHCP mappings</li>
+<li>Any aliases</li>
+<li>Any reverse proxy or homelab routing dependencies</li>
+<li>Any rules supporting Traefik or internal services</li>
+<li>Any DNS overrides for homelab services</li>
+<li>OPNsense config backup workflow</li>
+</ul>
+<p>Recommended follow-up:</p>
+<ul>
+<li>Export a fresh known-good OPNsense config backup once rebuilt.</li>
+<li>Store the backup somewhere outside the firewall.</li>
+<li>Document custom firewall rules and interface assignments.</li>
+</ul>
+<h2 id="lessons-learned">Lessons Learned<a class="headerlink" href="#lessons-learned" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Try safe console options before factory reset:</li>
+<li>Option 11: Reload all services</li>
+<li>Option 12: Update from console</li>
+<li>Use factory reset only when backend/config recovery fails or fast restoration is more important than preserving current config.</li>
+<li>Keep OPNsense backups before major changes.</li>
+<li>A partially loading Web GUI is useful diagnostic evidence:</li>
+<li>Static page = web server probably works</li>
+<li>Missing login/backend behavior = PHP or configd problem</li>
+<li>During outages, console access is critical.</li>
+<li>Maintaining a short “break glass” runbook reduces guesswork during firewall failure.</li>
+</ul>
+<hr />
+<h1 id="part-2-reusable-opnsense-web-gui-recovery-runbook">Part 2 — Reusable OPNsense Web GUI Recovery Runbook<a class="headerlink" href="#part-2-reusable-opnsense-web-gui-recovery-runbook" title="Permanent link">&para;</a></h1>
+<h2 id="purpose">Purpose<a class="headerlink" href="#purpose" title="Permanent link">&para;</a></h2>
+<p>Provide a repeatable, low-risk procedure to recover a broken OPNsense Web GUI in a homelab environment without immediately resorting to a factory reset.</p>
+<h2 id="scope">Scope<a class="headerlink" href="#scope" title="Permanent link">&para;</a></h2>
+<p>Covers issues where:</p>
+<ul>
+<li>Web GUI is unreachable</li>
+<li>Web GUI partially loads, such as the “Hi there…” page only</li>
+<li><code>lighttpd</code> fails to start</li>
+<li>Backend services such as <code>configd</code> or PHP-FPM are broken</li>
+</ul>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Console access, such as physical console, IPMI, or Proxmox VM console</li>
+<li>Root access to the OPNsense shell or console menu</li>
+<li>Awareness that some actions, especially <code>pfctl -d</code> and factory reset, carry risk</li>
+</ul>
+<hr />
+<h1 id="recovery-workflow">Recovery Workflow<a class="headerlink" href="#recovery-workflow" title="Permanent link">&para;</a></h1>
+<h2 id="phase-1-quick-wins">Phase 1 — Quick Wins<a class="headerlink" href="#phase-1-quick-wins" title="Permanent link">&para;</a></h2>
+<h3 id="1-reload-all-services">1. Reload All Services<a class="headerlink" href="#1-reload-all-services" title="Permanent link">&para;</a></h3>
+<p>From the OPNsense console menu, choose:</p>
+<pre><code class="language-text">11) Reload all services
+</code></pre>
+<p>Purpose:</p>
+<ul>
+<li>Restart core services such as <code>lighttpd</code>, <code>php-fpm</code>, and <code>configd</code></li>
+</ul>
+<p>Expected result:</p>
+<ul>
+<li>The Web GUI returns without further intervention</li>
+</ul>
+<hr />
+<h3 id="2-reset-web-gui-to-http">2. Reset Web GUI to HTTP<a class="headerlink" href="#2-reset-web-gui-to-http" title="Permanent link">&para;</a></h3>
+<p>Switch from HTTPS to HTTP to eliminate certificate or TLS-related issues.</p>
+<pre><code class="language-bash">configctl webgui set protocol=http
+configctl webgui set port=80
+service lighttpd restart
+</code></pre>
+<p>Expected result:</p>
+<pre><code class="language-text">http://&lt;LAN_IP&gt;
+</code></pre>
+<hr />
+<h3 id="3-test-local-web-access">3. Test Local Web Access<a class="headerlink" href="#3-test-local-web-access" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash">curl -vk http://127.0.0.1
+</code></pre>
+<p>Interpretation:</p>
+<ul>
+<li>HTML response: Web service is working locally.</li>
+<li>Connection refused: Web service is not running or not listening.</li>
+<li>Static page only: Web server may be working, but PHP/backend services may still be broken.</li>
+</ul>
+<hr />
+<h2 id="phase-2-service-level-recovery">Phase 2 — Service-Level Recovery<a class="headerlink" href="#phase-2-service-level-recovery" title="Permanent link">&para;</a></h2>
+<h3 id="4-restart-core-services-manually">4. Restart Core Services Manually<a class="headerlink" href="#4-restart-core-services-manually" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash">service configd restart
+service php-fpm restart
+service lighttpd restart
+</code></pre>
+<p>Purpose:</p>
+<ul>
+<li>Restart the backend chain that supports the Web GUI:</li>
+</ul>
+<pre><code class="language-text">configd -&gt; php-fpm -&gt; lighttpd
+</code></pre>
+<p>Expected result:</p>
+<ul>
+<li>The Web GUI loads correctly and the login form appears.</li>
+</ul>
+<hr />
+<h3 id="5-verify-web-server-binding">5. Verify Web Server Binding<a class="headerlink" href="#5-verify-web-server-binding" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash">sockstat -4 -l | grep lighttpd
+</code></pre>
+<p>Expected result:</p>
+<pre><code class="language-text">*:80
+</code></pre>
+<p>or:</p>
+<pre><code class="language-text">*:443
+</code></pre>
+<p>If <code>lighttpd</code> is not listening, the problem is likely service or config related.</p>
+<hr />
+<h3 id="6-temporarily-bypass-firewall-rules">6. Temporarily Bypass Firewall Rules<a class="headerlink" href="#6-temporarily-bypass-firewall-rules" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash">pfctl -d
+</code></pre>
+<p>Purpose:</p>
+<ul>
+<li>Temporarily disables packet filtering to determine whether firewall rules are blocking access to the Web GUI</li>
+</ul>
+<p>Warning:</p>
+<ul>
+<li>This temporarily allows traffic that would normally be filtered. Use only for testing.</li>
+</ul>
+<p>Re-enable packet filtering afterward:</p>
+<pre><code class="language-bash">pfctl -e
+</code></pre>
+<hr />
+<h2 id="phase-3-web-gui-config-repair">Phase 3 — Web GUI Config Repair<a class="headerlink" href="#phase-3-web-gui-config-repair" title="Permanent link">&para;</a></h2>
+<h3 id="7-regenerate-web-gui-config">7. Regenerate Web GUI Config<a class="headerlink" href="#7-regenerate-web-gui-config" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash">configctl template reload OPNsense/WebGui
+</code></pre>
+<p>Expected result:</p>
+<ul>
+<li>Recreates the Web GUI config file:</li>
+</ul>
+<pre><code class="language-text">/var/etc/lighty-webConfigurator.conf
+</code></pre>
+<hr />
+<h3 id="8-if-you-see-action-not-allowed">8. If You See “Action Not Allowed”<a class="headerlink" href="#8-if-you-see-action-not-allowed" title="Permanent link">&para;</a></h3>
+<p>If <code>configctl</code> returns:</p>
+<pre><code class="language-text">action not allowed
+</code></pre>
+<p>Restart <code>configd</code>:</p>
+<pre><code class="language-bash">service configd restart
+</code></pre>
+<p>Then retry:</p>
+<pre><code class="language-bash">configctl template reload OPNsense/WebGui
+</code></pre>
+<p>Interpretation:</p>
+<ul>
+<li>An “action not allowed” error often points to a broken or stuck <code>configd</code> backend.</li>
+</ul>
+<hr />
+<h2 id="phase-4-package-repair">Phase 4 — Package Repair<a class="headerlink" href="#phase-4-package-repair" title="Permanent link">&para;</a></h2>
+<h3 id="9-reinstall-core-packages">9. Reinstall Core Packages<a class="headerlink" href="#9-reinstall-core-packages" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash">pkg install -f opnsense
+pkg install -f lighttpd
+pkg install -f php82 php82-extensions
+</code></pre>
+<p>Purpose:</p>
+<ul>
+<li>Repair missing or corrupted OPNsense, web server, or PHP backend files</li>
+</ul>
+<p>Expected result:</p>
+<ul>
+<li>Required package files are restored and services can start normally.</li>
+</ul>
+<hr />
+<h3 id="10-update-system-from-console">10. Update System from Console<a class="headerlink" href="#10-update-system-from-console" title="Permanent link">&para;</a></h3>
+<p>From the OPNsense console menu, choose:</p>
+<pre><code class="language-text">12) Update from console
+</code></pre>
+<p>When prompted for a version or branch, enter:</p>
+<pre><code class="language-text">latest
+</code></pre>
+<p>When prompted to proceed, enter:</p>
+<pre><code class="language-text">y
+</code></pre>
+<p>After the update finishes, reboot.</p>
+<p>Purpose:</p>
+<ul>
+<li>Pull fresh package and system updates that may repair broken GUI components.</li>
+</ul>
+<hr />
+<h2 id="phase-5-diagnose-partial-page-load">Phase 5 — Diagnose Partial Page Load<a class="headerlink" href="#phase-5-diagnose-partial-page-load" title="Permanent link">&para;</a></h2>
+<h3 id="symptom">Symptom<a class="headerlink" href="#symptom" title="Permanent link">&para;</a></h3>
+<p>The Web GUI displays the OPNsense “Hi there…” page, but the login form is missing or not working.</p>
+<h3 id="likely-root-cause">Likely Root Cause<a class="headerlink" href="#likely-root-cause" title="Permanent link">&para;</a></h3>
+<p><code>lighttpd</code> is serving static files, but PHP is not executing correctly.</p>
+<h3 id="fix">Fix<a class="headerlink" href="#fix" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash">service php-fpm restart
+service configd restart
+service lighttpd restart
+</code></pre>
+<p>Expected result:</p>
+<ul>
+<li>The full login page appears and authentication works.</li>
+</ul>
+<hr />
+<h2 id="phase-6-last-resort">Phase 6 — Last Resort<a class="headerlink" href="#phase-6-last-resort" title="Permanent link">&para;</a></h2>
+<h3 id="11-factory-reset">11. Factory Reset<a class="headerlink" href="#11-factory-reset" title="Permanent link">&para;</a></h3>
+<p>From the OPNsense console menu, choose:</p>
+<pre><code class="language-text">4) Reset to factory defaults
+</code></pre>
+<p>Warning:</p>
+<ul>
+<li>This wipes the OPNsense configuration.</li>
+</ul>
+<p>After reset, the Web GUI should be available at:</p>
+<pre><code class="language-text">http://192.168.1.1
+</code></pre>
+<p>Default login:</p>
+<pre><code class="language-text">root / opnsense
+</code></pre>
+<hr />
+<h1 id="validation-checklist">Validation Checklist<a class="headerlink" href="#validation-checklist" title="Permanent link">&para;</a></h1>
+<p>After recovery, confirm:</p>
+<ul>
+<li>[ ] Web GUI loads fully, not just a static splash page.</li>
+<li>[ ] Login form appears.</li>
+<li>[ ] Authentication works.</li>
+<li>[ ] <code>lighttpd</code> is running.</li>
+<li>[ ] <code>php-fpm</code> is running.</li>
+<li>[ ] <code>configd</code> is running.</li>
+<li>[ ] Web GUI port is listening.</li>
+<li>[ ] Firewall packet filtering is re-enabled if it was disabled.</li>
+</ul>
+<p>Check service status:</p>
+<pre><code class="language-bash">service lighttpd status
+service php-fpm status
+service configd status
+</code></pre>
+<p>Check listening ports:</p>
+<pre><code class="language-bash">sockstat -4 -l | grep lighttpd
+</code></pre>
+<p>Confirm firewall is enabled if you disabled it earlier:</p>
+<pre><code class="language-bash">pfctl -e
+</code></pre>
+<hr />
+<h1 id="post-recovery-tasks">Post-Recovery Tasks<a class="headerlink" href="#post-recovery-tasks" title="Permanent link">&para;</a></h1>
+<p>If factory reset was used, reconfigure or restore:</p>
+<ul>
+<li>WAN and LAN interfaces</li>
+<li>Firewall rules</li>
+<li>NAT and port forwards</li>
+<li>DHCP settings</li>
+<li>VLANs</li>
+<li>DNS / Unbound settings</li>
+<li>Gateway configuration</li>
+<li>Static mappings</li>
+<li>Any Traefik or reverse proxy dependencies</li>
+<li>Internal service access rules</li>
+</ul>
+<p>Also consider:</p>
+<ul>
+<li>Restoring from a known-good OPNsense config backup</li>
+<li>Re-enabling HTTPS for the Web GUI</li>
+<li>Verifying LAN-to-firewall access rules</li>
+<li>Exporting a fresh config backup after recovery</li>
+</ul>
+<hr />
+<h1 id="decision-tree">Decision Tree<a class="headerlink" href="#decision-tree" title="Permanent link">&para;</a></h1>
+<pre><code class="language-text">GUI broken?
+│
+├── Try Option 11: Reload all services
+│
+├── Still broken?
+│   ├── Reset Web GUI to HTTP:80
+│   └── Restart lighttpd
+│
+├── Still broken?
+│   ├── Restart configd, php-fpm, and lighttpd
+│   └── Verify lighttpd is listening
+│
+├── Still broken?
+│   ├── Temporarily disable packet filter with pfctl -d
+│   └── Re-enable with pfctl -e after testing
+│
+├── Still broken?
+│   ├── Regenerate Web GUI template
+│   └── Restart configd if action is not allowed
+│
+├── Still broken?
+│   ├── Reinstall opnsense, lighttpd, and PHP packages
+│   └── Run console Option 12 update
+│
+├── Static page only?
+│   └── Restart php-fpm, configd, and lighttpd
+│
+└── Completely broken?
+    └── Console Option 4: Factory reset
+</code></pre>
+<hr />
+<h1 id="command-reference">Command Reference<a class="headerlink" href="#command-reference" title="Permanent link">&para;</a></h1>
+<h2 id="command">Command<a class="headerlink" href="#command" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">service configd restart
+</code></pre>
+<p>Restarts the OPNsense backend configuration daemon.</p>
+<ul>
+<li>Used when <code>configctl</code> fails or backend actions are not working.</li>
+<li>Expected success: <code>configd</code> restarts and accepts commands.</li>
+<li>Failure may indicate deeper service or package corruption.</li>
+</ul>
+<hr />
+<h2 id="command_1">Command<a class="headerlink" href="#command_1" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">service php-fpm restart
+</code></pre>
+<p>Restarts PHP-FPM, which executes the PHP code behind the OPNsense Web GUI.</p>
+<ul>
+<li>Used when the static page loads but the login form is missing.</li>
+<li>Expected success: PHP-backed GUI pages render correctly.</li>
+</ul>
+<hr />
+<h2 id="command_2">Command<a class="headerlink" href="#command_2" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">service lighttpd restart
+</code></pre>
+<p>Restarts the Web GUI frontend web server.</p>
+<ul>
+<li>Used when the GUI does not load or after regenerating GUI config.</li>
+<li>Expected success: <code>lighttpd</code> starts and listens on the configured port.</li>
+</ul>
+<hr />
+<h2 id="command_3">Command<a class="headerlink" href="#command_3" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">configctl template reload OPNsense/WebGui
+</code></pre>
+<p>Regenerates the OPNsense Web GUI template files.</p>
+<ul>
+<li>Used when <code>/var/etc/lighty-webConfigurator.conf</code> is missing or broken.</li>
+<li>Expected success: Web GUI config file is recreated.</li>
+<li>Failure such as “action not allowed” points toward <code>configd</code> issues.</li>
+</ul>
+<hr />
+<h2 id="command_4">Command<a class="headerlink" href="#command_4" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">configctl webgui set protocol=http
+</code></pre>
+<p>Sets the Web GUI protocol to HTTP.</p>
+<ul>
+<li>Used to bypass HTTPS, certificate, or TLS problems.</li>
+<li>Expected success: GUI can be reached over plain HTTP.</li>
+</ul>
+<hr />
+<h2 id="command_5">Command<a class="headerlink" href="#command_5" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">configctl webgui set port=80
+</code></pre>
+<p>Sets the Web GUI port to 80.</p>
+<ul>
+<li>Used to force access through a known default HTTP port.</li>
+<li>Watch for conflicts if another service is using port 80.</li>
+</ul>
+<hr />
+<h2 id="command_6">Command<a class="headerlink" href="#command_6" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sockstat -4 -l | grep lighttpd
+</code></pre>
+<p>Checks whether <code>lighttpd</code> is listening on IPv4.</p>
+<ul>
+<li>Used to verify whether the Web GUI is actually bound to a port.</li>
+<li>Success shows <code>lighttpd</code> listening on port 80 or 443.</li>
+</ul>
+<hr />
+<h2 id="command_7">Command<a class="headerlink" href="#command_7" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">curl -vk http://127.0.0.1
+</code></pre>
+<p>Tests Web GUI access locally from the OPNsense firewall itself.</p>
+<ul>
+<li>Used to separate service problems from network/firewall problems.</li>
+<li>HTML output means the web service is responding locally.</li>
+<li>Connection refused means the service is not listening.</li>
+</ul>
+<hr />
+<h2 id="command_8">Command<a class="headerlink" href="#command_8" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">curl -vk https://127.0.0.1:443
+</code></pre>
+<p>Tests local HTTPS access to the Web GUI.</p>
+<ul>
+<li>Used when the GUI is expected to be available over HTTPS.</li>
+<li>The <code>-k</code> flag allows curl to ignore certificate validation errors.</li>
+<li>The <code>-v</code> flag prints verbose connection information.</li>
+</ul>
+<hr />
+<h2 id="command_9">Command<a class="headerlink" href="#command_9" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">pfctl -d
+</code></pre>
+<p>Disables the packet filter.</p>
+<ul>
+<li>Used to test whether firewall rules are blocking GUI access.</li>
+<li>Risk: temporarily bypasses firewall filtering.</li>
+<li>Use only during troubleshooting.</li>
+</ul>
+<hr />
+<h2 id="command_10">Command<a class="headerlink" href="#command_10" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">pfctl -e
+</code></pre>
+<p>Re-enables the packet filter.</p>
+<ul>
+<li>Used immediately after testing with <code>pfctl -d</code>.</li>
+<li>Expected result: firewall filtering resumes.</li>
+</ul>
+<hr />
+<h2 id="command_11">Command<a class="headerlink" href="#command_11" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">pkg install -f opnsense
+</code></pre>
+<p>Force reinstalls the OPNsense package.</p>
+<ul>
+<li>Used to repair missing or corrupted core files.</li>
+<li>Usually safer than a factory reset, but still significant.</li>
+</ul>
+<hr />
+<h2 id="command_12">Command<a class="headerlink" href="#command_12" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">pkg install -f lighttpd
+</code></pre>
+<p>Force reinstalls the <code>lighttpd</code> web server package.</p>
+<ul>
+<li>Used when Web GUI frontend files or binaries may be damaged.</li>
+</ul>
+<hr />
+<h2 id="command_13">Command<a class="headerlink" href="#command_13" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">pkg install -f php82 php82-extensions
+</code></pre>
+<p>Force reinstalls PHP and PHP extensions.</p>
+<ul>
+<li>Used when the Web GUI static page loads but PHP-backed pages fail.</li>
+<li>Relevant when the login form does not render.</li>
+</ul>
+<hr />
+<h2 id="command_14">Command<a class="headerlink" href="#command_14" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">opnsense-update -f
+</code></pre>
+<p>Forces an OPNsense firmware update refresh.</p>
+<ul>
+<li>Used to repair or refresh system update state.</li>
+<li>Often paired with the console update workflow.</li>
+</ul>
+<hr />
+<h2 id="command_15">Command<a class="headerlink" href="#command_15" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">opnsense-update -kr latest
+</code></pre>
+<p>Updates kernel and base system to the latest available release.</p>
+<ul>
+<li>Used for deeper repair when packages or base system components are inconsistent.</li>
+<li>Reboot afterward.</li>
+</ul>
+<hr />
+<h2 id="command_16">Command<a class="headerlink" href="#command_16" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">reboot
+</code></pre>
+<p>Reboots OPNsense.</p>
+<ul>
+<li>Used after package repair, updates, or major config repair.</li>
+<li>Expected result: clean service startup after boot.</li>
+</ul>
+<hr />
+<h2 id="console-option">Console Option<a class="headerlink" href="#console-option" title="Permanent link">&para;</a></h2>
+<pre><code class="language-text">4) Reset to factory defaults
+</code></pre>
+<p>Factory resets OPNsense.</p>
+<ul>
+<li>Used only as a last resort.</li>
+<li>Risk: wipes firewall configuration.</li>
+<li>Expected result: Web GUI restored at <code>http://192.168.1.1</code>.</li>
+</ul>
+<hr />
+<h2 id="console-option_1">Console Option<a class="headerlink" href="#console-option_1" title="Permanent link">&para;</a></h2>
+<pre><code class="language-text">11) Reload all services
+</code></pre>
+<p>Reloads all services from the OPNsense console menu.</p>
+<ul>
+<li>Used as the safest first recovery step.</li>
+<li>Expected result: Web GUI may return without deeper changes.</li>
+</ul>
+<hr />
+<h2 id="console-option_2">Console Option<a class="headerlink" href="#console-option_2" title="Permanent link">&para;</a></h2>
+<pre><code class="language-text">12) Update from console
+</code></pre>
+<p>Runs OPNsense update from the console menu.</p>
+<ul>
+<li>Used to repair packages and system components.</li>
+<li>When prompted for version or branch, <code>latest</code> is usually appropriate for the current stable branch.</li>
+</ul>
+<hr />
+<h1 id="break-glass-checklist">Break Glass Checklist<a class="headerlink" href="#break-glass-checklist" title="Permanent link">&para;</a></h1>
+<p>Use this when the Web GUI is down and you need the fastest practical recovery path.</p>
+<ol>
+<li>
+<p>Console menu:
+   <code>text
+   11) Reload all services</code></p>
+</li>
+<li>
+<p>If still broken, shell:
+   <code>bash
+   service configd restart
+   service php-fpm restart
+   service lighttpd restart</code></p>
+</li>
+<li>
+<p>If still broken, force HTTP:
+   <code>bash
+   configctl webgui set protocol=http
+   configctl webgui set port=80
+   service lighttpd restart</code></p>
+</li>
+<li>
+<p>Test locally:
+   <code>bash
+   curl -vk http://127.0.0.1</code></p>
+</li>
+<li>
+<p>Check listening port:
+   <code>bash
+   sockstat -4 -l | grep lighttpd</code></p>
+</li>
+<li>
+<p>If access may be blocked:
+   <code>bash
+   pfctl -d</code></p>
+</li>
+</ol>
+<p>Re-enable immediately after testing:</p>
+<p><code>bash
+   pfctl -e</code></p>
+<ol>
+<li>
+<p>If templates are broken:
+   <code>bash
+   configctl template reload OPNsense/WebGui</code></p>
+</li>
+<li>
+<p>If packages are broken:
+   <code>bash
+   pkg install -f opnsense
+   pkg install -f lighttpd
+   pkg install -f php82 php82-extensions
+   reboot</code></p>
+</li>
+<li>
+<p>If nothing works and backup/rebuild is acceptable:
+   <code>text
+   Console Option 4: Reset to factory defaults</code></p>
+</li>
+</ol>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

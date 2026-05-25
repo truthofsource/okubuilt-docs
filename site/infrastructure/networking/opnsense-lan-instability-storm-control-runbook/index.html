@@ -1,0 +1,3563 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Infrastructure, cloud, automation, security, and operations documentation portfolio.">
+      
+      
+        <meta name="author" content="Kingsley Oku">
+      
+      
+      
+        <link rel="prev" href="../att-fiber-opnsense-outage-runbook/">
+      
+      
+        <link rel="next" href="../opnsense-lan-ip-dhcp-static-device-runbook/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>OPNsense LAN Instability, AP/OPT Segmentation Review, and TL-SG108E Storm-Control Stabilization - OkuBuilt Infrastructure & Cloud Portfolio</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#opnsense-lan-instability-apopt-segmentation-review-and-tl-sg108e-storm-control-stabilization" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-header__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OkuBuilt Infrastructure & Cloud Portfolio
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              OPNsense LAN Instability, AP/OPT Segmentation Review, and TL-SG108E Storm-Control Stabilization
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-nav__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OkuBuilt Infrastructure & Cloud Portfolio
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/proxmox-traefik-opnsense-ha-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox, Traefik, OPNsense HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Automation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cephfs-snips-cloudinit-vm100-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox CephFS Snips Cloud-Init VM100
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloud-init-docker-vm-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Docker VM Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-vm100-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker VM100 Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-cicustom-snippet-storage-ha/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init cicustom Snippet Storage HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/vm100-docker-startup-mountguard-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Startup Mount Guard Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compute
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/debian-docker-vm-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/home-assistant-os-proxmox-ceph-vm-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home Assistant OS Proxmox Ceph VM Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/homelab-vm100-rebuild-restore-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab VM100 Rebuild Restore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Containers & Apps
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Containers & Apps
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/debian-docker-vm-rebuild-cloudinit-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM Rebuild Cloud-Init
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-apps-offen-restore-gluetun-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Apps Offen Restore Gluetun Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-compose-memos-image-tag-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Compose Memos Image Tag Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/gluetun-corrupted-servers-permissions-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gluetun Corrupted Servers Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/proxmox-traefik-console-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Traefik Console Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-docker29-upgrade-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Docker Upgrade Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-proxy-docker-network-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Proxy Docker Network
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm100-docker-data-disk-recovery-cloud-init-hardening/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Data Disk Recovery Cloud-Init Hardening
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm110-provisioning-guest-agent-docker-appdata-permissions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM110 Provisioning Guest Agent Docker AppData Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring & Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Monitoring & Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-ceph-memtest-ram-fault-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Ceph Memtest RAM Fault
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-host-kernel-ram-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Host Kernel RAM Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-nuc-e1000e-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox NUC e1000e Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networking
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Networking
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../att-fiber-opnsense-outage-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AT&T Fiber OPNsense Outage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN Instability Storm Control
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN Instability Storm Control
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Findings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#facts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Facts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#assumptions-working-theories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Assumptions / Working Theories
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../opnsense-lan-ip-dhcp-static-device-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN IP DHCP Static Device
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../opnsense-opt2-lan-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense OPT2 LAN
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../opnsense-web-gui-documentation-and-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense Web GUI Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../wireguard-ec2-proxmox-lxc-homelab-remote-access/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WireGuard EC2 Proxmox LXC Homelab Remote Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Security
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/homelab-ssh-ansible-nut-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab SSH Ansible NUT Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/proxmox-root-login-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Root Login Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_9" id="__nav_2_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Storage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Storage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/ceph-mainframe-osd-mon-mgr-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Mainframe OSD MON MGR Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/ceph-monitor-crash-loop-mainframe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Monitor Crash Loop Mainframe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/proxmox-ha-live-migration-ceph-vm-state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox HA Live Migration Ceph VM State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/truenas-vm-zfs-hba-planning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TrueNAS VM ZFS HBA Planning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/vm100-ceph-gluetun-troubleshooting-runbook-15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Ceph Gluetun Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/vm100-docker-nas-offen-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker NAS Offen Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Runbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runbooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_11" id="__nav_2_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting Incidents
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting Incidents
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting-incidents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloud
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cloud
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cloud/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portfolio
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Portfolio
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../portfolio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/documentation-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation Standards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/placement-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Placement Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/recurring-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recurring Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/command-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Findings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#facts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Facts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#assumptions-working-theories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Assumptions / Working Theories
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="opnsense-lan-instability-apopt-segmentation-review-and-tl-sg108e-storm-control-stabilization">OPNsense LAN Instability, AP/OPT Segmentation Review, and TL-SG108E Storm-Control Stabilization<a class="headerlink" href="#opnsense-lan-instability-apopt-segmentation-review-and-tl-sg108e-storm-control-stabilization" title="Permanent link">&para;</a></h1>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>This session focused on troubleshooting intermittent LAN and internet connectivity problems in a homelab network built around OPNsense, multiple TP-Link TL-SG108E smart switches, and TP-Link Archer access points. The original investigation began around a question of whether an OPT interface and a second downstream router were causing client internet failures. During troubleshooting, it was clarified that one downstream TP-Link device was already operating in access point mode rather than router mode, shifting attention back to the main LAN path.</p>
+<p>The issue was ultimately narrowed to instability on the flat LAN segment rather than OPT1. The network was simplified conceptually as a flat switched network, and switch storm-control settings were applied uniformly. A flat storm-control threshold of 8000 Kbps on all switches appeared to stabilize the environment.</p>
+<h2 id="environment">Environment<a class="headerlink" href="#environment" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Router/firewall: OPNsense running on a CWWK 12th-gen Intel mini PC with Intel i3-N305</li>
+<li>Primary LAN switching:</li>
+<li>4 × TP-Link TL-SG108E Easy Smart switches</li>
+<li>Wireless infrastructure:</li>
+<li>TP-Link Archer AX80 in AP mode on LAN</li>
+<li>TP-Link Archer AX72 Pro in AP mode on OPT1</li>
+<li>Wired clients mentioned:</li>
+<li>Proxmox nodes</li>
+<li>Android TV box</li>
+<li>OPNsense interfaces:</li>
+<li>LAN</li>
+<li>OPT1</li>
+<li>Logical network design during this session:</li>
+<li>Flat LAN on the main switched path</li>
+<li>Separate OPT1 segment feeding the Archer AX72 Pro in AP mode</li>
+<li>Services discussed:</li>
+<li>OPNsense DHCP</li>
+<li>OPNsense Unbound DNS</li>
+<li>Firewall rules and outbound NAT</li>
+<li>Switch storm control</li>
+<li>Loop prevention</li>
+<li>VLANs:</li>
+<li>Discussed conceptually only</li>
+<li>Not implemented during this session</li>
+</ul>
+<h2 id="problem">Problem<a class="headerlink" href="#problem" title="Permanent link">&para;</a></h2>
+<p>Devices on the main LAN were slow to connect, sometimes failed to get internet access after connecting, and wired devices downstream of the smart switches were also losing connectivity. There was initial uncertainty about whether the issue was related to OPT1 segmentation, downstream TP-Link operating mode, DHCP behavior, or broader layer-2 instability.</p>
+<h2 id="symptoms">Symptoms<a class="headerlink" href="#symptoms" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Devices were slow to connect to the network</li>
+<li>Once connected, devices often had no internet access</li>
+<li>Wired devices connected through the smart-switch chain also lost connectivity</li>
+<li>OPNsense logs showed some default deny and state-violation entries</li>
+<li>There was uncertainty about whether a second downstream TP-Link was acting as a router or only as an AP</li>
+<li>Connectivity problems affected both wireless and wired clients on the main LAN path</li>
+</ul>
+<h2 id="actions-taken">Actions Taken<a class="headerlink" href="#actions-taken" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Reviewed the original physical topology:</li>
+<li>OPNsense LAN → TL-SG108E core switch → additional TL-SG108E switches → Proxmox nodes, Android TV box, and Archer AX80 in AP mode</li>
+<li>
+<p>OPNsense OPT1 → Archer AX72 Pro in AP mode</p>
+</li>
+<li>
+<p>Considered whether the downstream TP-Link on the secondary path should operate as:</p>
+</li>
+<li>a router behind an OPNsense OPT interface, or</li>
+<li>
+<p>a pure AP bridged into the OPNsense segment</p>
+</li>
+<li>
+<p>Clarified that the Archer on the secondary segment was already in AP mode, not router mode.</p>
+</li>
+<li>
+<p>Determined that OPT1 appeared to be functioning correctly and shifted focus to the main LAN path.</p>
+</li>
+<li>
+<p>Reviewed likely causes on LAN:</p>
+</li>
+<li>layer-2 loops</li>
+<li>broadcast or multicast storms</li>
+<li>rogue DHCP</li>
+<li>AP uplink misconfiguration</li>
+<li>
+<p>switch-chain instability</p>
+</li>
+<li>
+<p>Verified or discussed AP best practices:</p>
+</li>
+<li>AP mode enabled</li>
+<li>DHCP disabled on APs</li>
+<li>uplink should use LAN port rather than WAN in AP mode</li>
+<li>
+<p>management IPs should be static or reserved</p>
+</li>
+<li>
+<p>Discussed assigning static IP addresses to the Archer APs for management.</p>
+</li>
+<li>
+<p>Reviewed TL-SG108E management considerations:</p>
+</li>
+<li>password-reset path if login access was lost</li>
+<li>
+<p>later confirmed switch login was still using the default credentials</p>
+</li>
+<li>
+<p>Reviewed TL-SG108E VLAN features conceptually:</p>
+</li>
+<li>MTU VLAN</li>
+<li>Port-Based VLAN</li>
+<li>802.1Q VLAN</li>
+<li>PVID behavior</li>
+<li>
+<p>Confirmed VLANs were not needed at this time</p>
+</li>
+<li>
+<p>Confirmed that loop prevention was already enabled by default on the switches.</p>
+</li>
+<li>
+<p>Applied storm-control settings uniformly across the switches at a flat threshold of 8000 Kbps to simplify the configuration.</p>
+</li>
+<li>
+<p>Observed that the storm-control change appeared to resolve the immediate LAN instability.</p>
+</li>
+</ol>
+<h2 id="key-findings">Key Findings<a class="headerlink" href="#key-findings" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The problem path was the main LAN, not OPT1.</li>
+<li>The secondary TP-Link device was already in AP mode, so the issue was not caused by an intended router-behind-OPT design.</li>
+<li>Because the AP was bridged, clients behind it should have been using OPNsense-provided DHCP, gateway, and DNS rather than a separate routed path.</li>
+<li>The symptoms matched a likely layer-2 issue more closely than a routing issue:</li>
+<li>intermittent connectivity</li>
+<li>slow association</li>
+<li>wired and wireless impact</li>
+<li>apparent stabilization after storm-control changes</li>
+<li>Loop prevention was already enabled, but that alone was not sufficient to fully suppress the instability.</li>
+<li>Applying storm control at 8000 Kbps on all switches appeared to mitigate the problem.</li>
+<li>VLAN support on the TL-SG108E and OPNsense was discussed for future use, but VLANs were not part of the implemented fix.</li>
+</ul>
+<h3 id="facts">Facts<a class="headerlink" href="#facts" title="Permanent link">&para;</a></h3>
+<ul>
+<li>OPT1 appeared stable during this session.</li>
+<li>Archer AX72 Pro was confirmed to be in AP mode.</li>
+<li>Archer AX80 was also being used in AP mode on LAN.</li>
+<li>There were actually 4 TL-SG108E switches in the environment, not 3.</li>
+<li>Loop prevention was enabled by default.</li>
+<li>Storm control set to 8000 Kbps across the switches appeared to solve the issue for the time being.</li>
+</ul>
+<h3 id="assumptions-working-theories">Assumptions / Working Theories<a class="headerlink" href="#assumptions-working-theories" title="Permanent link">&para;</a></h3>
+<ul>
+<li>The root cause was likely excessive broadcast, multicast, unknown unicast, or other layer-2 flood behavior on the flat LAN.</li>
+<li>A loop, bursty discovery traffic, or MAC-table churn may have contributed even if loop prevention was enabled.</li>
+<li>Rogue DHCP remained a theoretical possibility earlier in the investigation, but no direct evidence in this conversation confirmed it as the final cause.</li>
+</ul>
+<h2 id="resolution">Resolution<a class="headerlink" href="#resolution" title="Permanent link">&para;</a></h2>
+<p>The practical workaround and current working fix was to keep the network flat and enable switch storm control uniformly at 8000 Kbps across the TL-SG108E switches. This simplified the configuration and appears to have stabilized LAN behavior.</p>
+<p>No VLAN design was deployed during this work session. OPT1 remained separate from LAN, but the main issue was treated as a LAN switching problem rather than a firewall or routed-interface problem.</p>
+<h2 id="validation">Validation<a class="headerlink" href="#validation" title="Permanent link">&para;</a></h2>
+<p>Success was validated informally by observed behavior after the switch change:
+- LAN connectivity appeared stable
+- Internet access returned for affected devices
+- The user reported that storm control seemed to have solved the issue
+- A flat 8000 Kbps threshold was retained because it worked and was easy to manage</p>
+<h2 id="follow-up-tasks">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Change the default admin password on all TL-SG108E switches</li>
+<li>Assign static management IPs to all TL-SG108E switches</li>
+<li>Assign static management IPs or DHCP reservations to both Archer APs</li>
+<li>Document exact switch port mappings:</li>
+<li>core switch uplink to OPNsense</li>
+<li>inter-switch uplinks</li>
+<li>Proxmox-node ports</li>
+<li>AP ports</li>
+<li>Android TV box port</li>
+<li>Back up switch configurations after confirming stability</li>
+<li>Continue monitoring for:</li>
+<li>renewed packet loss</li>
+<li>discovery failures</li>
+<li>intermittent wired drops</li>
+<li>multicast-heavy application issues</li>
+<li>Consider raising multicast or unknown-unicast storm thresholds on switch uplinks later if application-specific issues appear</li>
+<li>Verify that only OPNsense is providing DHCP on the LAN segment</li>
+<li>Disable EEE/Green Ethernet on uplinks, AP ports, and server ports if not already done</li>
+<li>Keep VLAN planning deferred until the flat network remains stable over time</li>
+</ul>
+<h2 id="lessons-learned">Lessons Learned<a class="headerlink" href="#lessons-learned" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Do not assume a downstream TP-Link is routing; confirm whether it is in AP mode or router mode before designing around NAT or firewall behavior.</li>
+<li>If both wired and wireless clients are unstable on the same flat LAN, investigate layer-2 conditions before focusing on routing.</li>
+<li>Loop prevention alone may not be enough to stabilize a noisy switched environment.</li>
+<li>A simple, flat storm-control policy can be a useful first stabilization step in a small homelab.</li>
+<li>Keep management IPs for APs and switches fixed and documented.</li>
+<li>Avoid adding VLAN complexity until the physical topology and baseline switching behavior are stable.</li>
+</ul>
+<hr />
+<h1 id="command-reference">Command Reference<a class="headerlink" href="#command-reference" title="Permanent link">&para;</a></h1>
+<h2 id="command">Command<a class="headerlink" href="#command" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ipconfig
+</code></pre>
+<h3 id="what-it-does">What it does<a class="headerlink" href="#what-it-does" title="Permanent link">&para;</a></h3>
+<p>Displays IP configuration on Windows clients.</p>
+<h3 id="why-it-was-relevant">Why it was relevant<a class="headerlink" href="#why-it-was-relevant" title="Permanent link">&para;</a></h3>
+<p>Used or implied for checking whether a client received the correct IP address, default gateway, and DNS server.</p>
+<h3 id="expected-result">Expected result<a class="headerlink" href="#expected-result" title="Permanent link">&para;</a></h3>
+<p>A client on the LAN should receive:
+- an IP in the LAN subnet
+- default gateway equal to the OPNsense LAN IP
+- DNS pointing to OPNsense or the intended DNS path</p>
+<h3 id="what-success-or-failure-indicates">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: client is likely getting correct DHCP information</li>
+<li>Failure: wrong gateway or DNS may indicate rogue DHCP, AP/router misconfiguration, or subnet mismatch</li>
+</ul>
+<h3 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h3>
+<p>Low risk.</p>
+<hr />
+<h2 id="command_1">Command<a class="headerlink" href="#command_1" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ifconfig
+</code></pre>
+<h3 id="what-it-does_1">What it does<a class="headerlink" href="#what-it-does_1" title="Permanent link">&para;</a></h3>
+<p>Displays interface configuration on Unix-like systems.</p>
+<h3 id="why-it-was-relevant_1">Why it was relevant<a class="headerlink" href="#why-it-was-relevant_1" title="Permanent link">&para;</a></h3>
+<p>Implied as the Linux/macOS equivalent of <code>ipconfig</code> for confirming client IP settings.</p>
+<h3 id="expected-result_1">Expected result<a class="headerlink" href="#expected-result_1" title="Permanent link">&para;</a></h3>
+<p>The client interface should show the correct subnet, address, and routing context.</p>
+<h3 id="what-success-or-failure-indicates_1">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Correct interface details support DHCP and addressing health</li>
+<li>Incorrect subnet or no address points toward DHCP or physical connectivity issues</li>
+</ul>
+<h3 id="notes_1">Notes<a class="headerlink" href="#notes_1" title="Permanent link">&para;</a></h3>
+<p>Low risk.</p>
+<hr />
+<h2 id="command_2">Command<a class="headerlink" href="#command_2" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ping 8.8.8.8
+</code></pre>
+<h3 id="what-it-does_2">What it does<a class="headerlink" href="#what-it-does_2" title="Permanent link">&para;</a></h3>
+<p>Tests raw IP connectivity without depending on DNS.</p>
+<h3 id="why-it-was-relevant_2">Why it was relevant<a class="headerlink" href="#why-it-was-relevant_2" title="Permanent link">&para;</a></h3>
+<p>Used conceptually to distinguish routing/internet problems from DNS problems.</p>
+<h3 id="expected-result_2">Expected result<a class="headerlink" href="#expected-result_2" title="Permanent link">&para;</a></h3>
+<p>Replies from 8.8.8.8 if the client has working connectivity to the internet.</p>
+<h3 id="what-success-or-failure-indicates_2">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: routing and outbound connectivity are likely working</li>
+<li>Failure: internet routing, firewall, NAT, or upstream path may be broken</li>
+</ul>
+<h3 id="notes_2">Notes<a class="headerlink" href="#notes_2" title="Permanent link">&para;</a></h3>
+<p>Low risk.<br />
+A more policy-neutral test target in some environments may be the ISP gateway or another known reachable IP.</p>
+<hr />
+<h2 id="command_3">Command<a class="headerlink" href="#command_3" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ping example.com
+</code></pre>
+<h3 id="what-it-does_3">What it does<a class="headerlink" href="#what-it-does_3" title="Permanent link">&para;</a></h3>
+<p>Tests both DNS resolution and connectivity.</p>
+<h3 id="why-it-was-relevant_3">Why it was relevant<a class="headerlink" href="#why-it-was-relevant_3" title="Permanent link">&para;</a></h3>
+<p>Used conceptually to determine whether hostname resolution was working after a raw IP ping test.</p>
+<h3 id="expected-result_3">Expected result<a class="headerlink" href="#expected-result_3" title="Permanent link">&para;</a></h3>
+<p>The hostname should resolve and the destination should reply.</p>
+<h3 id="what-success-or-failure-indicates_3">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li>If <code>ping 8.8.8.8</code> works but this fails, DNS is the likely problem</li>
+<li>If both fail, the issue is probably broader than DNS</li>
+</ul>
+<h3 id="notes_3">Notes<a class="headerlink" href="#notes_3" title="Permanent link">&para;</a></h3>
+<p>Low risk.</p>
+<hr />
+<h2 id="command_4">Command<a class="headerlink" href="#command_4" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">nslookup example.com
+</code></pre>
+<h3 id="what-it-does_4">What it does<a class="headerlink" href="#what-it-does_4" title="Permanent link">&para;</a></h3>
+<p>Queries DNS directly for a hostname.</p>
+<h3 id="why-it-was-relevant_4">Why it was relevant<a class="headerlink" href="#why-it-was-relevant_4" title="Permanent link">&para;</a></h3>
+<p>Implied for validating whether OPNsense Unbound DNS was reachable and resolving names correctly.</p>
+<h3 id="expected-result_4">Expected result<a class="headerlink" href="#expected-result_4" title="Permanent link">&para;</a></h3>
+<p>The command should return a valid DNS response from the intended resolver.</p>
+<h3 id="what-success-or-failure-indicates_4">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: DNS service path is functioning</li>
+<li>Failure: resolver access, Unbound interface binding, access lists, or upstream resolution may be broken</li>
+</ul>
+<h3 id="notes_4">Notes<a class="headerlink" href="#notes_4" title="Permanent link">&para;</a></h3>
+<p>Low risk.</p>
+<hr />
+<h2 id="command_5">Command<a class="headerlink" href="#command_5" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">traceroute 8.8.8.8
+</code></pre>
+<h3 id="what-it-does_5">What it does<a class="headerlink" href="#what-it-does_5" title="Permanent link">&para;</a></h3>
+<p>Shows the path packets take toward a destination on Unix-like systems.</p>
+<h3 id="why-it-was-relevant_5">Why it was relevant<a class="headerlink" href="#why-it-was-relevant_5" title="Permanent link">&para;</a></h3>
+<p>Implied for checking whether traffic was traversing the expected local gateway path.</p>
+<h3 id="expected-result_5">Expected result<a class="headerlink" href="#expected-result_5" title="Permanent link">&para;</a></h3>
+<p>The first hop should be the local router for that segment, followed by upstream path entries.</p>
+<h3 id="what-success-or-failure-indicates_5">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Correct first hop confirms the expected default gateway</li>
+<li>Unexpected first hops can reveal hidden NAT, wrong gateway assignment, or routing asymmetry</li>
+</ul>
+<h3 id="notes_5">Notes<a class="headerlink" href="#notes_5" title="Permanent link">&para;</a></h3>
+<p>Low risk.</p>
+<h3 id="safer-platform-note">Safer / platform note<a class="headerlink" href="#safer-platform-note" title="Permanent link">&para;</a></h3>
+<p>On Windows, the equivalent is:</p>
+<pre><code class="language-bash">tracert 8.8.8.8
+</code></pre>
+<hr />
+<h2 id="command_6">Command<a class="headerlink" href="#command_6" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">tracert 8.8.8.8
+</code></pre>
+<h3 id="what-it-does_6">What it does<a class="headerlink" href="#what-it-does_6" title="Permanent link">&para;</a></h3>
+<p>Windows equivalent of <code>traceroute</code>.</p>
+<h3 id="why-it-was-relevant_6">Why it was relevant<a class="headerlink" href="#why-it-was-relevant_6" title="Permanent link">&para;</a></h3>
+<p>Suggested conceptually to verify that clients were using the correct gateway and path.</p>
+<h3 id="expected-result_6">Expected result<a class="headerlink" href="#expected-result_6" title="Permanent link">&para;</a></h3>
+<p>The first hop should be the local router for the client subnet.</p>
+<h3 id="what-success-or-failure-indicates_6">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_6" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Correct path supports proper DHCP and routing</li>
+<li>Incorrect path suggests gateway or topology problems</li>
+</ul>
+<h3 id="notes_6">Notes<a class="headerlink" href="#notes_6" title="Permanent link">&para;</a></h3>
+<p>Low risk.</p>
+<hr />
+<h2 id="likely-command-used">Likely command used<a class="headerlink" href="#likely-command-used" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">arp -a
+</code></pre>
+<h3 id="what-it-does_7">What it does<a class="headerlink" href="#what-it-does_7" title="Permanent link">&para;</a></h3>
+<p>Displays the ARP cache on many client systems.</p>
+<h3 id="why-it-was-relevant_7">Why it was relevant<a class="headerlink" href="#why-it-was-relevant_7" title="Permanent link">&para;</a></h3>
+<p>A likely troubleshooting step for checking IP-to-MAC relationships and detecting duplicate IP behavior or unexpected gateways.</p>
+<h3 id="expected-result_7">Expected result<a class="headerlink" href="#expected-result_7" title="Permanent link">&para;</a></h3>
+<p>The gateway IP should map to the expected OPNsense MAC address.</p>
+<h3 id="what-success-or-failure-indicates_7">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_7" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Expected mapping supports correct layer-2 forwarding</li>
+<li>Flapping or unexpected MACs can suggest duplicate addressing or rogue infrastructure</li>
+</ul>
+<h3 id="notes_7">Notes<a class="headerlink" href="#notes_7" title="Permanent link">&para;</a></h3>
+<p>Low risk.</p>
+<hr />
+<h2 id="opnsense-action">OPNsense action<a class="headerlink" href="#opnsense-action" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">Diagnostics → States → Reset States
+</code></pre>
+<h3 id="what-it-does_8">What it does<a class="headerlink" href="#what-it-does_8" title="Permanent link">&para;</a></h3>
+<p>Clears the firewall state table in OPNsense.</p>
+<h3 id="why-it-was-relevant_8">Why it was relevant<a class="headerlink" href="#why-it-was-relevant_8" title="Permanent link">&para;</a></h3>
+<p>Suggested after topology changes or interface-path changes to remove stale states that can produce state-violation logs or inconsistent connectivity.</p>
+<h3 id="expected-result_8">Expected result<a class="headerlink" href="#expected-result_8" title="Permanent link">&para;</a></h3>
+<p>Existing connections are briefly interrupted, then rebuild using current topology and policy.</p>
+<h3 id="what-success-or-failure-indicates_8">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_8" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Improvement afterward suggests stale states contributed to the issue</li>
+<li>No improvement suggests the root cause is elsewhere</li>
+</ul>
+<h3 id="notes_8">Notes<a class="headerlink" href="#notes_8" title="Permanent link">&para;</a></h3>
+<p>Moderate operational impact.<br />
+This is disruptive to active sessions and should be used carefully during production traffic.</p>
+<hr />
+<h2 id="opnsense-action_1">OPNsense action<a class="headerlink" href="#opnsense-action_1" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">Services → DHCPv4 → Leases
+</code></pre>
+<h3 id="what-it-does_9">What it does<a class="headerlink" href="#what-it-does_9" title="Permanent link">&para;</a></h3>
+<p>Displays active DHCP leases on an interface.</p>
+<h3 id="why-it-was-relevant_9">Why it was relevant<a class="headerlink" href="#why-it-was-relevant_9" title="Permanent link">&para;</a></h3>
+<p>Used to verify that clients were receiving addresses from OPNsense rather than from a rogue DHCP server.</p>
+<h3 id="expected-result_9">Expected result<a class="headerlink" href="#expected-result_9" title="Permanent link">&para;</a></h3>
+<p>Affected clients should appear with addresses in the correct subnet.</p>
+<h3 id="what-success-or-failure-indicates_9">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_9" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Expected leases support correct DHCP behavior</li>
+<li>Missing or inconsistent leases may indicate DHCP conflict or wrong segment placement</li>
+</ul>
+<h3 id="notes_9">Notes<a class="headerlink" href="#notes_9" title="Permanent link">&para;</a></h3>
+<p>Low risk.<br />
+Read-only diagnostic view.</p>
+<hr />
+<h2 id="opnsense-action_2">OPNsense action<a class="headerlink" href="#opnsense-action_2" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">Services → Unbound DNS → General
+</code></pre>
+<h3 id="what-it-does_10">What it does<a class="headerlink" href="#what-it-does_10" title="Permanent link">&para;</a></h3>
+<p>Controls Unbound DNS listener interfaces and resolver behavior.</p>
+<h3 id="why-it-was-relevant_10">Why it was relevant<a class="headerlink" href="#why-it-was-relevant_10" title="Permanent link">&para;</a></h3>
+<p>Discussed in detail because DNS issues can look like internet failures even when routing works.</p>
+<h3 id="expected-result_10">Expected result<a class="headerlink" href="#expected-result_10" title="Permanent link">&para;</a></h3>
+<p>Unbound should listen on the intended internal interfaces and permit the intended client subnets.</p>
+<h3 id="what-success-or-failure-indicates_10">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_10" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Correct configuration allows reliable name resolution</li>
+<li>Misconfiguration can cause clients to appear “online but without internet”</li>
+</ul>
+<h3 id="notes_10">Notes<a class="headerlink" href="#notes_10" title="Permanent link">&para;</a></h3>
+<p>Low risk when reviewing.<br />
+Changing settings may affect DNS for multiple subnets.</p>
+<hr />
+<h2 id="opnsense-action_3">OPNsense action<a class="headerlink" href="#opnsense-action_3" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">Firewall → Rules → LAN
+</code></pre>
+<h3 id="what-it-does_11">What it does<a class="headerlink" href="#what-it-does_11" title="Permanent link">&para;</a></h3>
+<p>Shows and manages firewall rules for the LAN interface.</p>
+<h3 id="why-it-was-relevant_11">Why it was relevant<a class="headerlink" href="#why-it-was-relevant_11" title="Permanent link">&para;</a></h3>
+<p>A standard check when determining whether the problem is routing/firewall-related or truly layer-2-related.</p>
+<h3 id="expected-result_11">Expected result<a class="headerlink" href="#expected-result_11" title="Permanent link">&para;</a></h3>
+<p>A permissive LAN rule set should allow normal outbound traffic during basic troubleshooting.</p>
+<h3 id="what-success-or-failure-indicates_11">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_11" title="Permanent link">&para;</a></h3>
+<ul>
+<li>If rules are correct and the issue persists, the cause is more likely switching, DHCP, or DNS</li>
+<li>Misordered or missing rules can block traffic in ways that mimic network instability</li>
+</ul>
+<h3 id="notes_11">Notes<a class="headerlink" href="#notes_11" title="Permanent link">&para;</a></h3>
+<p>Moderate risk if modified.<br />
+Firewall changes affect reachability immediately.</p>
+<hr />
+<h2 id="opnsense-action_4">OPNsense action<a class="headerlink" href="#opnsense-action_4" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">Firewall → NAT → Outbound
+</code></pre>
+<h3 id="what-it-does_12">What it does<a class="headerlink" href="#what-it-does_12" title="Permanent link">&para;</a></h3>
+<p>Controls outbound NAT policy.</p>
+<h3 id="why-it-was-relevant_12">Why it was relevant<a class="headerlink" href="#why-it-was-relevant_12" title="Permanent link">&para;</a></h3>
+<p>Discussed when evaluating whether OPT-style routed networks were missing internet due to NAT configuration.</p>
+<h3 id="expected-result_12">Expected result<a class="headerlink" href="#expected-result_12" title="Permanent link">&para;</a></h3>
+<p>Internal subnets requiring internet access should be translated correctly on WAN.</p>
+<h3 id="what-success-or-failure-indicates_12">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_12" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Correct NAT allows outbound internet access</li>
+<li>Missing NAT on a routed subnet breaks internet access even when local connectivity works</li>
+</ul>
+<h3 id="notes_12">Notes<a class="headerlink" href="#notes_12" title="Permanent link">&para;</a></h3>
+<p>Moderate risk if changed.<br />
+Incorrect outbound NAT can disrupt all egress traffic.</p>
+<hr />
+<h2 id="opnsense-action_5">OPNsense action<a class="headerlink" href="#opnsense-action_5" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">Interfaces → Assignments / Interfaces → OPT1
+</code></pre>
+<h3 id="what-it-does_13">What it does<a class="headerlink" href="#what-it-does_13" title="Permanent link">&para;</a></h3>
+<p>Assigns and configures routed interfaces such as OPT1.</p>
+<h3 id="why-it-was-relevant_13">Why it was relevant<a class="headerlink" href="#why-it-was-relevant_13" title="Permanent link">&para;</a></h3>
+<p>Used conceptually when determining whether a second router or AP on OPT1 should be routed or bridged.</p>
+<h3 id="expected-result_13">Expected result<a class="headerlink" href="#expected-result_13" title="Permanent link">&para;</a></h3>
+<p>OPT1 should have the intended subnet and service scope if used as a separate network.</p>
+<h3 id="what-success-or-failure-indicates_13">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_13" title="Permanent link">&para;</a></h3>
+<ul>
+<li>A healthy OPT1 with working clients suggests the main issue is elsewhere</li>
+<li>Misconfiguration would isolate clients on that segment</li>
+</ul>
+<h3 id="notes_13">Notes<a class="headerlink" href="#notes_13" title="Permanent link">&para;</a></h3>
+<p>Moderate risk if changed.<br />
+Interface changes can interrupt connected devices.</p>
+<hr />
+<h2 id="switch-action">Switch action<a class="headerlink" href="#switch-action" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">QoS → Storm Control
+</code></pre>
+<h3 id="what-it-does_14">What it does<a class="headerlink" href="#what-it-does_14" title="Permanent link">&para;</a></h3>
+<p>Applies per-port thresholds to suppress excessive broadcast, multicast, or unknown-unicast traffic on the TL-SG108E switches.</p>
+<h3 id="why-it-was-relevant_14">Why it was relevant<a class="headerlink" href="#why-it-was-relevant_14" title="Permanent link">&para;</a></h3>
+<p>This became the key stabilization step in the session.</p>
+<h3 id="expected-result_14">Expected result<a class="headerlink" href="#expected-result_14" title="Permanent link">&para;</a></h3>
+<p>Flood behavior should be limited enough to prevent LAN instability while still allowing normal traffic.</p>
+<h3 id="what-success-or-failure-indicates_14">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_14" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Improvement after enabling or adjusting storm control suggests a layer-2 flood condition was contributing</li>
+<li>Overly aggressive thresholds may suppress legitimate traffic</li>
+</ul>
+<h3 id="notes_14">Notes<a class="headerlink" href="#notes_14" title="Permanent link">&para;</a></h3>
+<p>Moderate operational risk.<br />
+Improper thresholds can interfere with legitimate traffic such as discovery or multicast-heavy applications.</p>
+<hr />
+<h2 id="switch-action_1">Switch action<a class="headerlink" href="#switch-action_1" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">Loop Prevention / Loopback Detection
+</code></pre>
+<h3 id="what-it-does_15">What it does<a class="headerlink" href="#what-it-does_15" title="Permanent link">&para;</a></h3>
+<p>Attempts to detect and suppress switching loops on the TL-SG108E platform.</p>
+<h3 id="why-it-was-relevant_15">Why it was relevant<a class="headerlink" href="#why-it-was-relevant_15" title="Permanent link">&para;</a></h3>
+<p>Reviewed because a loop or loop-like condition was one of the primary suspected causes of the LAN instability.</p>
+<h3 id="expected-result_15">Expected result<a class="headerlink" href="#expected-result_15" title="Permanent link">&para;</a></h3>
+<p>The switch should detect and mitigate loop conditions automatically.</p>
+<h3 id="what-success-or-failure-indicates_15">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_15" title="Permanent link">&para;</a></h3>
+<ul>
+<li>If enabled but instability persists, additional controls such as storm control may still be required</li>
+<li>A disabled state would increase exposure to accidental loops</li>
+</ul>
+<h3 id="notes_15">Notes<a class="headerlink" href="#notes_15" title="Permanent link">&para;</a></h3>
+<p>Low risk to enable.<br />
+Important baseline protection in daisy-chained homelab switch topologies.</p>
+<hr />
+<h2 id="switch-action_2">Switch action<a class="headerlink" href="#switch-action_2" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">Advanced → Network → LAN
+</code></pre>
+<h3 id="what-it-does_16">What it does<a class="headerlink" href="#what-it-does_16" title="Permanent link">&para;</a></h3>
+<p>Used on the Archer APs to set or review the management IP address.</p>
+<h3 id="why-it-was-relevant_16">Why it was relevant<a class="headerlink" href="#why-it-was-relevant_16" title="Permanent link">&para;</a></h3>
+<p>Static IP assignment for AP management was part of the cleanup and hardening discussion.</p>
+<h3 id="expected-result_16">Expected result<a class="headerlink" href="#expected-result_16" title="Permanent link">&para;</a></h3>
+<p>Each AP receives a stable management address in the correct subnet and outside the DHCP pool.</p>
+<h3 id="what-success-or-failure-indicates_16">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_16" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Correct IPs make AP administration predictable</li>
+<li>Wrong subnet or overlapping DHCP use can cause management-plane confusion</li>
+</ul>
+<h3 id="notes_16">Notes<a class="headerlink" href="#notes_16" title="Permanent link">&para;</a></h3>
+<p>Low to moderate risk.<br />
+Changing the management IP can briefly disconnect the web session until reconnecting to the new address.</p>
+<hr />
+<h2 id="switch-ap-action">Switch / AP action<a class="headerlink" href="#switch-ap-action" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">Factory reset via recessed reset button
+</code></pre>
+<h3 id="what-it-does_17">What it does<a class="headerlink" href="#what-it-does_17" title="Permanent link">&para;</a></h3>
+<p>Restores the switch or AP to factory defaults.</p>
+<h3 id="why-it-was-relevant_17">Why it was relevant<a class="headerlink" href="#why-it-was-relevant_17" title="Permanent link">&para;</a></h3>
+<p>Discussed as a recovery method for TL-SG108E login access before it was discovered that the switches were still using the default credentials.</p>
+<h3 id="expected-result_17">Expected result<a class="headerlink" href="#expected-result_17" title="Permanent link">&para;</a></h3>
+<p>Default management access and default credentials are restored.</p>
+<h3 id="what-success-or-failure-indicates_17">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_17" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Successful reset restores admin access</li>
+<li>It also removes custom configuration, requiring reconfiguration afterward</li>
+</ul>
+<h3 id="notes_17">Notes<a class="headerlink" href="#notes_17" title="Permanent link">&para;</a></h3>
+<p>High operational risk.<br />
+Use only when necessary and after recording current settings if possible.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

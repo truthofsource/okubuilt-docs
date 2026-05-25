@@ -1,0 +1,3551 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Infrastructure, cloud, automation, security, and operations documentation portfolio.">
+      
+      
+        <meta name="author" content="Kingsley Oku">
+      
+      
+      
+        <link rel="prev" href="../proxmox-ha-live-migration-ceph-vm-state/">
+      
+      
+        <link rel="next" href="../vm100-ceph-gluetun-troubleshooting-runbook-15/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Planning TrueNAS VM ZFS Storage on Proxmox with 4×16TB HDDs - OkuBuilt Infrastructure & Cloud Portfolio</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#planning-truenas-vm-zfs-storage-on-proxmox-with-416tb-hdds" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-header__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OkuBuilt Infrastructure & Cloud Portfolio
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Planning TrueNAS VM ZFS Storage on Proxmox with 4×16TB HDDs
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-nav__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OkuBuilt Infrastructure & Cloud Portfolio
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/proxmox-traefik-opnsense-ha-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox, Traefik, OPNsense HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Automation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cephfs-snips-cloudinit-vm100-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox CephFS Snips Cloud-Init VM100
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloud-init-docker-vm-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Docker VM Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-vm100-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker VM100 Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-cicustom-snippet-storage-ha/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init cicustom Snippet Storage HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/vm100-docker-startup-mountguard-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Startup Mount Guard Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compute
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/debian-docker-vm-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/home-assistant-os-proxmox-ceph-vm-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home Assistant OS Proxmox Ceph VM Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/homelab-vm100-rebuild-restore-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab VM100 Rebuild Restore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Containers & Apps
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Containers & Apps
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/debian-docker-vm-rebuild-cloudinit-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM Rebuild Cloud-Init
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-apps-offen-restore-gluetun-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Apps Offen Restore Gluetun Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-compose-memos-image-tag-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Compose Memos Image Tag Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/gluetun-corrupted-servers-permissions-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gluetun Corrupted Servers Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/proxmox-traefik-console-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Traefik Console Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-docker29-upgrade-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Docker Upgrade Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-proxy-docker-network-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Proxy Docker Network
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm100-docker-data-disk-recovery-cloud-init-hardening/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Data Disk Recovery Cloud-Init Hardening
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm110-provisioning-guest-agent-docker-appdata-permissions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM110 Provisioning Guest Agent Docker AppData Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring & Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Monitoring & Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-ceph-memtest-ram-fault-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Ceph Memtest RAM Fault
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-host-kernel-ram-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Host Kernel RAM Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-nuc-e1000e-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox NUC e1000e Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networking
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Networking
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/att-fiber-opnsense-outage-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AT&T Fiber OPNsense Outage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-lan-instability-storm-control-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN Instability Storm Control
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-lan-ip-dhcp-static-device-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN IP DHCP Static Device
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-opt2-lan-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense OPT2 LAN
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-web-gui-documentation-and-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense Web GUI Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/wireguard-ec2-proxmox-lxc-homelab-remote-access/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WireGuard EC2 Proxmox LXC Homelab Remote Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Security
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/homelab-ssh-ansible-nut-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab SSH Ansible NUT Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/proxmox-root-login-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Root Login Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_9" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_9" id="__nav_2_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Storage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_9_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Storage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ceph-mainframe-osd-mon-mgr-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Mainframe OSD MON MGR Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ceph-monitor-crash-loop-mainframe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Monitor Crash Loop Mainframe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../proxmox-ha-live-migration-ceph-vm-state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox HA Live Migration Ceph VM State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TrueNAS VM ZFS HBA Planning
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TrueNAS VM ZFS HBA Planning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Resolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#current-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#final-decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Final decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recommended-implementation-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended implementation path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alternative-workaround" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alternative workaround
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sata-controller-enumeration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SATA controller enumeration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#disk-to-controller-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Disk-to-controller mapping
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vm100-ceph-gluetun-troubleshooting-runbook-15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Ceph Gluetun Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vm100-docker-nas-offen-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker NAS Offen Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Runbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runbooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_11" id="__nav_2_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting Incidents
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting Incidents
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting-incidents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloud
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cloud
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cloud/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portfolio
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Portfolio
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../portfolio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/documentation-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation Standards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/placement-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Placement Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/recurring-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recurring Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/command-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Resolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#current-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#final-decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Final decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recommended-implementation-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended implementation path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alternative-workaround" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alternative workaround
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sata-controller-enumeration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SATA controller enumeration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#disk-to-controller-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Disk-to-controller mapping
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="planning-truenas-vm-zfs-storage-on-proxmox-with-416tb-hdds">Planning TrueNAS VM ZFS Storage on Proxmox with 4×16TB HDDs<a class="headerlink" href="#planning-truenas-vm-zfs-storage-on-proxmox-with-416tb-hdds" title="Permanent link">&para;</a></h1>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>This work session focused on planning a TrueNAS virtual machine on Proxmox to manage a ZFS pool built from four 16TB HDDs. The main goals were to determine the correct ZFS layout, decide whether motherboard SATA controller passthrough was viable, verify whether a Ceph SATA SSD would be unintentionally included in passthrough, and identify the correct hardware approach for clean disk presentation to TrueNAS.</p>
+<p>The session ended with the conclusion that the onboard SATA controller could not be safely passed through because all SATA devices on the host were attached to the same Intel AHCI controller, including the Ceph SSD. The recommended path forward was to purchase a dedicated HBA and use it in IT mode for passthrough to the TrueNAS VM.</p>
+<h2 id="environment">Environment<a class="headerlink" href="#environment" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Hypervisor:</strong> Proxmox VE</li>
+<li><strong>Host:</strong> <code>mainframe</code></li>
+<li><strong>Boot device:</strong> Separate NVMe drive for Proxmox host OS</li>
+<li><strong>Target storage VM:</strong> Planned TrueNAS VM</li>
+<li><strong>Intended ZFS disks:</strong> 4×16TB HDD</li>
+<li><strong>Other SATA device present:</strong> 1 SATA SSD already part of a cephpool</li>
+<li><strong>Onboard SATA controller:</strong> Intel Cannon Lake PCH SATA AHCI Controller at <code>00:17.0</code></li>
+<li><strong>Relevant storage context:</strong> Ceph pool already in use on the Proxmox host; one SATA SSD must remain under host control and must not be exposed to TrueNAS by mistake</li>
+</ul>
+<h2 id="problem">Problem<a class="headerlink" href="#problem" title="Permanent link">&para;</a></h2>
+<p>The user wanted to build ZFS storage in a TrueNAS VM on Proxmox using four 16TB HDDs and preferred to passthrough the entire SATA controller for clean disk access. However, there was concern that another SATA SSD used by Ceph might be attached to the same controller and would be included unintentionally.</p>
+<p>A related question was whether one physical SATA port on the motherboard corresponded to one separate SATA controller.</p>
+<h2 id="symptoms">Symptoms<a class="headerlink" href="#symptoms" title="Permanent link">&para;</a></h2>
+<p>No outage or failure occurred during this session. This was a design and verification task. The main risks identified were:
+- accidental passthrough of the Ceph SATA SSD to the TrueNAS VM
+- loss of Proxmox host access to all motherboard SATA devices if the whole controller were passed through
+- potential cephpool breakage if the Ceph SSD were removed from host access
+- incorrect assumption that one SATA port equals one controller</p>
+<h2 id="actions-taken">Actions Taken<a class="headerlink" href="#actions-taken" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Reviewed the intended storage layout for the TrueNAS VM.</li>
+<li>Adjusted the original plan from 5 HDDs to <strong>4×16TB HDDs</strong>.</li>
+<li>Discussed suitable ZFS layouts for four large-capacity disks.</li>
+<li>Evaluated whole-controller passthrough as the preferred method for exposing disks to TrueNAS.</li>
+<li>Clarified the distinction between:</li>
+<li>a <strong>SATA port</strong></li>
+<li>a <strong>SATA controller</strong></li>
+<li>Ran a PCI device listing on the Proxmox host to enumerate SATA controllers:</li>
+</ol>
+<pre><code class="language-bash">lspci -nn | egrep -i 'sata|ahci|asmedia|marvell'
+</code></pre>
+<p>Purpose: identify whether the system had one or multiple SATA controllers.</p>
+<ol>
+<li>Ran a disk path listing to map attached SATA disks to their PCI controller:</li>
+</ol>
+<pre><code class="language-bash">ls -l /dev/disk/by-path/ | egrep 'ata-|sata'
+</code></pre>
+<p>Purpose: verify which controller each SATA disk used.</p>
+<ol>
+<li>Interpreted the command output to determine whether the four 16TB HDDs and the Ceph SSD were isolated on different controllers or shared the same one.</li>
+<li>Ruled out onboard controller passthrough because all SATA disks were attached to the same controller.</li>
+<li>Evaluated alternative approaches:<ul>
+<li>use a dedicated PCIe HBA for the 4 HDDs</li>
+<li>passthrough individual disks by <code>/dev/disk/by-id/</code></li>
+</ul>
+</li>
+<li>Recommended purchase of an LSI HBA and explained why <strong>IT mode</strong> is required for ZFS/TrueNAS.</li>
+</ol>
+<h2 id="key-findings">Key Findings<a class="headerlink" href="#key-findings" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The Proxmox host has <strong>only one onboard SATA controller</strong>:</li>
+<li><code>00:17.0 SATA controller [0106]: Intel Corporation Cannon Lake PCH SATA AHCI Controller [8086:a352]</code></li>
+<li>All enumerated SATA devices were attached to that same controller via paths like:</li>
+<li><code>pci-0000:00:17.0-ata-*</code></li>
+<li>This means the motherboard SATA ports are not independent controllers; they are multiple ports provided by a single AHCI controller.</li>
+<li>As a result, passing through controller <code>00:17.0</code> to the TrueNAS VM would remove <strong>all SATA-attached disks</strong> from the Proxmox host.</li>
+<li>That would include the SATA SSD already used by Ceph, which must remain under Proxmox control.</li>
+<li>Therefore, <strong>whole-controller passthrough of the onboard SATA controller is not safe in the current hardware layout</strong>.</li>
+<li>For four 16TB HDDs, the most conservative recommended ZFS layout is <strong>RAIDZ2</strong>, because large-disk rebuilds are lengthy and double parity provides better fault tolerance.</li>
+<li>A dedicated HBA in <strong>IT mode</strong> is the cleanest solution for TrueNAS virtualization:</li>
+<li>the 4 HDDs would connect to the HBA</li>
+<li>the Ceph SSD would remain on motherboard SATA</li>
+<li>the HBA would be passed through as a PCI device to the TrueNAS VM</li>
+</ul>
+<h2 id="resolution">Resolution<a class="headerlink" href="#resolution" title="Permanent link">&para;</a></h2>
+<h3 id="current-status">Current status<a class="headerlink" href="#current-status" title="Permanent link">&para;</a></h3>
+<p>No live storage migration or passthrough change was performed during this session.</p>
+<h3 id="final-decision">Final decision<a class="headerlink" href="#final-decision" title="Permanent link">&para;</a></h3>
+<p>The current onboard SATA controller should <strong>not</strong> be passed through to the TrueNAS VM because it also carries the Ceph SATA SSD.</p>
+<h3 id="recommended-implementation-path">Recommended implementation path<a class="headerlink" href="#recommended-implementation-path" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Purchase a supported PCIe HBA such as:</li>
+<li>LSI 9207-8i</li>
+<li>LSI 9211-8i</li>
+<li>LSI 9300-8i</li>
+<li>Ensure the HBA is running <strong>IT mode</strong> firmware.</li>
+<li>Attach the 4×16TB HDDs to the HBA.</li>
+<li>Leave the Ceph SSD on the motherboard SATA controller.</li>
+<li>Pass through the HBA PCI device to the TrueNAS VM.</li>
+<li>Build the TrueNAS pool as <strong>RAIDZ2</strong> unless capacity priorities justify another layout.</li>
+</ol>
+<h3 id="alternative-workaround">Alternative workaround<a class="headerlink" href="#alternative-workaround" title="Permanent link">&para;</a></h3>
+<p>If no HBA is added, individual-disk passthrough using stable <code>/dev/disk/by-id/</code> names is possible, but this is less ideal than HBA passthrough for a TrueNAS VM design.</p>
+<h2 id="validation">Validation<a class="headerlink" href="#validation" title="Permanent link">&para;</a></h2>
+<p>The conclusion was validated by direct host inspection.</p>
+<h3 id="sata-controller-enumeration">SATA controller enumeration<a class="headerlink" href="#sata-controller-enumeration" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash">lspci -nn | egrep -i 'sata|ahci|asmedia|marvell'
+</code></pre>
+<p>This showed only one SATA controller: <code>00:17.0</code>.</p>
+<h3 id="disk-to-controller-mapping">Disk-to-controller mapping<a class="headerlink" href="#disk-to-controller-mapping" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash">ls -l /dev/disk/by-path/ | egrep 'ata-|sata'
+</code></pre>
+<p>This showed all SATA disks mapped to <code>pci-0000:00:17.0-ata-*</code>, confirming that the HDDs and Ceph SSD share the same controller.</p>
+<p>This was sufficient to validate that onboard controller passthrough would include every motherboard SATA disk.</p>
+<h2 id="follow-up-tasks">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Buy a supported PCIe HBA suitable for TrueNAS passthrough.</li>
+<li>Confirm the HBA is flashed to <strong>IT mode</strong> before use.</li>
+<li>Buy the correct forward breakout cables for the chosen HBA.</li>
+<li>Physically move the four 16TB HDDs from motherboard SATA to the HBA.</li>
+<li>Leave the Ceph SSD on the motherboard SATA controller.</li>
+<li>Enable and validate IOMMU support in BIOS and Proxmox before PCI passthrough.</li>
+<li>Create or configure the TrueNAS VM with PCI passthrough of the HBA.</li>
+<li>Build the ZFS pool in TrueNAS, likely as RAIDZ2.</li>
+<li>Validate SMART visibility, disk serial visibility, and pool health inside TrueNAS after deployment.</li>
+</ul>
+<h2 id="lessons-learned">Lessons Learned<a class="headerlink" href="#lessons-learned" title="Permanent link">&para;</a></h2>
+<ul>
+<li>A motherboard SATA <strong>port</strong> is not the same thing as a SATA <strong>controller</strong>.</li>
+<li>Consumer motherboards often expose several SATA ports through a single Intel AHCI controller.</li>
+<li>Whole-controller passthrough is only safe when every disk on that controller is intended for the guest VM.</li>
+<li>If one host-critical disk such as a Ceph OSD SSD is on the same controller, controller passthrough is not viable.</li>
+<li>For virtualized TrueNAS, a dedicated HBA in IT mode is the cleanest and most maintainable approach.</li>
+<li>For large-capacity HDD pools, RAIDZ2 is often the safer default than RAIDZ1 because rebuild windows are longer and risk exposure is higher.</li>
+</ul>
+<hr />
+<h1 id="command-reference">Command Reference<a class="headerlink" href="#command-reference" title="Permanent link">&para;</a></h1>
+<h2 id="command">Command<a class="headerlink" href="#command" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">lspci -nn | egrep -i 'sata|ahci|asmedia|marvell'
+</code></pre>
+<h3 id="what-it-does">What it does<a class="headerlink" href="#what-it-does" title="Permanent link">&para;</a></h3>
+<p>Lists PCI devices on the Proxmox host and filters the output for SATA-related controller names and common vendor/controller keywords.</p>
+<h3 id="important-flags-and-arguments">Important flags and arguments<a class="headerlink" href="#important-flags-and-arguments" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>lspci</code><br />
+  Lists PCI devices in the system.</li>
+<li><code>-nn</code><br />
+  Shows both human-readable names and numeric vendor/device IDs, useful for exact hardware identification.</li>
+<li><code>egrep -i</code><br />
+  Filters output case-insensitively for matching keywords.</li>
+<li><code>'sata|ahci|asmedia|marvell'</code><br />
+  Searches for common onboard SATA or add-in controller identifiers.</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment" title="Permanent link">&para;</a></h3>
+<p>It was used to determine whether the Proxmox host had:
+- only one onboard SATA controller, or
+- multiple SATA controllers that might allow safe isolation of disks for passthrough.</p>
+<h3 id="expected-result">Expected result<a class="headerlink" href="#expected-result" title="Permanent link">&para;</a></h3>
+<p>One or more controller lines with PCI addresses such as <code>00:17.0</code>.</p>
+<h3 id="what-success-or-failure-would-indicate">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Success:</strong> hardware inventory is visible and can be used for passthrough planning.</li>
+<li><strong>If only one SATA controller appears:</strong> all motherboard SATA ports may belong to the same controller.</li>
+<li><strong>If multiple controllers appear:</strong> it may be possible to isolate the HDDs and Ceph SSD onto different controllers.</li>
+</ul>
+<h3 id="risk">Risk<a class="headerlink" href="#risk" title="Permanent link">&para;</a></h3>
+<p>Low risk. Read-only inspection command.</p>
+<h3 id="safer-alternative">Safer alternative<a class="headerlink" href="#safer-alternative" title="Permanent link">&para;</a></h3>
+<p>None needed. This is already a safe discovery command.</p>
+<hr />
+<h2 id="command_1">Command<a class="headerlink" href="#command_1" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ls -l /dev/disk/by-path/ | egrep 'ata-|sata'
+</code></pre>
+<h3 id="what-it-does_1">What it does<a class="headerlink" href="#what-it-does_1" title="Permanent link">&para;</a></h3>
+<p>Lists persistent disk path symlinks and filters for SATA-attached devices. These path names often include the PCI controller address and ATA port mapping, which helps determine which controller a disk is attached to.</p>
+<h3 id="important-flags-and-arguments_1">Important flags and arguments<a class="headerlink" href="#important-flags-and-arguments_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>ls -l</code><br />
+  Shows symlink targets rather than only file names.</li>
+<li><code>/dev/disk/by-path/</code><br />
+  Contains stable device symlinks based on bus/path topology.</li>
+<li><code>egrep 'ata-|sata'</code><br />
+  Filters to show ATA/SATA-related entries.</li>
+</ul>
+<h3 id="why-it-was-used-at-that-moment_1">Why it was used at that moment<a class="headerlink" href="#why-it-was-used-at-that-moment_1" title="Permanent link">&para;</a></h3>
+<p>It was used to map each SATA disk to its controller and to confirm whether the 4 HDDs and the Ceph SSD shared the same PCI SATA controller.</p>
+<h3 id="expected-result_1">Expected result<a class="headerlink" href="#expected-result_1" title="Permanent link">&para;</a></h3>
+<p>Entries such as:</p>
+<pre><code class="language-bash">pci-0000:00:17.0-ata-1 -&gt; ../../sda
+</code></pre>
+<p>These expose the PCI controller address and the Linux block device currently associated with that path.</p>
+<h3 id="what-success-or-failure-would-indicate_1">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Success:</strong> each disk can be mapped to a specific controller.</li>
+<li><strong>If all disks show the same PCI address:</strong> whole-controller passthrough would include them all.</li>
+<li><strong>If disks show different PCI addresses:</strong> controller separation may be possible.</li>
+</ul>
+<h3 id="risk_1">Risk<a class="headerlink" href="#risk_1" title="Permanent link">&para;</a></h3>
+<p>Low risk. Read-only inspection command.</p>
+<h3 id="safer-alternative_1">Safer alternative<a class="headerlink" href="#safer-alternative_1" title="Permanent link">&para;</a></h3>
+<p>None needed. This is an appropriate topology-inspection command.</p>
+<hr />
+<h2 id="likely-command-used">Likely command used<a class="headerlink" href="#likely-command-used" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm set &lt;VMID&gt; -hostpci0 0000:00:17.0,pcie=1
+</code></pre>
+<h3 id="what-it-does_2">What it does<a class="headerlink" href="#what-it-does_2" title="Permanent link">&para;</a></h3>
+<p>Adds a PCI passthrough device to a Proxmox VM configuration. In this case it would pass a SATA controller through to the guest.</p>
+<h3 id="important-flags-and-arguments_2">Important flags and arguments<a class="headerlink" href="#important-flags-and-arguments_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>qm set</code><br />
+  Modifies a Proxmox VM configuration.</li>
+<li><code>&lt;VMID&gt;</code><br />
+  Target VM ID, which would be the TrueNAS VM.</li>
+<li><code>-hostpci0</code><br />
+  Adds the first passthrough PCI device entry.</li>
+<li><code>0000:00:17.0</code><br />
+  Full PCI address of the controller.</li>
+<li><code>pcie=1</code><br />
+  Presents the device as a PCIe device when appropriate.</li>
+</ul>
+<h3 id="why-it-was-discussed">Why it was discussed<a class="headerlink" href="#why-it-was-discussed" title="Permanent link">&para;</a></h3>
+<p>This is the standard Proxmox method for passing an entire controller to a VM. It was relevant because the user initially wanted whole-controller passthrough for TrueNAS.</p>
+<h3 id="expected-result_2">Expected result<a class="headerlink" href="#expected-result_2" title="Permanent link">&para;</a></h3>
+<p>The VM configuration would include the SATA controller as a passthrough device, and on boot the guest OS would take ownership of that controller.</p>
+<h3 id="what-success-or-failure-would-indicate_2">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Success:</strong> the VM sees the controller and the host no longer manages disks behind it.</li>
+<li><strong>Failure or incorrect usage:</strong> the VM may fail to start, or the host may lose access to disks it still needs.</li>
+</ul>
+<h3 id="risk_2">Risk<a class="headerlink" href="#risk_2" title="Permanent link">&para;</a></h3>
+<p>High risk in this environment. Passing through <code>00:17.0</code> would also remove the Ceph SATA SSD and all other motherboard SATA disks from Proxmox host control.</p>
+<h3 id="safer-alternative_2">Safer alternative<a class="headerlink" href="#safer-alternative_2" title="Permanent link">&para;</a></h3>
+<p>Use a dedicated HBA for passthrough, or passthrough only specific disks by <code>/dev/disk/by-id/</code>.</p>
+<hr />
+<h2 id="likely-command-used_1">Likely command used<a class="headerlink" href="#likely-command-used_1" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">lsblk -o NAME,SIZE,MODEL,SERIAL,TYPE
+</code></pre>
+<h3 id="what-it-does_3">What it does<a class="headerlink" href="#what-it-does_3" title="Permanent link">&para;</a></h3>
+<p>Displays block devices with selected columns including size, model, serial, and type.</p>
+<h3 id="important-flags-and-arguments_3">Important flags and arguments<a class="headerlink" href="#important-flags-and-arguments_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>lsblk</code><br />
+  Lists block devices.</li>
+<li><code>-o</code><br />
+  Selects custom output columns.</li>
+<li><code>NAME,SIZE,MODEL,SERIAL,TYPE</code><br />
+  Useful for distinguishing large HDDs from SSDs and identifying exact disks by model and serial.</li>
+</ul>
+<h3 id="why-it-was-suggested">Why it was suggested<a class="headerlink" href="#why-it-was-suggested" title="Permanent link">&para;</a></h3>
+<p>It would be used to identify which Linux block devices correspond to the 16TB HDDs and which disk is the Ceph SSD.</p>
+<h3 id="expected-result_3">Expected result<a class="headerlink" href="#expected-result_3" title="Permanent link">&para;</a></h3>
+<p>A readable disk inventory showing device names and hardware identity data.</p>
+<h3 id="what-success-or-failure-would-indicate_3">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Success:</strong> disks can be clearly identified before passthrough planning.</li>
+<li><strong>Failure or missing serials:</strong> further identification may require SMART tools or additional queries.</li>
+</ul>
+<h3 id="risk_3">Risk<a class="headerlink" href="#risk_3" title="Permanent link">&para;</a></h3>
+<p>Low risk. Read-only inspection command.</p>
+<h3 id="safer-alternative_3">Safer alternative<a class="headerlink" href="#safer-alternative_3" title="Permanent link">&para;</a></h3>
+<p>None needed.</p>
+<hr />
+<h2 id="likely-command-used_2">Likely command used<a class="headerlink" href="#likely-command-used_2" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ls -l /dev/disk/by-id/ | egrep 'ata-|wwn-' | egrep -v 'part'
+</code></pre>
+<h3 id="what-it-does_4">What it does<a class="headerlink" href="#what-it-does_4" title="Permanent link">&para;</a></h3>
+<p>Lists stable disk identifiers that should be used instead of <code>/dev/sdX</code> names when passing individual disks to a VM.</p>
+<h3 id="important-flags-and-arguments_4">Important flags and arguments<a class="headerlink" href="#important-flags-and-arguments_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>/dev/disk/by-id/</code><br />
+  Persistent device names based on serial/model/WWN.</li>
+<li><code>egrep 'ata-|wwn-'</code><br />
+  Filters for ATA or WWN-based identifiers.</li>
+<li><code>egrep -v 'part'</code><br />
+  Excludes partition symlinks and shows whole disks only.</li>
+</ul>
+<h3 id="why-it-was-suggested_1">Why it was suggested<a class="headerlink" href="#why-it-was-suggested_1" title="Permanent link">&para;</a></h3>
+<p>This is the preferred identification method if passing through specific disks rather than a whole controller.</p>
+<h3 id="expected-result_4">Expected result<a class="headerlink" href="#expected-result_4" title="Permanent link">&para;</a></h3>
+<p>Stable device paths suitable for raw-disk passthrough in Proxmox.</p>
+<h3 id="what-success-or-failure-would-indicate_4">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Success:</strong> individual HDDs can be safely targeted by stable ID.</li>
+<li><strong>Failure or ambiguity:</strong> disk identification is incomplete and should be verified before passthrough.</li>
+</ul>
+<h3 id="risk_4">Risk<a class="headerlink" href="#risk_4" title="Permanent link">&para;</a></h3>
+<p>Low risk. Read-only inspection command.</p>
+<h3 id="safer-alternative_4">Safer alternative<a class="headerlink" href="#safer-alternative_4" title="Permanent link">&para;</a></h3>
+<p>None needed.</p>
+<hr />
+<h2 id="likely-command-used_3">Likely command used<a class="headerlink" href="#likely-command-used_3" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm set &lt;VMID&gt; -scsi1 /dev/disk/by-id/ata-&lt;disk-id&gt;
+</code></pre>
+<h3 id="what-it-does_5">What it does<a class="headerlink" href="#what-it-does_5" title="Permanent link">&para;</a></h3>
+<p>Assigns a host disk directly to a Proxmox VM as a raw SCSI device using a stable <code>/dev/disk/by-id/</code> path.</p>
+<h3 id="important-flags-and-arguments_5">Important flags and arguments<a class="headerlink" href="#important-flags-and-arguments_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>qm set</code><br />
+  Edits Proxmox VM configuration.</li>
+<li><code>-scsi1</code><br />
+  Attaches a disk to the first available SCSI slot.</li>
+<li><code>/dev/disk/by-id/ata-&lt;disk-id&gt;</code><br />
+  Stable host path to the physical disk.</li>
+</ul>
+<h3 id="why-it-was-discussed_1">Why it was discussed<a class="headerlink" href="#why-it-was-discussed_1" title="Permanent link">&para;</a></h3>
+<p>This is the fallback method when whole-controller passthrough is not possible and the user still wants TrueNAS to see real disks.</p>
+<h3 id="expected-result_5">Expected result<a class="headerlink" href="#expected-result_5" title="Permanent link">&para;</a></h3>
+<p>The specified physical disk becomes available inside the guest VM.</p>
+<h3 id="what-success-or-failure-would-indicate_5">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Success:</strong> the guest sees the individual disk.</li>
+<li><strong>Failure:</strong> incorrect device mapping or a VM boot/config issue.</li>
+<li><strong>Incorrect disk choice:</strong> a host-managed disk could be exposed accidentally.</li>
+</ul>
+<h3 id="risk_5">Risk<a class="headerlink" href="#risk_5" title="Permanent link">&para;</a></h3>
+<p>Moderate. Safe when done carefully with correct disk IDs, but dangerous if the wrong disk is selected.</p>
+<h3 id="safer-alternative_5">Safer alternative<a class="headerlink" href="#safer-alternative_5" title="Permanent link">&para;</a></h3>
+<p>Dedicated HBA passthrough remains safer and cleaner.</p>
+<hr />
+<h2 id="likely-command-used_4">Likely command used<a class="headerlink" href="#likely-command-used_4" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">update-grub
+</code></pre>
+<h3 id="what-it-does_6">What it does<a class="headerlink" href="#what-it-does_6" title="Permanent link">&para;</a></h3>
+<p>Rebuilds the GRUB bootloader configuration after changes to kernel boot parameters.</p>
+<h3 id="important-flags-and-arguments_6">Important flags and arguments<a class="headerlink" href="#important-flags-and-arguments_6" title="Permanent link">&para;</a></h3>
+<p>No special flags here.</p>
+<h3 id="why-it-was-discussed_2">Why it was discussed<a class="headerlink" href="#why-it-was-discussed_2" title="Permanent link">&para;</a></h3>
+<p>Needed when enabling IOMMU-related kernel parameters for PCI passthrough on Proxmox.</p>
+<h3 id="expected-result_6">Expected result<a class="headerlink" href="#expected-result_6" title="Permanent link">&para;</a></h3>
+<p>GRUB config regenerates successfully.</p>
+<h3 id="what-success-or-failure-would-indicate_6">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_6" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Success:</strong> bootloader will use updated kernel arguments at next reboot.</li>
+<li><strong>Failure:</strong> passthrough-related boot parameter changes may not take effect.</li>
+</ul>
+<h3 id="risk_6">Risk<a class="headerlink" href="#risk_6" title="Permanent link">&para;</a></h3>
+<p>Moderate. Generally safe, but boot configuration changes should be made carefully on production hosts.</p>
+<h3 id="safer-alternative_6">Safer alternative<a class="headerlink" href="#safer-alternative_6" title="Permanent link">&para;</a></h3>
+<p>Back up <code>/etc/default/grub</code> before modifying it.</p>
+<hr />
+<h2 id="likely-command-used_5">Likely command used<a class="headerlink" href="#likely-command-used_5" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">update-initramfs -u -k all
+</code></pre>
+<h3 id="what-it-does_7">What it does<a class="headerlink" href="#what-it-does_7" title="Permanent link">&para;</a></h3>
+<p>Rebuilds initramfs images for installed kernels, ensuring boot-time modules and parameters are updated.</p>
+<h3 id="important-flags-and-arguments_7">Important flags and arguments<a class="headerlink" href="#important-flags-and-arguments_7" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>-u</code><br />
+  Updates existing initramfs images.</li>
+<li><code>-k all</code><br />
+  Applies the update to all installed kernels.</li>
+</ul>
+<h3 id="why-it-was-discussed_3">Why it was discussed<a class="headerlink" href="#why-it-was-discussed_3" title="Permanent link">&para;</a></h3>
+<p>Often paired with IOMMU or vfio-related configuration changes before rebooting a Proxmox host for PCI passthrough readiness.</p>
+<h3 id="expected-result_7">Expected result<a class="headerlink" href="#expected-result_7" title="Permanent link">&para;</a></h3>
+<p>Initramfs images rebuild successfully.</p>
+<h3 id="what-success-or-failure-would-indicate_7">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_7" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Success:</strong> boot environment is updated for passthrough-related changes.</li>
+<li><strong>Failure:</strong> the host may boot without necessary module/initramfs updates.</li>
+</ul>
+<h3 id="risk_7">Risk<a class="headerlink" href="#risk_7" title="Permanent link">&para;</a></h3>
+<p>Moderate. Common system administration command, but it affects boot preparation.</p>
+<h3 id="safer-alternative_7">Safer alternative<a class="headerlink" href="#safer-alternative_7" title="Permanent link">&para;</a></h3>
+<p>Ensure recent host backups and console access exist before major boot-chain changes.</p>
+<hr />
+<h2 id="likely-command-used_6">Likely command used<a class="headerlink" href="#likely-command-used_6" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">find /sys/kernel/iommu_groups/ -type l | grep -E '00:17.0|03:00.0'
+</code></pre>
+<h3 id="what-it-does_8">What it does<a class="headerlink" href="#what-it-does_8" title="Permanent link">&para;</a></h3>
+<p>Inspects IOMMU group membership for specific PCI devices to determine whether passthrough isolation is clean.</p>
+<h3 id="important-flags-and-arguments_8">Important flags and arguments<a class="headerlink" href="#important-flags-and-arguments_8" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>find /sys/kernel/iommu_groups/ -type l</code><br />
+  Lists PCI devices grouped by IOMMU isolation boundaries.</li>
+<li><code>grep -E '00:17.0|03:00.0'</code><br />
+  Filters for target controller/device addresses.</li>
+</ul>
+<h3 id="why-it-was-discussed_4">Why it was discussed<a class="headerlink" href="#why-it-was-discussed_4" title="Permanent link">&para;</a></h3>
+<p>A device must be in a passthrough-safe IOMMU grouping, especially for full PCI controller passthrough.</p>
+<h3 id="expected-result_8">Expected result<a class="headerlink" href="#expected-result_8" title="Permanent link">&para;</a></h3>
+<p>Output showing the group containing the target controller.</p>
+<h3 id="what-success-or-failure-would-indicate_8">What success or failure would indicate<a class="headerlink" href="#what-success-or-failure-would-indicate_8" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Success with clean isolation:</strong> passthrough is more likely to be practical.</li>
+<li><strong>Shared group with critical devices:</strong> passthrough may be unsafe or require workarounds.</li>
+</ul>
+<h3 id="risk_8">Risk<a class="headerlink" href="#risk_8" title="Permanent link">&para;</a></h3>
+<p>Low risk. Read-only inspection command.</p>
+<h3 id="safer-alternative_8">Safer alternative<a class="headerlink" href="#safer-alternative_8" title="Permanent link">&para;</a></h3>
+<p>None needed.</p>
+<hr />
+<h2 id="concept-note-it-mode">Concept note: IT mode<a class="headerlink" href="#concept-note-it-mode" title="Permanent link">&para;</a></h2>
+<p>No shell command was run for this, but it was an important technical point in the session.</p>
+<h3 id="what-it-means">What it means<a class="headerlink" href="#what-it-means" title="Permanent link">&para;</a></h3>
+<p><strong>IT mode</strong> means the HBA firmware exposes each attached drive directly to the operating system without hardware RAID abstraction.</p>
+<h3 id="why-it-matters-here">Why it matters here<a class="headerlink" href="#why-it-matters-here" title="Permanent link">&para;</a></h3>
+<p>TrueNAS and ZFS should manage disks directly. An HBA in RAID/IR mode can hide or virtualize disks, which is not desirable for ZFS.</p>
+<h3 id="expected-outcome">Expected outcome<a class="headerlink" href="#expected-outcome" title="Permanent link">&para;</a></h3>
+<p>With an HBA in IT mode:
+- each disk appears individually in TrueNAS
+- SMART and serial information are visible
+- ZFS manages redundancy and recovery directly</p>
+<h3 id="risk_9">Risk<a class="headerlink" href="#risk_9" title="Permanent link">&para;</a></h3>
+<p>Using a RAID-mode card instead of IT mode can complicate ZFS visibility, health checks, and recovery.</p>
+<h3 id="safer-alternative_9">Safer alternative<a class="headerlink" href="#safer-alternative_9" title="Permanent link">&para;</a></h3>
+<p>Buy an HBA confirmed to be flashed to IT mode before installation.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

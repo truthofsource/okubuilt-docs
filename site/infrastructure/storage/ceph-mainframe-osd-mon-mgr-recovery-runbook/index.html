@@ -1,0 +1,4129 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Infrastructure, cloud, automation, security, and operations documentation portfolio.">
+      
+      
+        <meta name="author" content="Kingsley Oku">
+      
+      
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../ceph-monitor-crash-loop-mainframe/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Recreate `mainframe` OSD on `/dev/sda` and Restore Cluster Capacity - OkuBuilt Infrastructure & Cloud Portfolio</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#recreate-mainframe-osd-on-devsda-and-restore-cluster-capacity" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-header__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OkuBuilt Infrastructure & Cloud Portfolio
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Recreate `mainframe` OSD on `/dev/sda` and Restore Cluster Capacity
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-nav__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OkuBuilt Infrastructure & Cloud Portfolio
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/proxmox-traefik-opnsense-ha-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox, Traefik, OPNsense HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Automation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cephfs-snips-cloudinit-vm100-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox CephFS Snips Cloud-Init VM100
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloud-init-docker-vm-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Docker VM Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-vm100-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker VM100 Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-cicustom-snippet-storage-ha/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init cicustom Snippet Storage HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/vm100-docker-startup-mountguard-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Startup Mount Guard Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compute
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/debian-docker-vm-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/home-assistant-os-proxmox-ceph-vm-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home Assistant OS Proxmox Ceph VM Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compute/homelab-vm100-rebuild-restore-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab VM100 Rebuild Restore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Containers & Apps
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Containers & Apps
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/debian-docker-vm-rebuild-cloudinit-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM Rebuild Cloud-Init
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-apps-offen-restore-gluetun-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Apps Offen Restore Gluetun Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-compose-memos-image-tag-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Compose Memos Image Tag Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/gluetun-corrupted-servers-permissions-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gluetun Corrupted Servers Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/proxmox-traefik-console-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Traefik Console Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-docker29-upgrade-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Docker Upgrade Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-proxy-docker-network-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Proxy Docker Network
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm100-docker-data-disk-recovery-cloud-init-hardening/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Data Disk Recovery Cloud-Init Hardening
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm110-provisioning-guest-agent-docker-appdata-permissions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM110 Provisioning Guest Agent Docker AppData Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring & Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Monitoring & Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-ceph-memtest-ram-fault-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Ceph Memtest RAM Fault
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-host-kernel-ram-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Host Kernel RAM Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-nuc-e1000e-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox NUC e1000e Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networking
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Networking
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/att-fiber-opnsense-outage-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AT&T Fiber OPNsense Outage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-lan-instability-storm-control-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN Instability Storm Control
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-lan-ip-dhcp-static-device-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN IP DHCP Static Device
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-opt2-lan-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense OPT2 LAN
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-web-gui-documentation-and-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense Web GUI Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/wireguard-ec2-proxmox-lxc-homelab-remote-access/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WireGuard EC2 Proxmox LXC Homelab Remote Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Security
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/homelab-ssh-ansible-nut-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab SSH Ansible NUT Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/proxmox-root-login-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Root Login Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_9" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_9" id="__nav_2_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Storage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_9_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Storage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Mainframe OSD MON MGR Recovery
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Mainframe OSD MON MGR Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ceph-monitor-crash-loop-mainframe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Monitor Crash Loop Mainframe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../proxmox-ha-live-migration-ceph-vm-state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox HA Live Migration Ceph VM State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../truenas-vm-zfs-hba-planning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TrueNAS VM ZFS HBA Planning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vm100-ceph-gluetun-troubleshooting-runbook-15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Ceph Gluetun Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vm100-docker-nas-offen-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker NAS Offen Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Runbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runbooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_11" id="__nav_2_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting Incidents
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting Incidents
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting-incidents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloud
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cloud
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cloud/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portfolio
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Portfolio
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../portfolio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/documentation-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation Standards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/placement-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Placement Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/recurring-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recurring Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/command-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-taken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions Taken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lessons-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lessons Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="recreate-mainframe-osd-on-devsda-and-restore-cluster-capacity">Recreate <code>mainframe</code> OSD on <code>/dev/sda</code> and Restore Cluster Capacity<a class="headerlink" href="#recreate-mainframe-osd-on-devsda-and-restore-cluster-capacity" title="Permanent link">&para;</a></h1>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>Work focused on removing a broken or misprovisioned Ceph OSD on <code>mainframe</code>, cleaning up an accidental OSD deployment on the wrong disk, recreating the OSD on the intended device (<code>/dev/sda</code>), and restoring it to cluster service.</p>
+<h2 id="environment">Environment<a class="headerlink" href="#environment" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Platform: Proxmox VE with Ceph Reef</li>
+<li>Cluster FSID: <code>5e281287-9217-4e59-b590-400f72adc1e9</code></li>
+<li>Ceph version observed later in logs: <code>18.2.7 (reef)</code></li>
+<li>Hosts involved: <code>mainframe</code>, <code>pve1</code>, <code>pve2</code>, <code>pve3</code>, <code>pve4</code></li>
+<li>OSD layout at the time: <code>osd.0</code> on <code>mainframe</code>, <code>osd.1</code> on <code>pve3</code>, <code>osd.2</code> on <code>pve2</code>, <code>osd.3</code> on <code>pve1</code>, <code>osd.4</code> on <code>pve4</code></li>
+<li>Intended <code>mainframe</code> OSD disk: <code>/dev/sda</code></li>
+<li>Mistakenly used disk during recovery attempt: <code>/dev/nvme0n1</code></li>
+</ul>
+<h2 id="problem">Problem<a class="headerlink" href="#problem" title="Permanent link">&para;</a></h2>
+<p><code>osd.0</code> on <code>mainframe</code> was down, missing its OSD data directory, and had been recreated on the wrong device during troubleshooting.</p>
+<h2 id="symptoms">Symptoms<a class="headerlink" href="#symptoms" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Cluster showed <code>5 osds: 4 up, 4 in</code></li>
+<li><code>osd.0</code> repeatedly crashed on <code>mainframe</code></li>
+<li><code>ceph-osd@0</code> was inactive or failed</li>
+<li><code>/var/lib/ceph/osd/ceph-0</code> was missing at one point</li>
+<li><code>ceph-volume lvm create --bluestore --data /dev/nvme0n1</code> was run, then later identified as a mistake</li>
+<li>A stale masked <code>ceph-osd@0</code> unit blocked a later recreation attempt on <code>/dev/sda</code></li>
+</ul>
+<h2 id="actions-taken">Actions Taken<a class="headerlink" href="#actions-taken" title="Permanent link">&para;</a></h2>
+<ol>
+<li>
+<p>Checked cluster state and OSD health.
+   <code>bash
+   ceph osd stat
+   ceph osd tree
+   ceph health detail</code>
+   Purpose: confirm which OSD was down and whether cluster health was degraded.</p>
+</li>
+<li>
+<p>Checked local OSD service state and OSD directory.
+   <code>bash
+   systemctl status ceph-osd@0 --no-pager
+   journalctl -u ceph-osd@0 -n 300 --no-pager
+   ls -ld /var/lib/ceph/osd/ceph-0
+   ceph-volume lvm list | sed -n '1,200p'</code>
+   Purpose: determine whether the OSD existed locally and whether Ceph volume metadata still referenced it.</p>
+</li>
+<li>
+<p>Attempted a quick BlueStore repair.
+   <code>bash
+   systemctl stop ceph-osd@0
+   ceph-bluestore-tool quick-fix --path /var/lib/ceph/osd/ceph-0 || true
+   systemctl start ceph-osd@0</code>
+   Purpose: try a non-destructive repair before full rebuild.</p>
+</li>
+<li>
+<p>Confirmed the OSD data directory was missing and later noticed the OSD had been recreated on the wrong disk.
+   <code>bash
+   ceph-volume lvm create --bluestore --data /dev/nvme0n1</code>
+   Purpose: this recreated <code>osd.0</code> on the wrong device and had to be undone.</p>
+</li>
+<li>
+<p>Marked the OSD out, stopped it, purged it from Ceph, and removed its CRUSH host entry.
+   <code>bash
+   ceph osd out 0
+   systemctl stop ceph-osd@0
+   ceph crash archive-all
+   ceph osd crush rm mainframe
+   ceph osd purge 0 --yes-i-really-mean-it</code>
+   Purpose: safely remove the broken OSD from cluster maps before reprovisioning.</p>
+</li>
+<li>
+<p>Zapped the mistaken OSD deployment on <code>/dev/nvme0n1</code>.
+   <code>bash
+   ceph-volume lvm zap /dev/nvme0n1 --destroy
+   rm -rf /var/lib/ceph/osd/ceph-0 || true</code>
+   Purpose: erase BlueStore/LVM metadata from the wrong device.</p>
+</li>
+<li>
+<p>Found <code>/dev/sda</code> was already prepared from a previous attempt, then zapped it too.
+   <code>bash
+   ceph-volume lvm list /dev/sda | sed -n '1,200p'
+   ceph-volume lvm zap /dev/sda --destroy</code>
+   Purpose: remove stale OSD metadata so <code>/dev/sda</code> could be used cleanly.</p>
+</li>
+<li>
+<p>Cleared stale mounts and the masked unit that prevented OSD recreation.
+   <code>bash
+   umount -l /var/lib/ceph/osd/ceph-0 2&gt;/dev/null || true
+   rm -rf /var/lib/ceph/osd/ceph-0 2&gt;/dev/null || true
+   systemctl unmask ceph-osd@0
+   systemctl daemon-reload</code>
+   Purpose: remove state left behind by earlier failed attempts.</p>
+</li>
+<li>
+<p>Recreated the OSD correctly on <code>/dev/sda</code>.
+   <code>bash
+   ceph-volume lvm create --bluestore --data /dev/sda</code>
+   Purpose: provision a fresh BlueStore OSD on the intended disk.</p>
+</li>
+<li>
+<p>Recreated the <code>mainframe</code> CRUSH bucket and re-added <code>osd.0</code>.
+    <code>bash
+    ceph osd crush add-bucket mainframe host 2&gt;/dev/null || true
+    ceph osd crush move mainframe root=default
+    ceph osd crush set-device-class ssd osd.0
+    ceph osd crush add osd.0 0.45479 host=mainframe 2&gt;/dev/null || \
+      ceph osd crush reweight osd.0 1.0
+    ceph osd in 0 || true
+    ceph osd reweight 0 1.0
+    ceph osd unset noout</code>
+    Purpose: put the new OSD back into CRUSH and allow recovery/backfill to begin.</p>
+</li>
+</ol>
+<h2 id="key-findings">Key Findings<a class="headerlink" href="#key-findings" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>osd.0</code> had no valid local OSD directory during part of the incident.</li>
+<li>The first recreation landed on <code>/dev/nvme0n1</code>, which was not the intended disk.</li>
+<li><code>/dev/sda</code> also had stale Ceph LVM metadata and had to be zapped.</li>
+<li>A masked <code>ceph-osd@0</code> unit caused a rollback when recreating the OSD.</li>
+<li>After unmasking and cleaning up old state, the OSD successfully came up on <code>/dev/sda</code>.</li>
+</ul>
+<h2 id="resolution">Resolution<a class="headerlink" href="#resolution" title="Permanent link">&para;</a></h2>
+<p><code>osd.0</code> was fully reprovisioned on <code>/dev/sda</code>, re-added to CRUSH under <code>mainframe</code>, marked in, and allowed to backfill.</p>
+<h2 id="validation">Validation<a class="headerlink" href="#validation" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>ceph -s</code> showed:</li>
+<li><code>5 osds: 5 up, 5 in</code></li>
+<li>active recovery/backfill progressing</li>
+<li><code>ceph osd tree</code> showed <code>osd.0</code> back under host <code>mainframe</code></li>
+<li><code>HEALTH_OK</code> was observed after recovery completed</li>
+</ul>
+<h2 id="follow-up-tasks">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Confirm persistent activation of the OSD after reboot</li>
+<li>Review why the wrong device was selected during the first rebuild attempt</li>
+<li>Confirm all OSD systemd activation units are enabled on every OSD node</li>
+<li>Add recovery notes to runbook to avoid reusing stale masked units</li>
+</ul>
+<h2 id="lessons-learned">Lessons Learned<a class="headerlink" href="#lessons-learned" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Always verify the target disk with <code>lsblk</code> and <code>ceph-volume lvm list</code> before recreating an OSD.</li>
+<li>A masked <code>ceph-osd@&lt;id&gt;</code> unit can silently block a correct rebuild.</li>
+<li>Stale Ceph LVM metadata on a reused disk must be removed before reprovisioning.</li>
+<li>Unsetting <code>noout</code> after recovery is important so Ceph can rebalance normally.</li>
+</ul>
+<hr />
+<h1 id="restore-mainframe-monitor-and-rehome-ceph-manager-services">Restore <code>mainframe</code> Monitor and Rehome Ceph Manager Services<a class="headerlink" href="#restore-mainframe-monitor-and-rehome-ceph-manager-services" title="Permanent link">&para;</a></h1>
+<h2 id="summary_1">Summary<a class="headerlink" href="#summary_1" title="Permanent link">&para;</a></h2>
+<p>After OSD recovery, work shifted to restoring <code>mon.mainframe</code>, correcting Ceph monitor configuration issues, and moving the active Ceph manager role to <code>pve1</code> with standby managers on the remaining nodes.</p>
+<h2 id="environment_1">Environment<a class="headerlink" href="#environment_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Same Ceph Reef cluster</li>
+<li>Monitor IPs:</li>
+<li><code>mainframe</code> = <code>192.168.16.11</code></li>
+<li><code>pve1</code> = <code>192.168.16.12</code></li>
+<li><code>pve2</code> = <code>192.168.16.13</code></li>
+<li><code>pve3</code> = <code>192.168.16.14</code></li>
+<li><code>pve4</code> = <code>192.168.16.15</code></li>
+<li>Shared Ceph config file: <code>/etc/pve/ceph.conf</code></li>
+</ul>
+<h2 id="problem_1">Problem<a class="headerlink" href="#problem_1" title="Permanent link">&para;</a></h2>
+<p><code>mon.mainframe</code> was absent from quorum and failed to recreate cleanly. At the same time, Ceph manager placement needed cleanup so <code>pve1</code> would become active and the rest would operate as standbys.</p>
+<h2 id="symptoms_1">Symptoms<a class="headerlink" href="#symptoms_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>pveceph mon create</code> returned:</li>
+<li><code>monitor address '192.168.16.11' already in use</code></li>
+<li><code>ceph-mon@mainframe</code> was failed/inactive</li>
+<li><code>/etc/pve/ceph.conf</code> contained stale monitor-related configuration</li>
+<li><code>public_network</code> and <code>cluster_network</code> were set to host IP form (<code>192.168.16.11/24</code>) rather than subnet form</li>
+<li><code>pveceph mgr create</code> initially created a manager on <code>pve1</code>, but earlier attempts showed missing keyring and no active mgr</li>
+<li>Ceph GUI/manager views later appeared to show duplicated or stale entries</li>
+</ul>
+<h2 id="actions-taken_1">Actions Taken<a class="headerlink" href="#actions-taken_1" title="Permanent link">&para;</a></h2>
+<ol>
+<li>
+<p>Verified monitor failure and cluster monitor state.
+   <code>bash
+   systemctl status ceph-mon@mainframe --no-pager
+   ceph mon dump
+   ceph -s
+   timedatectl
+   getent hosts mainframe</code>
+   Purpose: confirm monitor identity, address resolution, and quorum state.</p>
+</li>
+<li>
+<p>Attempted monitor creation through Proxmox helper.
+   <code>bash
+   pveceph mon create
+   pveceph mon create --mon-address 192.168.16.11</code>
+   Purpose: restore <code>mon.mainframe</code> using the supported Proxmox workflow.</p>
+</li>
+<li>
+<p>Inspected and corrected Ceph config.
+   <code>bash
+   grep -nE 'mon host|mon initial members|192\.168\.16\.11|mainframe' /etc/pve/ceph.conf
+   sed -ri 's#^( *cluster_network *= *).*#\1192.168.16.0/24#' /etc/pve/ceph.conf
+   sed -ri 's#^( *public_network *= *).*#\1192.168.16.0/24#'  /etc/pve/ceph.conf</code>
+   Purpose: fix invalid network definitions and remove conflicting state.</p>
+</li>
+<li>
+<p>Removed stale monitor stanza and stale backup state from shared config.
+   <code>bash
+   awk '
+     BEGIN{skip=0}
+     /^\[mon\.mainframe\]/{skip=1}
+     skip &amp;&amp; NF==0{skip=0; next}
+     !skip
+   ' /etc/pve/ceph.conf &gt; /etc/pve/ceph.conf.new &amp;&amp; mv /etc/pve/ceph.conf.new /etc/pve/ceph.conf</code>
+   Purpose: remove stale monitor configuration that interfered with monitor recreation.</p>
+</li>
+<li>
+<p>Rebuilt monitor membership directly by editing monmap state and starting the service.
+   <code>bash
+   ceph mon getmap -o /tmp/monmap
+   monmaptool --add mainframe 192.168.16.11 /tmp/monmap
+   systemctl enable ceph-mon@mainframe
+   systemctl start ceph-mon@mainframe
+   ceph mon dump
+   ceph -s</code>
+   Purpose: restore <code>mon.mainframe</code> as a valid quorum member.</p>
+</li>
+<li>
+<p>Created and stabilized Ceph manager on <code>pve1</code>.
+   <code>bash
+   pveceph mgr create
+   systemctl enable --now ceph-mgr@pve1
+   systemctl status ceph-mgr@pve1 --no-pager
+   journalctl -u ceph-mgr@pve1 -e --no-pager
+   ceph -s
+   ceph mgr dump -f json-pretty | egrep '"active_name"|"active_addr"'
+   ceph mgr services</code>
+   Purpose: ensure <code>pve1</code> became the active manager.</p>
+</li>
+<li>
+<p>Created standby managers on the remaining nodes.
+   <code>bash
+   pveceph mgr create
+   systemctl status ceph-mgr@pve2 --no-pager
+   ceph mgr dump | egrep 'active_name|standbys'</code>
+   Similar actions were taken on <code>pve3</code>, <code>pve4</code>, and <code>mainframe</code>.
+   Purpose: give the cluster manager failover capacity.</p>
+</li>
+<li>
+<p>Removed stale local monitor backup directory after UI duplication concerns.
+   <code>bash
+   ls -1 /var/lib/ceph/mon/
+   systemctl list-units 'ceph-mon@*'
+   rm -rf /var/lib/ceph/mon/ceph-mainframe.bak.1758198197
+   ceph -s
+   ceph mon dump</code>
+   Purpose: eliminate local stale state that could confuse UI views.</p>
+</li>
+</ol>
+<h2 id="key-findings_1">Key Findings<a class="headerlink" href="#key-findings_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The shared <code>/etc/pve/ceph.conf</code> had invalid network lines using a host address instead of subnet notation.</li>
+<li>A stale <code>mon.mainframe</code> stanza and/or local backup directory contributed to repeated monitor creation problems.</li>
+<li><code>pveceph mon create</code> did not accept <code>--mon-id</code> in this environment.</li>
+<li><code>pve1</code> became active manager successfully after its keyring/service state was corrected.</li>
+<li>Standby managers were eventually visible: <code>pve4</code>, <code>pve2</code>, <code>pve3</code>, and <code>mainframe</code>.</li>
+</ul>
+<h2 id="resolution_1">Resolution<a class="headerlink" href="#resolution_1" title="Permanent link">&para;</a></h2>
+<p><code>mon.mainframe</code> was restored to quorum, <code>pve1</code> became the active Ceph manager, and standby managers were present on the other nodes.</p>
+<h2 id="validation_1">Validation<a class="headerlink" href="#validation_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>ceph -s</code> showed:</li>
+<li><code>mon: 5 daemons, quorum pve1,pve3,pve2,pve4,mainframe</code></li>
+<li><code>mgr: pve1(active, since …), standbys: pve4, pve2, pve3, mainframe</code></li>
+<li><code>ceph mgr services</code> showed Prometheus on <code>pve1</code></li>
+<li><code>ceph mon dump</code> listed all five monitor endpoints</li>
+</ul>
+<h2 id="follow-up-tasks_1">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Periodically review <code>/etc/pve/ceph.conf</code> for stale monitor sections after manual recovery</li>
+<li>Keep <code>pve1</code> as active manager unless there is a reason to rebalance roles</li>
+<li>Avoid mixing Proxmox helper methods and manual monitor surgery unless required</li>
+</ul>
+<h2 id="lessons-learned_1">Lessons Learned<a class="headerlink" href="#lessons-learned_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>On Proxmox, monitor state problems often involve both cluster config and local monitor store state.</li>
+<li><code>public_network</code> and <code>cluster_network</code> must be subnet definitions, not individual host IPs.</li>
+<li>Standby managers are useful even if they appear idle; they reduce failover time.</li>
+<li>A stale <code>.bak</code> monitor directory can be harmless but confusing during troubleshooting.</li>
+</ul>
+<hr />
+<h1 id="recover-monmainframe-from-repeated-crashes-and-repair-an-inconsistent-pg">Recover <code>mon.mainframe</code> From Repeated Crashes and Repair an Inconsistent PG<a class="headerlink" href="#recover-monmainframe-from-repeated-crashes-and-repair-an-inconsistent-pg" title="Permanent link">&para;</a></h1>
+<h2 id="summary_2">Summary<a class="headerlink" href="#summary_2" title="Permanent link">&para;</a></h2>
+<p>After the monitor was restored, <code>mon.mainframe</code> later began crashing repeatedly and fell out of quorum. At the same time, Ceph reported one inconsistent placement group and scrub errors. Work focused on rebuilding the local monitor store from the live monmap/keyring, fixing ownership issues, and repairing the damaged PG.</p>
+<h2 id="environment_2">Environment<a class="headerlink" href="#environment_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Same Proxmox/Ceph Reef cluster</li>
+<li><code>mainframe</code> monitor address: <code>192.168.16.11</code></li>
+<li>Reported damaged PG: <code>2.1a</code></li>
+<li>Acting set observed during inconsistency: <code>[1,2,3]</code></li>
+</ul>
+<h2 id="problem_2">Problem<a class="headerlink" href="#problem_2" title="Permanent link">&para;</a></h2>
+<p><code>mon.mainframe</code> repeatedly crashed and stayed out of quorum. Cluster health also showed scrub errors and an inconsistent PG.</p>
+<h2 id="symptoms_2">Symptoms<a class="headerlink" href="#symptoms_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>HEALTH_WARN: 1/5 mons down, quorum pve1,pve3,pve2,pve4</code></li>
+<li><code>mon.mainframe ... is down (out of quorum)</code></li>
+<li><code>HEALTH_ERR: 2 scrub errors</code></li>
+<li><code>HEALTH_ERR: Possible data damage: 1 pg inconsistent</code></li>
+<li><code>pg 2.1a is active+clean+inconsistent</code></li>
+<li>Journal logs showed Ceph monitor assertion failures:</li>
+<li><code>MonitorDBStore.h: 615: FAILED ceph_assert(r &gt;= 0)</code></li>
+<li>repeated <code>DeleteCF(...)</code> lines</li>
+<li>Later logs also showed:</li>
+<li><code>error opening mon data directory ... Permission denied</code></li>
+</ul>
+<h2 id="actions-taken_2">Actions Taken<a class="headerlink" href="#actions-taken_2" title="Permanent link">&para;</a></h2>
+<ol>
+<li>
+<p>Verified cluster health and monitor crash history.
+   <code>bash
+   ceph -s
+   ceph mon dump | grep mainframe
+   journalctl -u ceph-mon@mainframe -b -e
+   ceph crash ls-new</code>
+   Purpose: confirm that the monitor was out of quorum and gather crash evidence.</p>
+</li>
+<li>
+<p>Exported the live monmap and monitor key from a healthy quorum member, then copied them to <code>mainframe</code>.
+   <code>bash
+   ceph mon getmap -o /tmp/monmap
+   ceph auth get mon. -o /tmp/mon.keyring
+   scp /tmp/monmap /tmp/mon.keyring mainframe:/tmp/</code>
+   Purpose: use current cluster monitor metadata to rebuild the broken local monitor store.</p>
+</li>
+<li>
+<p>Stopped the broken local monitor and parked the old monitor directory.
+   <code>bash
+   systemctl stop ceph-mon@mainframe
+   mv /var/lib/ceph/mon/ceph-mainframe /var/lib/ceph/mon/ceph-mainframe.bad.$(date +%s)</code>
+   Purpose: preserve the broken monitor store while creating a fresh one.</p>
+</li>
+<li>
+<p>Rebuilt the monitor store from the live monmap and keyring.
+   <code>bash
+   ceph-mon -i mainframe --mkfs --monmap /tmp/monmap --keyring /tmp/mon.keyring</code>
+   Purpose: create a new monitor database consistent with the current quorum.</p>
+</li>
+<li>
+<p>Fixed ownership and permissions after <code>Permission denied</code> errors.
+   <code>bash
+   install -d -o ceph -g ceph -m 0750 /var/lib/ceph/mon/ceph-mainframe
+   chown -R ceph:ceph /var/lib/ceph/mon/ceph-mainframe
+   find /var/lib/ceph/mon/ceph-mainframe -type f -name keyring -exec chmod 0600 {} \;
+   find /var/lib/ceph/mon/ceph-mainframe -type d -exec chmod 0750 {} \;
+   chgrp ceph /var/lib/ceph /var/lib/ceph/mon || true
+   chmod 0755 /var/lib/ceph /var/lib/ceph/mon || true
+   lsattr -R /var/lib/ceph/mon/ceph-mainframe</code>
+   Purpose: ensure the service account could open the rebuilt monitor store.</p>
+</li>
+<li>
+<p>Started the monitor again and checked quorum.
+   <code>bash
+   systemctl start ceph-mon@mainframe
+   ps -o user,group,cmd -C ceph-mon
+   ceph mon dump | egrep 'quorum|mainframe'
+   ceph -s</code>
+   Purpose: verify that the rebuilt monitor joined quorum successfully.</p>
+</li>
+<li>
+<p>Archived old crash records once the monitor was healthy.
+   <code>bash
+   ceph crash archive-all
+   ceph crash ls-new</code>
+   Purpose: clear historical crash warnings from cluster health.</p>
+</li>
+<li>
+<p>Investigated and repaired the inconsistent PG.
+   <code>bash
+   ceph health detail
+   ceph pg scrub 2.1a
+   ceph pg deep-scrub 2.1a
+   ceph pg repair 2.1a
+   watch -n5 'ceph health detail'</code>
+   Purpose: rescrub and repair the inconsistent placement group.</p>
+</li>
+</ol>
+<h2 id="key-findings_2">Key Findings<a class="headerlink" href="#key-findings_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>mon.mainframe</code> was failing in monitor DB cleanup during startup, then later also failed because of local file permissions.</li>
+<li>Rebuilding the local monitor store from the live quorum monmap/keyring resolved the corrupt local monitor state.</li>
+<li>The inconsistent PG was repairable through normal Ceph scrub/deep-scrub/repair operations.</li>
+<li><code>ceph crash archive-all</code> cleared health warnings tied only to historical crashes.</li>
+</ul>
+<h2 id="resolution_2">Resolution<a class="headerlink" href="#resolution_2" title="Permanent link">&para;</a></h2>
+<p><code>mon.mainframe</code> was rebuilt from the live monitor map and keyring, proper permissions were restored, the monitor rejoined quorum, and PG <code>2.1a</code> was scrubbed and repaired until cluster health returned to OK.</p>
+<h2 id="validation_2">Validation<a class="headerlink" href="#validation_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>ceph -s</code> returned to:</li>
+<li><code>mon: 5 daemons, quorum pve1,pve3,pve2,pve4,mainframe</code></li>
+<li><code>HEALTH_OK</code></li>
+<li><code>ceph quorum_status</code> showed all five monitor names in quorum</li>
+<li>The damaged PG progressed from <code>active+clean+inconsistent</code> to healthy after repair</li>
+<li><code>ceph crash ls-new</code> no longer showed new crash entries after archiving and successful service restart</li>
+</ul>
+<h2 id="follow-up-tasks_2">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Monitor <code>mon.mainframe</code> for repeated DB corruption after abrupt shutdowns</li>
+<li>Consider checking storage/media health on <code>mainframe</code> if monitor crashes recur</li>
+<li>Keep exported monmap/key recovery steps in the Ceph runbook</li>
+<li>Review UPS/power-loss strategy if abrupt outages are contributing to corruption</li>
+</ul>
+<h2 id="lessons-learned_2">Lessons Learned<a class="headerlink" href="#lessons-learned_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>A monitor can be present in the monmap but still fail locally due to store corruption or permissions.</li>
+<li>Rebuilding a local monitor store from the live quorum monmap is safer than guessing at stale local metadata.</li>
+<li><code>Permission denied</code> after a manual rebuild is often just ownership/mode mismatch.</li>
+<li>Historical crash warnings can hide the fact that the cluster is currently healthy; archive them after validating recovery.</li>
+</ul>
+<hr />
+<h1 id="recover-osd0-reactivate-osd4-and-return-cluster-to-health_ok">Recover <code>osd.0</code>, Reactivate <code>osd.4</code>, and Return Cluster to <code>HEALTH_OK</code><a class="headerlink" href="#recover-osd0-reactivate-osd4-and-return-cluster-to-health_ok" title="Permanent link">&para;</a></h1>
+<h2 id="summary_3">Summary<a class="headerlink" href="#summary_3" title="Permanent link">&para;</a></h2>
+<p>Following the monitor and PG repair work, two OSD issues remained: <code>osd.0</code> on <code>mainframe</code> suffered BlueStore/RocksDB corruption after a disruptive event, and <code>osd.4</code> on <code>pve4</code> was down and weighted out. Work focused on recovering <code>osd.0</code>, reactivating <code>osd.4</code>, re-enabling all OSD daemons, and clearing the final <code>noout</code> flag.</p>
+<h2 id="environment_3">Environment<a class="headerlink" href="#environment_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>osd.0</code> on <code>mainframe</code>, backed by <code>/dev/sda</code></li>
+<li><code>osd.4</code> on <code>pve4</code>, backed by <code>/dev/nvme0n1</code></li>
+<li>BlueStore block device examples:</li>
+<li><code>osd.0</code> LV under <code>ceph-569333fc-...</code></li>
+<li><code>osd.4</code> LV under <code>ceph-784f4bee-...</code></li>
+</ul>
+<h2 id="problem_3">Problem<a class="headerlink" href="#problem_3" title="Permanent link">&para;</a></h2>
+<p>After power-related or abrupt recovery events, <code>osd.0</code> stayed down with BlueStore database corruption. <code>osd.4</code> was also down and reweight <code>0</code>.</p>
+<h2 id="symptoms_3">Symptoms<a class="headerlink" href="#symptoms_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>ceph osd tree</code> showed only 3 or 4 OSDs up depending on stage</li>
+<li><code>systemctl status ceph-osd@0</code> repeatedly failed</li>
+<li>Logs for <code>osd.0</code> showed:</li>
+<li><code>rocksdb: Corruption: SST file is ahead of WALs in CF O-0</code></li>
+<li><code>OSD:init: unable to mount object store</code></li>
+<li><code>ERROR: osd init failed: (5) Input/output error</code></li>
+<li><code>ceph-bluestore-tool fsck</code> and <code>repair</code> both failed on <code>osd.0</code></li>
+<li><code>osd.4</code> on <code>pve4</code> existed in Ceph volume metadata but was not active</li>
+</ul>
+<h2 id="actions-taken_3">Actions Taken<a class="headerlink" href="#actions-taken_3" title="Permanent link">&para;</a></h2>
+<ol>
+<li>
+<p>Checked which OSDs were up and inspected the damaged PG after repair work.
+   <code>bash
+   ceph osd tree
+   ceph osd stat
+   ceph osd df
+   ceph pg 2.1a query | jq '.state, .stat_sum'</code>
+   Purpose: determine remaining storage degradation.</p>
+</li>
+<li>
+<p>Ensured OSD systemd targets and ceph-volume activators were enabled on each node.
+   <code>bash
+   systemctl enable ceph-osd.target
+   systemctl list-unit-files 'ceph-volume@lvm*' --no-legend | awk '{print $1}' | xargs -r -n1 systemctl enable
+   systemctl list-units 'ceph-volume@lvm*' --no-legend | awk '{print $1}' | xargs -r -n1 systemctl start
+   ceph-volume lvm activate --all</code>
+   Purpose: restore automatic OSD activation after reboot/failure.</p>
+</li>
+<li>
+<p>Investigated and attempted to repair <code>osd.0</code>.
+   <code>bash
+   systemctl stop ceph-osd@0
+   ceph osd out 0
+   ls -l /var/lib/ceph/osd/ceph-0/block
+   lsblk -o NAME,SIZE,TYPE,MOUNTPOINT
+   ceph-bluestore-tool fsck --path /var/lib/ceph/osd/ceph-0 --log-level 20
+   ceph-bluestore-tool repair --path /var/lib/ceph/osd/ceph-0 --log-level 20</code>
+   Purpose: confirm BlueStore block path and test whether the DB could be recovered in place.</p>
+</li>
+<li>
+<p>Verified service state and log output for <code>osd.0</code>.
+   <code>bash
+   systemctl status ceph-osd@0 -n50 --no-pager
+   journalctl -u ceph-osd@0 -b --no-pager | tail -200</code>
+   Purpose: identify exact startup failure mode.</p>
+</li>
+<li>
+<p>Later restarted <code>osd.0</code> successfully and confirmed it rejoined the cluster.
+   <code>bash
+   systemctl status 'ceph-osd@*' --no-pager
+   ceph osd tree
+   ceph osd stat
+   ceph -s</code>
+   Purpose: validate that <code>osd.0</code> returned to <code>up</code> and recovery began.</p>
+</li>
+</ol>
+<p><strong>Important note:</strong> the chat log shows the failed diagnostics and then later a successful <code>osd.0</code> startup, but it does not include a single explicit final corrective command between those states. The successful recovery is a fact; the exact final repair/rebuild step is not fully captured in the transcript.</p>
+<ol>
+<li>
+<p>Reactivated <code>osd.4</code> on <code>pve4</code>.
+   <code>bash
+   systemctl enable ceph-osd.target
+   ceph-volume lvm list
+   ceph-volume lvm activate 4 || ceph-volume lvm activate --all
+   systemctl status ceph-osd@4 -n50 --no-pager
+   ceph osd in 4
+   ceph osd reweight 4 1.0</code>
+   Purpose: re-enable the existing OSD and restore it to service.</p>
+</li>
+<li>
+<p>Verified full-cluster storage recovery and unset <code>noout</code>.
+   <code>bash
+   ceph -s
+   ceph pg stat
+   ceph osd unset noout
+   ceph osd tree
+   ceph osd df</code>
+   Purpose: confirm all OSDs were up/in and that placement groups returned to <code>active+clean</code>.</p>
+</li>
+</ol>
+<h2 id="key-findings_3">Key Findings<a class="headerlink" href="#key-findings_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>osd.0</code> failure was BlueStore DB corruption, not simple service-state drift.</li>
+<li><code>ceph-bluestore-tool fsck</code> and <code>repair</code> were not sufficient during the failed state that was captured.</li>
+<li><code>osd.4</code> was recoverable by activating the existing ceph-volume metadata and reweighting it.</li>
+<li>Once both OSDs were restored and <code>noout</code> was cleared, the cluster returned to normal placement.</li>
+</ul>
+<h2 id="resolution_3">Resolution<a class="headerlink" href="#resolution_3" title="Permanent link">&para;</a></h2>
+<p><code>osd.0</code> was ultimately brought back online on <code>mainframe</code>, <code>osd.4</code> was reactivated on <code>pve4</code>, both OSDs were marked in and weighted correctly, and the cluster returned to <code>5 osds: 5 up, 5 in</code>.</p>
+<h2 id="validation_3">Validation<a class="headerlink" href="#validation_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>ceph -s</code> showed:</li>
+<li><code>health: HEALTH_OK</code></li>
+<li><code>osd: 5 osds: 5 up, 5 in</code></li>
+<li><code>pgs: 33 active+clean</code></li>
+<li><code>ceph osd tree</code> showed all five OSDs up under the expected hosts</li>
+<li><code>ceph osd df</code> showed data redistributed across all OSDs</li>
+<li><code>ceph osd unset noout</code> succeeded</li>
+</ul>
+<h2 id="follow-up-tasks_3">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Capture a cleaner future procedure for BlueStore corruption triage vs. rebuild</li>
+<li>Confirm OSD auto-activation persists after reboots on all five nodes</li>
+<li>Review why <code>osd.0</code> experienced RocksDB corruption</li>
+<li>Consider using UPS protection or shutdown sequencing improvements if abrupt outage risk remains</li>
+</ul>
+<h2 id="lessons-learned_3">Lessons Learned<a class="headerlink" href="#lessons-learned_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>BlueStore/RocksDB corruption can persist even when volume metadata and block symlinks look normal.</li>
+<li><code>ceph-volume lvm activate --all</code> is useful for restoring OSD runtime state after cluster disruption.</li>
+<li><code>noout</code> is helpful during recovery but should be removed once the cluster is stable.</li>
+<li>A healthy monitor quorum and active manager do not guarantee all OSDs are actually serving data.</li>
+</ul>
+<hr />
+<h1 id="post-recovery-hardening-for-mainframe-osd-and-general-ceph-stability">Post-Recovery Hardening for <code>mainframe</code> OSD and General Ceph Stability<a class="headerlink" href="#post-recovery-hardening-for-mainframe-osd-and-general-ceph-stability" title="Permanent link">&para;</a></h1>
+<h2 id="summary_4">Summary<a class="headerlink" href="#summary_4" title="Permanent link">&para;</a></h2>
+<p>After the cluster returned to <code>HEALTH_OK</code>, work focused on low-risk Ceph hardening for <code>mainframe</code> and cluster-wide OSD behavior, including scrub scheduling, memory limits, recovery pacing, monitor compaction, SMART review, and queue/scheduler tuning.</p>
+<h2 id="environment_4">Environment<a class="headerlink" href="#environment_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>mainframe</code> OSD disk identified as Samsung SSD 870 EVO 500GB</li>
+<li>SMART tools already installed: <code>smartmontools 7.3-pve1</code></li>
+<li>OSD scheduler tuning targeted the real block disk behind <code>/dev/dm-0</code>, which mapped to <code>/dev/sda</code></li>
+<li>Ceph manager active on <code>pve1</code></li>
+<li>mClock scheduler behavior implicitly present on Reef</li>
+</ul>
+<h2 id="problem_4">Problem<a class="headerlink" href="#problem_4" title="Permanent link">&para;</a></h2>
+<p>The goal was to reduce the chance of repeat instability on <code>mainframe</code>, keep recovery less disruptive, and document what hardening was useful versus what Ceph Reef/mClock would ignore.</p>
+<h2 id="symptoms_4">Symptoms<a class="headerlink" href="#symptoms_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Need for gentler backfill/recovery settings after recent failures</li>
+<li>Need to verify SSD health on the <code>mainframe</code> OSD disk</li>
+<li><code>ceph config get osd osd_recovery_max_active</code> kept returning <code>0</code> even after setting it to <code>1</code></li>
+<li>Attempting <code>ceph mon compact</code> directly failed due to incorrect command form</li>
+<li>A udev rule line was mistakenly pasted directly into the shell and failed as a command</li>
+</ul>
+<h2 id="actions-taken_4">Actions Taken<a class="headerlink" href="#actions-taken_4" title="Permanent link">&para;</a></h2>
+<ol>
+<li>
+<p>Checked the OSD block path and the backing disk.
+   <code>bash
+   readlink -f /var/lib/ceph/osd/ceph-0/block
+   lsblk -no pkname /dev/dm-0</code>
+   Purpose: find the real disk behind the BlueStore LV.</p>
+</li>
+<li>
+<p>Applied temporary I/O queue tuning for the SSD.
+   <code>bash
+   echo none | tee /sys/block/sda/queue/scheduler
+   echo 0    | tee /sys/block/sda/queue/add_random</code>
+   Purpose: use SSD-appropriate queue settings and reduce unnecessary entropy accounting.</p>
+</li>
+<li>
+<p>Ran SMART baseline checks on <code>/dev/sda</code>.
+   <code>bash
+   apt-get install -y smartmontools
+   smartctl -x /dev/sda</code>
+   Purpose: verify that the Samsung SSD backing <code>osd.0</code> did not show obvious media failure.</p>
+</li>
+<li>
+<p>Set cluster-wide OSD pacing and memory knobs.
+   <code>bash
+   ceph config set osd osd_max_backfills 1
+   ceph config set osd osd_recovery_max_active 1
+   ceph config set osd osd_recovery_max_single_start 1
+   ceph config set osd osd_memory_target 1073741824
+   ceph config set osd bluestore_cache_autotune true
+   ceph config set osd bluestore_throttle_bytes 268435456
+   ceph config set osd osd_scrub_begin_hour 1
+   ceph config set osd osd_scrub_end_hour 7
+   ceph config set osd osd_scrub_auto_repair true</code>
+   Purpose: reduce recovery pressure and define an off-hours scrub window.</p>
+</li>
+<li>
+<p>Compacted all monitors correctly.
+   <code>bash
+   ceph quorum_status -f json-pretty | jq -r '.quorum_names[]'
+   ceph tell mon.* compact</code>
+   Purpose: compact monitor RocksDB stores using the correct Reef-compatible syntax.</p>
+</li>
+<li>
+<p>Queried config values and discovered <code>osd_recovery_max_active</code> remained <code>0</code> at runtime.
+   <code>bash
+   ceph config get osd osd_max_backfills
+   ceph config get osd osd_recovery_max_active
+   ceph tell osd.* config get osd_recovery_max_active
+   ceph tell osd.* config get osd_max_backfills</code>
+   Purpose: determine whether the config database value matched effective daemon behavior.</p>
+</li>
+</ol>
+<h2 id="key-findings_4">Key Findings<a class="headerlink" href="#key-findings_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li>SMART data for the Samsung 870 EVO looked healthy:</li>
+<li>SMART overall self-assessment passed</li>
+<li>no reallocated sectors</li>
+<li>no uncorrectable errors</li>
+<li>no CRC errors</li>
+<li><code>ceph tell mon.* compact</code> was the correct monitor compaction syntax in this environment.</li>
+<li><code>osd_max_backfills=1</code> applied successfully to all OSDs.</li>
+<li><code>osd_recovery_max_active</code> still showed <code>0</code> at runtime on all OSDs, which was later interpreted as normal mClock behavior on Reef rather than a failed configuration push.</li>
+<li>The attempted raw udev rule paste failed because it was shell syntax, not a shell command.</li>
+</ul>
+<h2 id="resolution_4">Resolution<a class="headerlink" href="#resolution_4" title="Permanent link">&para;</a></h2>
+<p>Main hardening changes were applied successfully:
+- <code>osd_max_backfills=1</code>
+- <code>osd_memory_target=1GiB</code>
+- <code>bluestore_cache_autotune=true</code>
+- scrub window and auto-repair settings
+- monitor compaction completed
+- SMART baseline confirmed the <code>mainframe</code> OSD SSD did not show obvious failure indicators</p>
+<p><code>osd_recovery_max_active</code> was left under the default mClock model rather than forcing legacy behavior.</p>
+<h2 id="validation_4">Validation<a class="headerlink" href="#validation_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>ceph tell osd.* config get osd_max_backfills</code> returned <code>1</code> across the cluster</li>
+<li>Monitor compaction completed successfully on all monitors</li>
+<li>SMART output on <code>/dev/sda</code> showed no critical failure counters</li>
+<li>Cluster remained healthy after the changes</li>
+</ul>
+<h2 id="follow-up-tasks_4">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Create a persistent udev rule for SSD queue tuning rather than relying only on <code>/sys</code> writes</li>
+<li>Decide whether to stay with Reef/mClock defaults or explicitly override them cluster-wide</li>
+<li>Consider running an extended SMART self-test on <code>/dev/sda</code></li>
+<li>Revisit recovery tuning once the cluster has been stable for a longer period</li>
+</ul>
+<h2 id="lessons-learned_4">Lessons Learned<a class="headerlink" href="#lessons-learned_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Not every Ceph config key that can be set will necessarily be honored the way older runbooks expect on newer releases.</li>
+<li>Reef/mClock can make legacy recovery knobs appear unset or ineffective even when recovery pacing is still controlled.</li>
+<li>SSD queue tuning should be made persistent with a udev rule, not by pasting udev syntax into the shell.</li>
+<li>SMART review is useful for ruling out obvious hardware failure before assuming all corruption is software-side.</li>
+</ul>
+<hr />
+<h1 id="command-reference">Command Reference<a class="headerlink" href="#command-reference" title="Permanent link">&para;</a></h1>
+<h2 id="command">Command<a class="headerlink" href="#command" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph osd stat
+</code></pre>
+<h3 id="what-it-does">What it does<a class="headerlink" href="#what-it-does" title="Permanent link">&para;</a></h3>
+<p>Shows how many OSDs exist and how many are up/in.</p>
+<h3 id="why-it-was-used">Why it was used<a class="headerlink" href="#why-it-was-used" title="Permanent link">&para;</a></h3>
+<p>To confirm cluster storage availability during OSD failure and recovery.</p>
+<h3 id="expected-result">Expected result<a class="headerlink" href="#expected-result" title="Permanent link">&para;</a></h3>
+<p>A healthy cluster would show all OSDs up and in.</p>
+<h3 id="what-success-or-failure-indicates">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: expected OSD counts and status</li>
+<li>Failure/degradation: missing or down OSDs, often requiring service or disk investigation</li>
+</ul>
+<hr />
+<h2 id="command_1">Command<a class="headerlink" href="#command_1" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph osd tree
+</code></pre>
+<h3 id="what-it-does_1">What it does<a class="headerlink" href="#what-it-does_1" title="Permanent link">&para;</a></h3>
+<p>Displays the CRUSH hierarchy of OSDs by host and root.</p>
+<h3 id="why-it-was-used_1">Why it was used<a class="headerlink" href="#why-it-was-used_1" title="Permanent link">&para;</a></h3>
+<p>To confirm <code>osd.0</code> and later <code>osd.4</code> were attached to the correct hosts and were up/down/in/out as expected.</p>
+<h3 id="expected-result_1">Expected result<a class="headerlink" href="#expected-result_1" title="Permanent link">&para;</a></h3>
+<p>Each OSD should appear under the proper host bucket with expected status.</p>
+<h3 id="what-success-or-failure-indicates_1">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: correct OSD placement and CRUSH structure</li>
+<li>Failure: missing host bucket, down OSD, or bad weight/reweight state</li>
+</ul>
+<hr />
+<h2 id="command_2">Command<a class="headerlink" href="#command_2" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph health detail
+</code></pre>
+<h3 id="what-it-does_2">What it does<a class="headerlink" href="#what-it-does_2" title="Permanent link">&para;</a></h3>
+<p>Prints detailed health checks and affected objects/PGs.</p>
+<h3 id="why-it-was-used_2">Why it was used<a class="headerlink" href="#why-it-was-used_2" title="Permanent link">&para;</a></h3>
+<p>To identify monitor crashes, scrub errors, inconsistent PGs, and crash warnings.</p>
+<h3 id="expected-result_2">Expected result<a class="headerlink" href="#expected-result_2" title="Permanent link">&para;</a></h3>
+<p><code>HEALTH_OK</code> or detailed reasons for non-OK health.</p>
+<h3 id="what-success-or-failure-indicates_2">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: cluster is healthy</li>
+<li>Failure: follow the named health checks to the affected service or PG</li>
+</ul>
+<hr />
+<h2 id="command_3">Command<a class="headerlink" href="#command_3" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">systemctl status ceph-osd@0 --no-pager
+journalctl -u ceph-osd@0 -n 300 --no-pager
+</code></pre>
+<h3 id="what-it-does_3">What it does<a class="headerlink" href="#what-it-does_3" title="Permanent link">&para;</a></h3>
+<p>Checks service state and recent logs for <code>osd.0</code>.</p>
+<h3 id="why-it-was-used_3">Why it was used<a class="headerlink" href="#why-it-was-used_3" title="Permanent link">&para;</a></h3>
+<p>To diagnose why <code>osd.0</code> would not start.</p>
+<h3 id="expected-result_3">Expected result<a class="headerlink" href="#expected-result_3" title="Permanent link">&para;</a></h3>
+<p>Active service and clean startup logs.</p>
+<h3 id="what-success-or-failure-indicates_3">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: service is running</li>
+<li>Failure: logs reveal missing directories, BlueStore errors, permission issues, or DB corruption</li>
+</ul>
+<hr />
+<h2 id="command_4">Command<a class="headerlink" href="#command_4" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph-volume lvm list
+ceph-volume lvm list /dev/sda
+</code></pre>
+<h3 id="what-it-does_4">What it does<a class="headerlink" href="#what-it-does_4" title="Permanent link">&para;</a></h3>
+<p>Shows Ceph OSD metadata stored in LVM on local disks.</p>
+<h3 id="why-it-was-used_4">Why it was used<a class="headerlink" href="#why-it-was-used_4" title="Permanent link">&para;</a></h3>
+<p>To identify where OSD metadata existed and whether disks were already “prepared.”</p>
+<h3 id="expected-result_4">Expected result<a class="headerlink" href="#expected-result_4" title="Permanent link">&para;</a></h3>
+<p>OSD IDs, FSIDs, block LVs, and backing devices.</p>
+<h3 id="what-success-or-failure-indicates_4">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: confirms existing Ceph volume layout</li>
+<li>Failure or unexpected output: indicates stale metadata or wrong device selection</li>
+</ul>
+<hr />
+<h2 id="command_5">Command<a class="headerlink" href="#command_5" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph-bluestore-tool quick-fix --path /var/lib/ceph/osd/ceph-0
+</code></pre>
+<h3 id="what-it-does_5">What it does<a class="headerlink" href="#what-it-does_5" title="Permanent link">&para;</a></h3>
+<p>Attempts a lightweight BlueStore metadata repair.</p>
+<h3 id="why-it-was-used_5">Why it was used<a class="headerlink" href="#why-it-was-used_5" title="Permanent link">&para;</a></h3>
+<p>As a non-destructive first repair step before full rebuild.</p>
+<h3 id="expected-result_5">Expected result<a class="headerlink" href="#expected-result_5" title="Permanent link">&para;</a></h3>
+<p>Minor BlueStore issues corrected.</p>
+<h3 id="what-success-or-failure-indicates_5">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: OSD may start without rebuild</li>
+<li>Failure: likely needs deeper repair or reprovisioning</li>
+</ul>
+<h3 id="risk">Risk<a class="headerlink" href="#risk" title="Permanent link">&para;</a></h3>
+<p>Moderate. Safer than full rebuild, but still a repair operation on object store metadata.</p>
+<hr />
+<h2 id="command_6">Command<a class="headerlink" href="#command_6" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph-volume lvm create --bluestore --data /dev/sda
+</code></pre>
+<h3 id="what-it-does_6">What it does<a class="headerlink" href="#what-it-does_6" title="Permanent link">&para;</a></h3>
+<p>Creates a new BlueStore OSD on the specified device.</p>
+<h3 id="why-it-was-used_6">Why it was used<a class="headerlink" href="#why-it-was-used_6" title="Permanent link">&para;</a></h3>
+<p>To reprovision <code>osd.0</code> on the intended disk.</p>
+<h3 id="expected-result_6">Expected result<a class="headerlink" href="#expected-result_6" title="Permanent link">&para;</a></h3>
+<p>A new OSD directory, block LV, and activated OSD service.</p>
+<h3 id="what-success-or-failure-indicates_6">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_6" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: OSD can be brought into cluster</li>
+<li>Failure: stale metadata, masked service, or wrong disk state may block creation</li>
+</ul>
+<h3 id="risk_1">Risk<a class="headerlink" href="#risk_1" title="Permanent link">&para;</a></h3>
+<p>High. This destroys prior data on the target device.</p>
+<hr />
+<h2 id="command_7">Command<a class="headerlink" href="#command_7" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph osd purge 0 --yes-i-really-mean-it
+</code></pre>
+<h3 id="what-it-does_7">What it does<a class="headerlink" href="#what-it-does_7" title="Permanent link">&para;</a></h3>
+<p>Removes the OSD from cluster maps and deletes related auth entries.</p>
+<h3 id="why-it-was-used_7">Why it was used<a class="headerlink" href="#why-it-was-used_7" title="Permanent link">&para;</a></h3>
+<p>To cleanly remove broken <code>osd.0</code> before reprovisioning.</p>
+<h3 id="expected-result_7">Expected result<a class="headerlink" href="#expected-result_7" title="Permanent link">&para;</a></h3>
+<p>OSD is gone from cluster metadata.</p>
+<h3 id="what-success-or-failure-indicates_7">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_7" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: safe to rebuild/readd</li>
+<li>Failure: stale CRUSH/auth references may remain</li>
+</ul>
+<h3 id="risk_2">Risk<a class="headerlink" href="#risk_2" title="Permanent link">&para;</a></h3>
+<p>High. This is destructive cluster metadata removal.</p>
+<hr />
+<h2 id="command_8">Command<a class="headerlink" href="#command_8" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph-volume lvm zap /dev/nvme0n1 --destroy
+ceph-volume lvm zap /dev/sda --destroy
+</code></pre>
+<h3 id="what-it-does_8">What it does<a class="headerlink" href="#what-it-does_8" title="Permanent link">&para;</a></h3>
+<p>Erases Ceph/LVM metadata from the target device.</p>
+<h3 id="why-it-was-used_8">Why it was used<a class="headerlink" href="#why-it-was-used_8" title="Permanent link">&para;</a></h3>
+<p>To remove mistaken or stale OSD state before rebuilding.</p>
+<h3 id="expected-result_8">Expected result<a class="headerlink" href="#expected-result_8" title="Permanent link">&para;</a></h3>
+<p>Disk no longer appears as a prepared Ceph OSD device.</p>
+<h3 id="what-success-or-failure-indicates_8">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_8" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: device is reusable</li>
+<li>Failure: active mounts/LVs may still exist</li>
+</ul>
+<h3 id="risk_3">Risk<a class="headerlink" href="#risk_3" title="Permanent link">&para;</a></h3>
+<p>High. This destroys Ceph metadata and LVM structures on the target disk.</p>
+<hr />
+<h2 id="command_9">Command<a class="headerlink" href="#command_9" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">systemctl unmask ceph-osd@0
+systemctl daemon-reload
+</code></pre>
+<h3 id="what-it-does_9">What it does<a class="headerlink" href="#what-it-does_9" title="Permanent link">&para;</a></h3>
+<p>Removes a systemd mask and reloads unit definitions.</p>
+<h3 id="why-it-was-used_9">Why it was used<a class="headerlink" href="#why-it-was-used_9" title="Permanent link">&para;</a></h3>
+<p>A masked <code>ceph-osd@0</code> prevented successful OSD recreation.</p>
+<h3 id="expected-result_9">Expected result<a class="headerlink" href="#expected-result_9" title="Permanent link">&para;</a></h3>
+<p>The service can be enabled/started again.</p>
+<h3 id="what-success-or-failure-indicates_9">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_9" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: later creation/activation can proceed</li>
+<li>Failure: stale systemd state remains</li>
+</ul>
+<hr />
+<h2 id="command_10">Command<a class="headerlink" href="#command_10" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph osd crush add-bucket mainframe host
+ceph osd crush move mainframe root=default
+ceph osd crush add osd.0 0.45479 host=mainframe
+ceph osd crush set-device-class ssd osd.0
+</code></pre>
+<h3 id="what-it-does_10">What it does<a class="headerlink" href="#what-it-does_10" title="Permanent link">&para;</a></h3>
+<p>Creates/positions a host bucket in CRUSH, adds the OSD, and assigns device class.</p>
+<h3 id="why-it-was-used_10">Why it was used<a class="headerlink" href="#why-it-was-used_10" title="Permanent link">&para;</a></h3>
+<p>To restore <code>mainframe</code> and <code>osd.0</code> to the CRUSH hierarchy after rebuild.</p>
+<h3 id="expected-result_10">Expected result<a class="headerlink" href="#expected-result_10" title="Permanent link">&para;</a></h3>
+<p>OSD appears under the correct host and root.</p>
+<h3 id="what-success-or-failure-indicates_10">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_10" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: OSD participates in placement correctly</li>
+<li>Failure: data placement and balancing may be wrong</li>
+</ul>
+<h3 id="risk_4">Risk<a class="headerlink" href="#risk_4" title="Permanent link">&para;</a></h3>
+<p>Moderate. Incorrect CRUSH edits can misplace data.</p>
+<hr />
+<h2 id="command_11">Command<a class="headerlink" href="#command_11" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph osd in 0
+ceph osd reweight 0 1.0
+ceph osd unset noout
+</code></pre>
+<h3 id="what-it-does_11">What it does<a class="headerlink" href="#what-it-does_11" title="Permanent link">&para;</a></h3>
+<p>Marks the OSD back in, restores full reweight, and clears the noout flag.</p>
+<h3 id="why-it-was-used_11">Why it was used<a class="headerlink" href="#why-it-was-used_11" title="Permanent link">&para;</a></h3>
+<p>To let the cluster rebalance onto the restored OSD.</p>
+<h3 id="expected-result_11">Expected result<a class="headerlink" href="#expected-result_11" title="Permanent link">&para;</a></h3>
+<p>Backfill/remap starts and then clears.</p>
+<h3 id="what-success-or-failure-indicates_11">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_11" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: OSD resumes normal cluster duty</li>
+<li>Failure: OSD may still be down or blocked</li>
+</ul>
+<hr />
+<h2 id="command_12">Command<a class="headerlink" href="#command_12" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">pveceph mon create
+pveceph mon destroy mainframe
+</code></pre>
+<h3 id="what-it-does_12">What it does<a class="headerlink" href="#what-it-does_12" title="Permanent link">&para;</a></h3>
+<p>Proxmox helper commands to create or remove Ceph monitor services on a node.</p>
+<h3 id="why-it-was-used_12">Why it was used<a class="headerlink" href="#why-it-was-used_12" title="Permanent link">&para;</a></h3>
+<p>To restore <code>mon.mainframe</code> using the Proxmox-supported workflow.</p>
+<h3 id="expected-result_12">Expected result<a class="headerlink" href="#expected-result_12" title="Permanent link">&para;</a></h3>
+<p>A local monitor directory and active monitor service.</p>
+<h3 id="what-success-or-failure-indicates_12">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_12" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: monitor joins monmap/quorum</li>
+<li>Failure: stale config, conflicting IP, or local store problems remain</li>
+</ul>
+<hr />
+<h2 id="command_13">Command<a class="headerlink" href="#command_13" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph mon dump
+ceph mon getmap -o /tmp/monmap
+ceph auth get mon. -o /tmp/mon.keyring
+</code></pre>
+<h3 id="what-it-does_13">What it does<a class="headerlink" href="#what-it-does_13" title="Permanent link">&para;</a></h3>
+<p>Inspects monitor membership, exports the monitor map, and exports monitor auth material.</p>
+<h3 id="why-it-was-used_13">Why it was used<a class="headerlink" href="#why-it-was-used_13" title="Permanent link">&para;</a></h3>
+<p>To rebuild a broken local monitor store from healthy cluster state.</p>
+<h3 id="expected-result_13">Expected result<a class="headerlink" href="#expected-result_13" title="Permanent link">&para;</a></h3>
+<p>A current monmap and valid monitor keyring.</p>
+<h3 id="what-success-or-failure-indicates_13">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_13" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: suitable inputs for monitor rebuild</li>
+<li>Failure: quorum or auth access problems</li>
+</ul>
+<hr />
+<h2 id="command_14">Command<a class="headerlink" href="#command_14" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph-mon -i mainframe --mkfs --monmap /tmp/monmap --keyring /tmp/mon.keyring
+</code></pre>
+<h3 id="what-it-does_14">What it does<a class="headerlink" href="#what-it-does_14" title="Permanent link">&para;</a></h3>
+<p>Initializes a local monitor store from a supplied monmap and keyring.</p>
+<h3 id="why-it-was-used_14">Why it was used<a class="headerlink" href="#why-it-was-used_14" title="Permanent link">&para;</a></h3>
+<p>To replace the broken <code>mainframe</code> monitor database with a clean one.</p>
+<h3 id="expected-result_14">Expected result<a class="headerlink" href="#expected-result_14" title="Permanent link">&para;</a></h3>
+<p>A valid local monitor store under <code>/var/lib/ceph/mon/ceph-mainframe</code>.</p>
+<h3 id="what-success-or-failure-indicates_14">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_14" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: monitor can start and join quorum</li>
+<li>Failure: permissions, bad monmap, or stale local state remain</li>
+</ul>
+<h3 id="risk_5">Risk<a class="headerlink" href="#risk_5" title="Permanent link">&para;</a></h3>
+<p>High. This replaces the local monitor store.</p>
+<hr />
+<h2 id="command_15">Command<a class="headerlink" href="#command_15" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">systemctl enable --now ceph-mgr@pve1
+ceph mgr dump
+ceph mgr services
+</code></pre>
+<h3 id="what-it-does_15">What it does<a class="headerlink" href="#what-it-does_15" title="Permanent link">&para;</a></h3>
+<p>Starts a Ceph manager and shows active/standby manager details and exported services.</p>
+<h3 id="why-it-was-used_15">Why it was used<a class="headerlink" href="#why-it-was-used_15" title="Permanent link">&para;</a></h3>
+<p>To move active manager duties to <code>pve1</code> and validate standby managers.</p>
+<h3 id="expected-result_15">Expected result<a class="headerlink" href="#expected-result_15" title="Permanent link">&para;</a></h3>
+<p><code>pve1</code> becomes active, others become standbys, and services like Prometheus appear.</p>
+<h3 id="what-success-or-failure-indicates_15">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_15" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: healthy manager control plane</li>
+<li>Failure: missing keyrings, service startup failure, or no active mgr</li>
+</ul>
+<hr />
+<h2 id="command_16">Command<a class="headerlink" href="#command_16" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph crash ls-new
+ceph crash archive-all
+</code></pre>
+<h3 id="what-it-does_16">What it does<a class="headerlink" href="#what-it-does_16" title="Permanent link">&para;</a></h3>
+<p>Lists new crash records and archives them.</p>
+<h3 id="why-it-was-used_16">Why it was used<a class="headerlink" href="#why-it-was-used_16" title="Permanent link">&para;</a></h3>
+<p>To review repeated monitor/OSD crashes and clear historical crash warnings after recovery.</p>
+<h3 id="expected-result_16">Expected result<a class="headerlink" href="#expected-result_16" title="Permanent link">&para;</a></h3>
+<p><code>ls-new</code> shows only unarchived crashes; after archiving it should be empty or reduced.</p>
+<h3 id="what-success-or-failure-indicates_16">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_16" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: warnings can be reduced after actual repair</li>
+<li>Failure: continuing crashes will recreate entries</li>
+</ul>
+<hr />
+<h2 id="command_17">Command<a class="headerlink" href="#command_17" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph pg scrub 2.1a
+ceph pg deep-scrub 2.1a
+ceph pg repair 2.1a
+</code></pre>
+<h3 id="what-it-does_17">What it does<a class="headerlink" href="#what-it-does_17" title="Permanent link">&para;</a></h3>
+<p>Forces a scrub, deep scrub, and repair of the named placement group.</p>
+<h3 id="why-it-was-used_17">Why it was used<a class="headerlink" href="#why-it-was-used_17" title="Permanent link">&para;</a></h3>
+<p>To fix <code>pg 2.1a</code> after Ceph reported it as inconsistent.</p>
+<h3 id="expected-result_17">Expected result<a class="headerlink" href="#expected-result_17" title="Permanent link">&para;</a></h3>
+<p>PG transitions through scrub/repair and returns to clean.</p>
+<h3 id="what-success-or-failure-indicates_17">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_17" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: inconsistency resolved</li>
+<li>Failure: deeper data corruption may remain</li>
+</ul>
+<h3 id="risk_6">Risk<a class="headerlink" href="#risk_6" title="Permanent link">&para;</a></h3>
+<p>Moderate. Repair changes cluster metadata/object state and should be used when inconsistency is confirmed.</p>
+<hr />
+<h2 id="command_18">Command<a class="headerlink" href="#command_18" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph-volume lvm activate --all
+</code></pre>
+<h3 id="what-it-does_18">What it does<a class="headerlink" href="#what-it-does_18" title="Permanent link">&para;</a></h3>
+<p>Activates all locally known Ceph OSDs from ceph-volume metadata.</p>
+<h3 id="why-it-was-used_18">Why it was used<a class="headerlink" href="#why-it-was-used_18" title="Permanent link">&para;</a></h3>
+<p>To restore OSD runtime activation after failures or reboot-like conditions.</p>
+<h3 id="expected-result_18">Expected result<a class="headerlink" href="#expected-result_18" title="Permanent link">&para;</a></h3>
+<p>Relevant <code>ceph-osd@&lt;id&gt;</code> services are enabled/started.</p>
+<h3 id="what-success-or-failure-indicates_18">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_18" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: OSD runtime state restored</li>
+<li>Failure: underlying block path, metadata, or service state still broken</li>
+</ul>
+<hr />
+<h2 id="command_19">Command<a class="headerlink" href="#command_19" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph-bluestore-tool fsck --path /var/lib/ceph/osd/ceph-0 --log-level 20
+ceph-bluestore-tool repair --path /var/lib/ceph/osd/ceph-0 --log-level 20
+</code></pre>
+<h3 id="what-it-does_19">What it does<a class="headerlink" href="#what-it-does_19" title="Permanent link">&para;</a></h3>
+<p>Runs BlueStore integrity checks and attempted repair.</p>
+<h3 id="why-it-was-used_19">Why it was used<a class="headerlink" href="#why-it-was-used_19" title="Permanent link">&para;</a></h3>
+<p>To investigate <code>osd.0</code> RocksDB corruption.</p>
+<h3 id="expected-result_19">Expected result<a class="headerlink" href="#expected-result_19" title="Permanent link">&para;</a></h3>
+<p>Repairable corruption would be corrected.</p>
+<h3 id="what-success-or-failure-indicates_19">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_19" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: OSD may mount again</li>
+<li>Failure: DB corruption may require rebuild or stronger recovery action</li>
+</ul>
+<h3 id="risk_7">Risk<a class="headerlink" href="#risk_7" title="Permanent link">&para;</a></h3>
+<p>Moderate to high. Repair operations touch BlueStore metadata and should be run carefully.</p>
+<hr />
+<h2 id="command_20">Command<a class="headerlink" href="#command_20" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph-volume lvm activate 4 || ceph-volume lvm activate --all
+ceph osd in 4
+ceph osd reweight 4 1.0
+</code></pre>
+<h3 id="what-it-does_20">What it does<a class="headerlink" href="#what-it-does_20" title="Permanent link">&para;</a></h3>
+<p>Activates <code>osd.4</code>, marks it in, and restores full cluster weight.</p>
+<h3 id="why-it-was-used_20">Why it was used<a class="headerlink" href="#why-it-was-used_20" title="Permanent link">&para;</a></h3>
+<p>To bring <code>pve4</code> storage back into service.</p>
+<h3 id="expected-result_20">Expected result<a class="headerlink" href="#expected-result_20" title="Permanent link">&para;</a></h3>
+<p><code>osd.4</code> becomes <code>up</code> and <code>in</code>.</p>
+<h3 id="what-success-or-failure-indicates_20">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_20" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: cluster capacity and redundancy are restored</li>
+<li>Failure: local OSD metadata or service startup issues remain</li>
+</ul>
+<hr />
+<h2 id="command_21">Command<a class="headerlink" href="#command_21" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">smartctl -x /dev/sda
+</code></pre>
+<h3 id="what-it-does_21">What it does<a class="headerlink" href="#what-it-does_21" title="Permanent link">&para;</a></h3>
+<p>Prints extended SMART health and device statistics.</p>
+<h3 id="why-it-was-used_21">Why it was used<a class="headerlink" href="#why-it-was-used_21" title="Permanent link">&para;</a></h3>
+<p>To verify SSD health on the disk backing <code>osd.0</code>.</p>
+<h3 id="expected-result_21">Expected result<a class="headerlink" href="#expected-result_21" title="Permanent link">&para;</a></h3>
+<p>Healthy SMART status, no media or CRC errors.</p>
+<h3 id="what-success-or-failure-indicates_21">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_21" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: no obvious hardware fault</li>
+<li>Failure: disk/media issues may explain corruption or instability</li>
+</ul>
+<hr />
+<h2 id="command_22">Command<a class="headerlink" href="#command_22" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph tell mon.* compact
+</code></pre>
+<h3 id="what-it-does_22">What it does<a class="headerlink" href="#what-it-does_22" title="Permanent link">&para;</a></h3>
+<p>Requests RocksDB compaction on all monitors.</p>
+<h3 id="why-it-was-used_22">Why it was used<a class="headerlink" href="#why-it-was-used_22" title="Permanent link">&para;</a></h3>
+<p>To perform light monitor database maintenance after monitor recovery.</p>
+<h3 id="expected-result_22">Expected result<a class="headerlink" href="#expected-result_22" title="Permanent link">&para;</a></h3>
+<p>Each monitor reports compaction completion.</p>
+<h3 id="what-success-or-failure-indicates_22">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_22" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: monitor DB compaction finished</li>
+<li>Failure: monitor command syntax or monitor availability issue</li>
+</ul>
+<hr />
+<h2 id="command_23">Command<a class="headerlink" href="#command_23" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph config set osd osd_max_backfills 1
+ceph config set osd osd_memory_target 1073741824
+ceph config set osd bluestore_cache_autotune true
+ceph config set osd bluestore_throttle_bytes 268435456
+ceph config set osd osd_scrub_begin_hour 1
+ceph config set osd osd_scrub_end_hour 7
+ceph config set osd osd_scrub_auto_repair true
+</code></pre>
+<h3 id="what-it-does_23">What it does<a class="headerlink" href="#what-it-does_23" title="Permanent link">&para;</a></h3>
+<p>Writes cluster-wide Ceph configuration overrides for OSD runtime behavior.</p>
+<h3 id="why-it-was-used_23">Why it was used<a class="headerlink" href="#why-it-was-used_23" title="Permanent link">&para;</a></h3>
+<p>To reduce recovery disruption, cap OSD memory, and move scrub activity into overnight hours.</p>
+<h3 id="expected-result_23">Expected result<a class="headerlink" href="#expected-result_23" title="Permanent link">&para;</a></h3>
+<p>All OSDs honor the new settings unless overridden by newer scheduler behavior.</p>
+<h3 id="what-success-or-failure-indicates_23">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_23" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: values appear in config queries and affect daemon behavior where supported</li>
+<li>Failure: runtime output may still show defaults if a different subsystem controls behavior</li>
+</ul>
+<hr />
+<h2 id="command_24">Command<a class="headerlink" href="#command_24" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">ceph tell osd.* config get osd_max_backfills
+ceph tell osd.* config get osd_recovery_max_active
+</code></pre>
+<h3 id="what-it-does_24">What it does<a class="headerlink" href="#what-it-does_24" title="Permanent link">&para;</a></h3>
+<p>Queries effective runtime config values from every OSD daemon.</p>
+<h3 id="why-it-was-used_24">Why it was used<a class="headerlink" href="#why-it-was-used_24" title="Permanent link">&para;</a></h3>
+<p>To confirm whether cluster-wide recovery knobs were actually active.</p>
+<h3 id="expected-result_24">Expected result<a class="headerlink" href="#expected-result_24" title="Permanent link">&para;</a></h3>
+<p>Consistent values across all OSDs.</p>
+<h3 id="what-success-or-failure-indicates_24">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_24" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: settings applied as intended</li>
+<li>Failure or unexpected values: scheduler behavior or unsupported legacy settings may be in play</li>
+</ul>
+<hr />
+<h2 id="command_25">Command<a class="headerlink" href="#command_25" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">echo none | tee /sys/block/sda/queue/scheduler
+echo 0    | tee /sys/block/sda/queue/add_random
+</code></pre>
+<h3 id="what-it-does_25">What it does<a class="headerlink" href="#what-it-does_25" title="Permanent link">&para;</a></h3>
+<p>Applies runtime block queue tuning to the SSD device.</p>
+<h3 id="why-it-was-used_25">Why it was used<a class="headerlink" href="#why-it-was-used_25" title="Permanent link">&para;</a></h3>
+<p>To use SSD-friendly scheduler behavior and reduce unnecessary entropy accounting.</p>
+<h3 id="expected-result_25">Expected result<a class="headerlink" href="#expected-result_25" title="Permanent link">&para;</a></h3>
+<p>Queue settings change immediately until reboot.</p>
+<h3 id="what-success-or-failure-indicates_25">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_25" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: kernel accepts the values</li>
+<li>Failure: wrong device name or unsupported scheduler</li>
+</ul>
+<h3 id="risk_8">Risk<a class="headerlink" href="#risk_8" title="Permanent link">&para;</a></h3>
+<p>Low to moderate. Runtime tuning only, but wrong device targeting can affect unrelated storage behavior.</p>
+<hr />
+<h2 id="command_26">Command<a class="headerlink" href="#command_26" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">systemctl enable ceph-osd.target
+systemctl enable ceph-osd@4
+systemctl enable ceph-volume@lvm-4-6612f47f-76be-4dc5-8b24-3332023e28db
+</code></pre>
+<h3 id="what-it-does_26">What it does<a class="headerlink" href="#what-it-does_26" title="Permanent link">&para;</a></h3>
+<p>Ensures OSD targets and local ceph-volume activation units are enabled across reboots.</p>
+<h3 id="why-it-was-used_26">Why it was used<a class="headerlink" href="#why-it-was-used_26" title="Permanent link">&para;</a></h3>
+<p>To make OSD activation persist after node restart or service disruption.</p>
+<h3 id="expected-result_26">Expected result<a class="headerlink" href="#expected-result_26" title="Permanent link">&para;</a></h3>
+<p>Required units are enabled in systemd.</p>
+<h3 id="what-success-or-failure-indicates_26">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_26" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: OSDs are more likely to auto-start after reboot</li>
+<li>Failure: cluster may come back partially degraded after restart</li>
+</ul>
+<hr />
+<h2 id="command_27">Command<a class="headerlink" href="#command_27" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">watch -n3 'ceph -s; echo; ceph pg stat'
+</code></pre>
+<h3 id="what-it-does_27">What it does<a class="headerlink" href="#what-it-does_27" title="Permanent link">&para;</a></h3>
+<p>Continuously monitors cluster health and PG state.</p>
+<h3 id="why-it-was-used_27">Why it was used<a class="headerlink" href="#why-it-was-used_27" title="Permanent link">&para;</a></h3>
+<p>To watch recovery, remapping, and final convergence to <code>active+clean</code>.</p>
+<h3 id="expected-result_27">Expected result<a class="headerlink" href="#expected-result_27" title="Permanent link">&para;</a></h3>
+<p>Recovery counters decrease until all PGs are clean.</p>
+<h3 id="what-success-or-failure-indicates_27">What success or failure indicates<a class="headerlink" href="#what-success-or-failure-indicates_27" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Success: backfill and remap complete</li>
+<li>Failure: recovery stalls or health errors persist</li>
+</ul>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

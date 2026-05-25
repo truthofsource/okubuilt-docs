@@ -1,0 +1,3829 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Infrastructure, cloud, automation, security, and operations documentation portfolio.">
+      
+      
+        <meta name="author" content="Kingsley Oku">
+      
+      
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../home-assistant-os-proxmox-ceph-vm-deployment/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Runbook – Build Debian Docker VM (Proxmox + Ceph + Cloud-Init) - OkuBuilt Infrastructure & Cloud Portfolio</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#runbook-build-debian-docker-vm-proxmox-ceph-cloud-init" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-header__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OkuBuilt Infrastructure & Cloud Portfolio
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Runbook – Build Debian Docker VM (Proxmox + Ceph + Cloud-Init)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="OkuBuilt Infrastructure &amp; Cloud Portfolio" class="md-nav__button md-logo" aria-label="OkuBuilt Infrastructure & Cloud Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OkuBuilt Infrastructure & Cloud Portfolio
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/proxmox-traefik-opnsense-ha-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox, Traefik, OPNsense HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Automation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cephfs-snips-cloudinit-vm100-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox CephFS Snips Cloud-Init VM100
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloud-init-docker-vm-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Docker VM Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-ceph-docker-vm100-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init Ceph Docker VM100 Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/proxmox-cloudinit-cicustom-snippet-storage-ha/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Cloud-Init cicustom Snippet Storage HA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/vm100-docker-startup-mountguard-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Startup Mount Guard Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compute
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Procedure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Procedure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-create-the-base-vm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Create the Base VM
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-add-the-dedicated-docker-disk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Add the Dedicated Docker Disk
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-create-cloud-init-network-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Create Cloud-Init Network Config
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-create-cloud-init-user-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Create Cloud-Init User Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-attach-cloud-init-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Attach Cloud-Init Config
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-start-the-vm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Start the VM
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post-deployment-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Post-Deployment Validation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Post-Deployment Validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#verify-cloud-init" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Cloud-Init
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-disk-and-mounts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Disk and Mounts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Docker
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-docker-group-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Docker Group Access
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-migration-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Migration Procedure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Migration Procedure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pull-appdata-from-old-docker-host" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pull Appdata from Old Docker Host
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validate-file-count" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validate File Count
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validate-with-checksum-dry-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validate With Checksum Dry Run
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compose-file-cleanup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compose File Cleanup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Compose File Cleanup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#update-puidpgid-to-1000" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update PUID/PGID to 1000
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-puidpgid-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify PUID/PGID Updates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remove-backup-files-after-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remove Backup Files After Verification
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#traefik-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Traefik Permissions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Traefik Permissions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fix-acmejson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fix acme.json
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cutover-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cutover Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../home-assistant-os-proxmox-ceph-vm-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home Assistant OS Proxmox Ceph VM Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../homelab-vm100-rebuild-restore-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab VM100 Rebuild Restore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Containers & Apps
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Containers & Apps
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/debian-docker-vm-rebuild-cloudinit-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian Docker VM Rebuild Cloud-Init
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-apps-offen-restore-gluetun-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Apps Offen Restore Gluetun Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/docker-compose-memos-image-tag-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Compose Memos Image Tag Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/gluetun-corrupted-servers-permissions-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gluetun Corrupted Servers Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/proxmox-traefik-console-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Traefik Console Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-docker29-upgrade-troubleshooting-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Docker Upgrade Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/traefik-proxy-docker-network-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik Proxy Docker Network
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm100-docker-data-disk-recovery-cloud-init-hardening/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker Data Disk Recovery Cloud-Init Hardening
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containers-apps/vm110-provisioning-guest-agent-docker-appdata-permissions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM110 Provisioning Guest Agent Docker AppData Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring & Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Monitoring & Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-ceph-memtest-ram-fault-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Ceph Memtest RAM Fault
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-host-kernel-ram-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Host Kernel RAM Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring-operations/proxmox-nuc-e1000e-instability-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox NUC e1000e Instability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networking
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Networking
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/att-fiber-opnsense-outage-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AT&T Fiber OPNsense Outage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-lan-instability-storm-control-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN Instability Storm Control
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-lan-ip-dhcp-static-device-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense LAN IP DHCP Static Device
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-opt2-lan-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense OPT2 LAN
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/opnsense-web-gui-documentation-and-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPNsense Web GUI Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../networking/wireguard-ec2-proxmox-lxc-homelab-remote-access/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WireGuard EC2 Proxmox LXC Homelab Remote Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Security
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/homelab-ssh-ansible-nut-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Homelab SSH Ansible NUT Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/proxmox-root-login-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Root Login Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_9" id="__nav_2_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Storage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Storage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/ceph-mainframe-osd-mon-mgr-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Mainframe OSD MON MGR Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/ceph-monitor-crash-loop-mainframe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph Monitor Crash Loop Mainframe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/proxmox-ha-live-migration-ceph-vm-state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox HA Live Migration Ceph VM State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/truenas-vm-zfs-hba-planning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TrueNAS VM ZFS HBA Planning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/vm100-ceph-gluetun-troubleshooting-runbook-15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Ceph Gluetun Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/vm100-docker-nas-offen-recovery-runbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM100 Docker NAS Offen Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Runbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runbooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_11" id="__nav_2_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting Incidents
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting Incidents
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting-incidents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloud
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cloud
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cloud/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portfolio
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Portfolio
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../portfolio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/documentation-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation Standards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/placement-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Placement Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/recurring-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recurring Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/command-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Procedure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Procedure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-create-the-base-vm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Create the Base VM
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-add-the-dedicated-docker-disk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Add the Dedicated Docker Disk
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-create-cloud-init-network-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Create Cloud-Init Network Config
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-create-cloud-init-user-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Create Cloud-Init User Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-attach-cloud-init-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Attach Cloud-Init Config
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-start-the-vm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Start the VM
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post-deployment-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Post-Deployment Validation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Post-Deployment Validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#verify-cloud-init" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Cloud-Init
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-disk-and-mounts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Disk and Mounts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Docker
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-docker-group-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Docker Group Access
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-migration-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Migration Procedure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Migration Procedure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pull-appdata-from-old-docker-host" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pull Appdata from Old Docker Host
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validate-file-count" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validate File Count
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validate-with-checksum-dry-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validate With Checksum Dry Run
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compose-file-cleanup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compose File Cleanup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Compose File Cleanup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#update-puidpgid-to-1000" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update PUID/PGID to 1000
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-puidpgid-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify PUID/PGID Updates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remove-backup-files-after-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remove Backup Files After Verification
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#traefik-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Traefik Permissions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Traefik Permissions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fix-acmejson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fix acme.json
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cutover-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cutover Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="runbook-build-debian-docker-vm-proxmox-ceph-cloud-init">Runbook – Build Debian Docker VM (Proxmox + Ceph + Cloud-Init)<a class="headerlink" href="#runbook-build-debian-docker-vm-proxmox-ceph-cloud-init" title="Permanent link">&para;</a></h1>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>This runbook provisions a <strong>Debian 12 Docker VM</strong> on Proxmox with:</p>
+<ul>
+<li>Ceph-backed storage</li>
+<li>Dedicated Docker disk (<code>/dev/sdb</code> → <code>/var/lib/docker</code>)</li>
+<li>Bind mounts:</li>
+<li><code>/opt/docker-apps</code> → container appdata</li>
+<li><code>/opt/compose</code> → compose stacks</li>
+<li>CIFS NAS mounts aligned to host UID/GID</li>
+<li>Docker installed from the official Docker repository</li>
+<li>Proper permissions for Traefik and application stacks</li>
+<li>Optional static IP via cloud-init</li>
+</ul>
+<p>Designed to be <strong>idempotent and reproducible</strong> for a homelab Docker host rebuild or migration.</p>
+<hr />
+<h2 id="environment">Environment<a class="headerlink" href="#environment" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Hypervisor:</strong> Proxmox VE</li>
+<li><strong>Storage backend:</strong> Ceph RBD</li>
+<li><strong>Ceph pool:</strong> <code>cephpool</code></li>
+<li><strong>VM ID:</strong> <code>100</code> example</li>
+<li><strong>VM name:</strong> <code>debian-docker</code></li>
+<li><strong>OS:</strong> Debian 12 cloud image</li>
+<li><strong>Network:</strong> <code>192.168.16.0/24</code></li>
+<li><strong>Gateway / router:</strong> OPNsense at <code>192.168.16.1</code></li>
+<li><strong>Snippet storage:</strong> <code>snips</code>, backed by CephFS</li>
+<li><strong>NAS CIFS mounts:</strong></li>
+<li><code>//192.168.16.21/Media</code> → <code>/srv/remotemount/NAS</code></li>
+<li><code>//192.168.16.22/Public</code> → <code>/srv/remotemount/wontonsoup</code></li>
+<li><strong>Primary Docker paths:</strong></li>
+<li><code>/var/lib/docker</code></li>
+<li><code>/opt/docker-apps</code></li>
+<li><code>/opt/compose</code></li>
+<li><strong>Key containers / services:</strong> Docker, Docker Compose, Traefik, Plex, Radarr, Sonarr, qBittorrent, SABnzbd, TubeArchivist, Gluetun</li>
+</ul>
+<hr />
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Proxmox node has access to Ceph storage pool <code>cephpool</code>.</li>
+<li>Debian 12 generic cloud image is available.</li>
+<li>Proxmox snippet storage <code>snips</code> is configured and available cluster-wide.</li>
+<li>VM networking uses bridge <code>vmbr0</code>.</li>
+<li>NAS SMB shares are reachable from the Docker VM network.</li>
+<li>Old Docker appdata, if migrating, exists under <code>/DockerAppData</code> on the previous host.</li>
+</ul>
+<hr />
+<h2 id="procedure">Procedure<a class="headerlink" href="#procedure" title="Permanent link">&para;</a></h2>
+<h3 id="1-create-the-base-vm">1. Create the Base VM<a class="headerlink" href="#1-create-the-base-vm" title="Permanent link">&para;</a></h3>
+<p>Create the VM shell:</p>
+<pre><code class="language-bash">qm create 100 --name debian-docker --memory 8192 --cores 4 --net0 virtio,bridge=vmbr0
+</code></pre>
+<p>Import the Debian cloud image to Ceph:</p>
+<pre><code class="language-bash">qm importdisk 100 debian-12-genericcloud-amd64.qcow2 cephpool
+</code></pre>
+<p>Attach the boot disk and cloud-init drive:</p>
+<pre><code class="language-bash">qm set 100 --scsi0 cephpool:vm-100-disk-0
+qm set 100 --boot order=scsi0
+qm set 100 --scsihw virtio-scsi-pci
+qm set 100 --ide2 cephpool:cloudinit
+qm set 100 --serial0 socket --vga serial0
+</code></pre>
+<hr />
+<h3 id="2-add-the-dedicated-docker-disk">2. Add the Dedicated Docker Disk<a class="headerlink" href="#2-add-the-dedicated-docker-disk" title="Permanent link">&para;</a></h3>
+<p>Attach a 100 GB Ceph-backed disk for Docker data:</p>
+<pre><code class="language-bash">qm set 100 --scsi1 cephpool:100G
+</code></pre>
+<p>Expected VM disk layout:</p>
+<pre><code class="language-text">scsi0: 50G OS/root disk
+scsi1: 100G Docker data disk
+</code></pre>
+<hr />
+<h3 id="3-create-cloud-init-network-config">3. Create Cloud-Init Network Config<a class="headerlink" href="#3-create-cloud-init-network-config" title="Permanent link">&para;</a></h3>
+<p>Use this for the static Docker VM IP. Replace the MAC address before applying.</p>
+<p>Find the VM NIC MAC address:</p>
+<pre><code class="language-bash">qm config 100 | grep net0
+</code></pre>
+<p>Create <code>docker-net.yml</code>:</p>
+<pre><code class="language-bash">cat &gt; /var/lib/vz/snips/snippets/docker-net.yml &lt;&lt;'NETEOF'
+version: 2
+renderer: networkd
+ethernets:
+  ens18:
+    match:
+      macaddress: aa:bb:cc:dd:ee:ff
+    set-name: ens18
+    dhcp4: no
+    dhcp6: no
+    addresses:
+      - 192.168.16.3/24
+    routes:
+      - to: default
+        via: 192.168.16.1
+    nameservers:
+      addresses:
+        - 192.168.16.1
+        - 1.1.1.1
+NETEOF
+</code></pre>
+<hr />
+<h3 id="4-create-cloud-init-user-data">4. Create Cloud-Init User Data<a class="headerlink" href="#4-create-cloud-init-user-data" title="Permanent link">&para;</a></h3>
+<p>Create the main cloud-init config:</p>
+<pre><code class="language-bash">cat &gt; /var/lib/vz/snips/snippets/docker-userdata.yml &lt;&lt;'USEREOF'
+#cloud-config
+hostname: debian-docker
+manage_etc_hosts: true
+ssh_pwauth: true
+
+users:
+  - name: debian
+    groups: sudo
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+
+package_update: false
+packages:
+  - qemu-guest-agent
+  - cifs-utils
+  - curl
+  - gnupg
+  - ca-certificates
+  - lsb-release
+
+bootcmd:
+  - mkdir -p /var/lib/docker /srv/remotemount/NAS /srv/remotemount/wontonsoup /opt/compose /opt/docker-apps
+
+fs_setup:
+  - label: docker-disk
+    filesystem: ext4
+    device: /dev/sdb
+    overwrite: true
+
+mounts:
+  - [ &quot;/dev/sdb&quot;, &quot;/var/lib/docker&quot;, &quot;ext4&quot;, &quot;defaults,nofail&quot;, &quot;0&quot;, &quot;2&quot; ]
+  - [ &quot;//192.168.16.21/Media&quot;, &quot;/srv/remotemount/NAS&quot;, &quot;cifs&quot;, &quot;credentials=/etc/smb-cred,rw,uid=1000,gid=1000,forceuid,forcegid,x-systemd.automount&quot;, &quot;0&quot;, &quot;0&quot; ]
+  - [ &quot;//192.168.16.22/Public&quot;, &quot;/srv/remotemount/wontonsoup&quot;, &quot;cifs&quot;, &quot;credentials=/etc/smb-cred,rw,uid=1000,gid=1000,forceuid,forcegid,x-systemd.automount&quot;, &quot;0&quot;, &quot;0&quot; ]
+
+write_files:
+  - path: /etc/smb-cred
+    permissions: '0600'
+    content: |
+      username=admin
+      password=REPLACE_ME
+
+runcmd:
+  - mount /var/lib/docker
+  - mkdir -p /var/lib/docker/appdata /var/lib/docker/compose
+  - echo &quot;/var/lib/docker/appdata /opt/docker-apps none bind 0 0&quot; &gt;&gt; /etc/fstab
+  - echo &quot;/var/lib/docker/compose /opt/compose none bind 0 0&quot; &gt;&gt; /etc/fstab
+  - mount -a
+
+  # Ownership
+  - groupadd -f docker
+  - chown -R debian:debian /var/lib/docker/appdata
+  - chown -R debian:docker /var/lib/docker/compose
+
+  # Permissions
+  - chmod -R 2770 /var/lib/docker/appdata
+  - chmod -R 2750 /var/lib/docker/compose
+
+  # Docker official repository
+  - install -m 0755 -d /etc/apt/keyrings
+  - curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+  - chmod a+r /etc/apt/keyrings/docker.gpg
+  - echo &quot;deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian bookworm stable&quot; &gt; /etc/apt/sources.list.d/docker.list
+  - apt-get update
+  - apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+  # Docker group access
+  - usermod -aG docker debian
+
+  - systemctl enable docker
+  - systemctl start docker
+USEREOF
+</code></pre>
+<blockquote>
+<p><strong>Security note:</strong> Replace <code>REPLACE_ME</code> with the actual SMB password before deployment. Do not commit this snippet to a public repository with real credentials.</p>
+</blockquote>
+<hr />
+<h3 id="5-attach-cloud-init-config">5. Attach Cloud-Init Config<a class="headerlink" href="#5-attach-cloud-init-config" title="Permanent link">&para;</a></h3>
+<p>Attach both the user-data and network snippets:</p>
+<pre><code class="language-bash">qm set 100 --cicustom &quot;user=snips:snippets/docker-userdata.yml,network=snips:snippets/docker-net.yml&quot;
+qm cloudinit update 100
+</code></pre>
+<hr />
+<h3 id="6-start-the-vm">6. Start the VM<a class="headerlink" href="#6-start-the-vm" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash">qm start 100
+</code></pre>
+<hr />
+<h2 id="post-deployment-validation">Post-Deployment Validation<a class="headerlink" href="#post-deployment-validation" title="Permanent link">&para;</a></h2>
+<h3 id="verify-cloud-init">Verify Cloud-Init<a class="headerlink" href="#verify-cloud-init" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash">cloud-init status --long
+</code></pre>
+<p>Expected result:</p>
+<pre><code class="language-text">status: done
+</code></pre>
+<hr />
+<h3 id="verify-disk-and-mounts">Verify Disk and Mounts<a class="headerlink" href="#verify-disk-and-mounts" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash">lsblk -f
+mount | egrep &quot;docker|/opt|/srv&quot;
+</code></pre>
+<p>Expected results:</p>
+<ul>
+<li><code>/dev/sdb</code> formatted as ext4</li>
+<li><code>/dev/sdb</code> mounted at <code>/var/lib/docker</code></li>
+<li><code>/opt/docker-apps</code> bind-mounted from <code>/var/lib/docker/appdata</code></li>
+<li><code>/opt/compose</code> bind-mounted from <code>/var/lib/docker/compose</code></li>
+<li>NAS mounts available under <code>/srv/remotemount/*</code></li>
+</ul>
+<hr />
+<h3 id="verify-docker">Verify Docker<a class="headerlink" href="#verify-docker" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash">docker --version
+systemctl status docker --no-pager
+</code></pre>
+<p>Expected results:</p>
+<ul>
+<li>Docker version prints successfully</li>
+<li><code>docker.service</code> is active or starts successfully</li>
+</ul>
+<hr />
+<h3 id="verify-docker-group-access">Verify Docker Group Access<a class="headerlink" href="#verify-docker-group-access" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash">id debian
+ls -l /var/run/docker.sock
+</code></pre>
+<p>Expected results:</p>
+<ul>
+<li><code>debian</code> is a member of the <code>docker</code> group</li>
+<li>Docker socket is owned by <code>root:docker</code></li>
+</ul>
+<p>If group membership was just added, log out and back in or run:</p>
+<pre><code class="language-bash">newgrp docker
+</code></pre>
+<hr />
+<h2 id="data-migration-procedure">Data Migration Procedure<a class="headerlink" href="#data-migration-procedure" title="Permanent link">&para;</a></h2>
+<h3 id="pull-appdata-from-old-docker-host">Pull Appdata from Old Docker Host<a class="headerlink" href="#pull-appdata-from-old-docker-host" title="Permanent link">&para;</a></h3>
+<p>Run this from the new VM:</p>
+<pre><code class="language-bash">sudo rsync -avz --partial --append-verify \
+  -e &quot;ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=3 -o MACs=hmac-sha2-256&quot; \
+  root@192.168.16.3:/DockerAppData/ /opt/docker-apps/
+</code></pre>
+<hr />
+<h3 id="validate-file-count">Validate File Count<a class="headerlink" href="#validate-file-count" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash">ssh root@192.168.16.3 &quot;find /DockerAppData -type f | wc -l&quot;
+sudo find /opt/docker-apps -type f | wc -l
+</code></pre>
+<p>Expected result: counts match.</p>
+<hr />
+<h3 id="validate-with-checksum-dry-run">Validate With Checksum Dry Run<a class="headerlink" href="#validate-with-checksum-dry-run" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash">sudo rsync -avcn --delete \
+  -e &quot;ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=3 -o MACs=hmac-sha2-256&quot; \
+  root@192.168.16.3:/DockerAppData/ /opt/docker-apps/
+</code></pre>
+<p>Expected result: no output listing changed files.</p>
+<hr />
+<h2 id="compose-file-cleanup">Compose File Cleanup<a class="headerlink" href="#compose-file-cleanup" title="Permanent link">&para;</a></h2>
+<h3 id="update-puidpgid-to-1000">Update PUID/PGID to 1000<a class="headerlink" href="#update-puidpgid-to-1000" title="Permanent link">&para;</a></h3>
+<p>Run this from the new VM:</p>
+<pre><code class="language-bash">sudo bash -c 'find /opt/compose -type f \( -iname &quot;*.yml&quot; -o -iname &quot;*.yaml&quot; -o -name &quot;.env&quot; -o -iname &quot;*.env&quot; \) -print0 \
+| xargs -0 sed -ri.bak \
+  -e &quot;s/PUID=[0-9]+/PUID=1000/g&quot; \
+  -e &quot;s/PGID=[0-9]+/PGID=1000/g&quot; \
+  -e &quot;s/PUID:\s*[\&quot;\047]?[0-9]+[\&quot;\047]?/PUID: 1000/g&quot; \
+  -e &quot;s/PGID:\s*[\&quot;\047]?[0-9]+[\&quot;\047]?/PGID: 1000/g&quot;'
+</code></pre>
+<hr />
+<h3 id="verify-puidpgid-updates">Verify PUID/PGID Updates<a class="headerlink" href="#verify-puidpgid-updates" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash">grep -RniE 'P(G|U)ID[:=]' /opt/compose | head -50
+</code></pre>
+<hr />
+<h3 id="remove-backup-files-after-verification">Remove Backup Files After Verification<a class="headerlink" href="#remove-backup-files-after-verification" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash">sudo find /opt/compose -type f -name &quot;*.bak&quot; -delete
+</code></pre>
+<hr />
+<h2 id="traefik-permissions">Traefik Permissions<a class="headerlink" href="#traefik-permissions" title="Permanent link">&para;</a></h2>
+<h3 id="fix-acmejson">Fix <code>acme.json</code><a class="headerlink" href="#fix-acmejson" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash">sudo chmod 600 /opt/docker-apps/Traefik/config/acme.json
+</code></pre>
+<p>Expected result: Traefik can safely read and write ACME certificate data.</p>
+<hr />
+<h2 id="cutover-checklist">Cutover Checklist<a class="headerlink" href="#cutover-checklist" title="Permanent link">&para;</a></h2>
+<p>Before switching the new VM to <code>192.168.16.3</code>:</p>
+<ul>
+<li>[ ] Stop Docker containers on the old host.</li>
+<li>[ ] Run final rsync from old host to new host.</li>
+<li>[ ] Shut down old host or remove its <code>.3</code> address.</li>
+<li>[ ] Boot or reconfigure new VM with <code>192.168.16.3</code>.</li>
+<li>[ ] Send gratuitous ARP from new VM:</li>
+</ul>
+<pre><code class="language-bash">sudo arping -A -c 3 -I ens18 192.168.16.3
+</code></pre>
+<ul>
+<li>[ ] Validate Traefik routes.</li>
+<li>[ ] Validate app UIs.</li>
+<li>[ ] Validate NAS-backed paths.</li>
+</ul>
+<hr />
+<h2 id="follow-up-tasks">Follow-Up Tasks<a class="headerlink" href="#follow-up-tasks" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Convert compose files to shared <code>.env</code> variables.</li>
+<li>Remove obsolete <code>version:</code> keys from compose files.</li>
+<li>Review permissions per special-case app, especially databases and Elasticsearch/Redis-backed apps.</li>
+<li>Add healthchecks and restart policies.</li>
+<li>Create backup job for <code>/opt/docker-apps</code> and <code>/opt/compose</code>.</li>
+<li>Monitor disk usage on <code>/var/lib/docker</code>.</li>
+<li>Validate Traefik TLS renewal after cutover.</li>
+</ul>
+<hr />
+<h1 id="command-reference">Command Reference<a class="headerlink" href="#command-reference" title="Permanent link">&para;</a></h1>
+<h2 id="command">Command<a class="headerlink" href="#command" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm create 100 --name debian-docker --memory 8192 --cores 4 --net0 virtio,bridge=vmbr0
+</code></pre>
+<p>Creates a new Proxmox VM shell. The VM is assigned ID <code>100</code>, given the name <code>debian-docker</code>, 8 GB RAM, 4 vCPUs, and a VirtIO NIC attached to <code>vmbr0</code>.</p>
+<hr />
+<h2 id="command_1">Command<a class="headerlink" href="#command_1" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm importdisk 100 debian-12-genericcloud-amd64.qcow2 cephpool
+</code></pre>
+<p>Imports the Debian cloud image into Proxmox storage. In this runbook, the target storage is the Ceph RBD pool <code>cephpool</code>.</p>
+<hr />
+<h2 id="command_2">Command<a class="headerlink" href="#command_2" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm set 100 --scsi1 cephpool:100G
+</code></pre>
+<p>Adds a second 100 GB Ceph-backed disk to VM <code>100</code>. This disk is expected to appear inside Debian as <code>/dev/sdb</code> and is used for Docker data.</p>
+<hr />
+<h2 id="command_3">Command<a class="headerlink" href="#command_3" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm set 100 --cicustom &quot;user=snips:snippets/docker-userdata.yml,network=snips:snippets/docker-net.yml&quot;
+</code></pre>
+<p>Attaches custom cloud-init user-data and network-data snippets. The <code>snips</code> storage must be available on the Proxmox node where the VM boots.</p>
+<hr />
+<h2 id="command_4">Command<a class="headerlink" href="#command_4" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">qm cloudinit update 100
+</code></pre>
+<p>Regenerates the cloud-init ISO for VM <code>100</code> after snippet changes.</p>
+<hr />
+<h2 id="command_5">Command<a class="headerlink" href="#command_5" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">cloud-init status --long
+</code></pre>
+<p>Shows whether cloud-init completed successfully. <code>status: done</code> indicates successful completion; <code>status: error</code> means logs should be reviewed.</p>
+<hr />
+<h2 id="command_6">Command<a class="headerlink" href="#command_6" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">lsblk -f
+</code></pre>
+<p>Lists disks, filesystems, labels, UUIDs, and mountpoints. Used to verify that <code>/dev/sdb</code> is formatted and mounted correctly.</p>
+<hr />
+<h2 id="command_7">Command<a class="headerlink" href="#command_7" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">mount | egrep &quot;docker|/opt|/srv&quot;
+</code></pre>
+<p>Filters mounted filesystems to Docker, bind mounts, and NAS mounts.</p>
+<hr />
+<h2 id="command_8">Command<a class="headerlink" href="#command_8" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo rsync -avz --partial --append-verify -e &quot;ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=3 -o MACs=hmac-sha2-256&quot; root@192.168.16.3:/DockerAppData/ /opt/docker-apps/
+</code></pre>
+<p>Copies appdata from the old Docker host to the new host.</p>
+<ul>
+<li><code>-a</code>: archive mode, preserves timestamps, permissions, symlinks, and ownership where possible</li>
+<li><code>-v</code>: verbose output</li>
+<li><code>-z</code>: compression</li>
+<li><code>--partial</code>: keeps partially transferred files</li>
+<li><code>--append-verify</code>: resumes partially transferred files and verifies them</li>
+<li><code>-e ssh</code>: uses SSH transport</li>
+<li>SSH keepalive and MAC options help reduce transfer failures in unstable connections</li>
+</ul>
+<hr />
+<h2 id="command_9">Command<a class="headerlink" href="#command_9" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo rsync -avcn --delete root@192.168.16.3:/DockerAppData/ /opt/docker-apps/
+</code></pre>
+<p>Performs a checksum-based dry-run comparison.</p>
+<ul>
+<li><code>-c</code>: compare file contents by checksum</li>
+<li><code>-n</code>: dry-run, do not write changes</li>
+<li><code>--delete</code>: detects files present on destination but missing from source</li>
+</ul>
+<p>No output means the source and destination are effectively synchronized.</p>
+<hr />
+<h2 id="command_10">Command<a class="headerlink" href="#command_10" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo bash -c 'find /opt/compose -type f \( -iname &quot;*.yml&quot; -o -iname &quot;*.yaml&quot; -o -name &quot;.env&quot; -o -iname &quot;*.env&quot; \) -print0 | xargs -0 sed -ri.bak -e &quot;s/PUID=[0-9]+/PUID=1000/g&quot; -e &quot;s/PGID=[0-9]+/PGID=1000/g&quot; -e &quot;s/PUID:\s*[\&quot;\047]?[0-9]+[\&quot;\047]?/PUID: 1000/g&quot; -e &quot;s/PGID:\s*[\&quot;\047]?[0-9]+[\&quot;\047]?/PGID: 1000/g&quot;'
+</code></pre>
+<p>Updates PUID and PGID values across compose and environment files.</p>
+<ul>
+<li>Uses <code>find</code> to discover YAML and env files</li>
+<li>Uses <code>sed</code> with extended regex</li>
+<li>Creates <code>.bak</code> backups</li>
+<li>Handles both <code>PUID=500</code> style and <code>PUID: "500"</code> style</li>
+</ul>
+<hr />
+<h2 id="command_11">Command<a class="headerlink" href="#command_11" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo chmod 600 /opt/docker-apps/Traefik/config/acme.json
+</code></pre>
+<p>Sets strict permissions for Traefik's ACME certificate file. This is required because <code>acme.json</code> contains TLS private key material.</p>
+<hr />
+<h2 id="command_12">Command<a class="headerlink" href="#command_12" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">sudo arping -A -c 3 -I ens18 192.168.16.3
+</code></pre>
+<p>Sends gratuitous ARP after IP cutover so switches, hosts, and the router update their ARP caches for the new VM.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
